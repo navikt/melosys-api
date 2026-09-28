@@ -144,7 +144,7 @@ jobs:
 
   # Har en label-kjøring (e2e-pr.yml) eller merge queue alt testet nøyaktig denne
   # koden grønt, finnes markøren e2e-ok-<tree>, og e2e-dispatch hoppes over.
-  # Jobben feiler aldri: enhver feil gir hit=false, og da kjører e2e som før.
+  # Jobben stopper aldri e2e: enhver feil gir hit=false (en timeout gir tom hit), og da kjører e2e som før.
   e2e-marker:
     name: Slå opp e2e-markør
     # Etter bygget (5–6 min), så en label-kjøring som blir ferdig like etter merge,
