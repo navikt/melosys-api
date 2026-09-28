@@ -67,7 +67,7 @@ jobs:
   build:
     name: Bygg image
     needs: e2e-marker
-    if: false # MIDLERTIDIG: akseptanse forsøk 5 (rød vei), reverteres
+    if: needs.e2e-marker.outputs.hit != 'true'
     runs-on: ubuntu-latest-8-cores
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -109,7 +109,7 @@ jobs:
 
   gate:
     name: E2E
-    needs: [e2e-marker] # MIDLERTIDIG: forsøk 5
+    needs: [e2e-marker, build]
     if: needs.e2e-marker.outputs.hit != 'true'
     permissions:
       id-token: write
@@ -118,6 +118,6 @@ jobs:
     with:
       service: melosys-api
       image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
-      tag: ${{ github.event.pull_request.head.sha }} # MIDLERTIDIG: forsøk 5, ingen image
+      tag: ${{ github.sha }}
     secrets:
       E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
