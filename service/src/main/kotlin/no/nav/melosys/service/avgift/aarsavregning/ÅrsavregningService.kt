@@ -362,7 +362,7 @@ class ÅrsavregningService(
                 || gjeldende.sisteBehandlingsresultatMedAvgift?.id == sisteÅrsavregning.id
             )
         årsavregning.beregnTilFaktureringsBeloep(
-            if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning!!.hentÅrsavregning().innbetaltTrygdeavgift else null
+            if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning.hentÅrsavregning().innbetaltTrygdeavgift else null
         )
     }
 

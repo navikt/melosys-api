@@ -77,7 +77,8 @@ class Årsavregning(
     /**
      * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år,
      * og skal bare oppgis når [tidligereFakturertBeloep] er hentet fra den samme årsavregningen. Da inngår innbetalingen
-     * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null.
+     * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null når det ikke
+     * er oppgitt beløp i avgiftssystemet.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
