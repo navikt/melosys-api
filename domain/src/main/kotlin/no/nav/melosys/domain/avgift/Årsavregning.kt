@@ -57,6 +57,15 @@ class Årsavregning(
     val hentTilFaktureringBeloep: BigDecimal
         get() = tilFaktureringBeloep ?: error("tilFaktureringBeloep er ikke satt for årsavregning med id: $id")
 
+    /**
+     * Det som er betalt for året før denne årsavregningen: tidligere fakturert pluss innbetalt i Avgiftssystemet, minus
+     * innbetaling som allerede inngikk i tidligere fakturert. Utledes som endelig avgift minus [tilFaktureringBeloep],
+     * slik at tallet som vises alltid stemmer med beløpet som faktureres.
+     */
+    val hentTidligereBetaltTotalt: BigDecimal
+        get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: error("Endelig avgift er ikke satt for årsavregning med id: $id"))
+            .subtract(hentTilFaktureringBeloep)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Årsavregning) return false

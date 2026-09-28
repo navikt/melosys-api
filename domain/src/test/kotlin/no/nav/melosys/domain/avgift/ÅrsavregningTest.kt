@@ -69,4 +69,19 @@ class ÅrsavregningTest {
 
         årsavregning.tilFaktureringBeloep shouldBe BigDecimal(-500)
     }
+
+    @Test
+    fun `hentTidligereBetaltTotalt er endelig avgift minus beløp til fakturering, uten dobbelt innbetalt`() {
+        val årsavregning = Årsavregning.forTest {
+            beregnetAvgiftBelop = BigDecimal(1000)
+            harInnbetaltTrygdeavgift = true
+            innbetaltTrygdeavgift = BigDecimal(300)
+            tidligereFakturertBeloep = BigDecimal(1500)
+        }
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal(300))
+
+        // 1500 + 300 - 300: innbetalingen inngikk allerede i de 1500
+        årsavregning.hentTidligereBetaltTotalt shouldBe BigDecimal(1500)
+    }
 }

@@ -271,6 +271,10 @@ class ÅrsavregningVedEndringIT(
         withClue("Kreditnota for fjoråret skal være minus alt som sist ble fastsatt for året: $fakturaBody") {
             fakturaBody["belop"].decimalValue() shouldBeEqualComparingTo forventetKreditering.negate()
             fakturaBody["fakturaGjelderInnbetalingstype"].asText() shouldBe "AARSAVREGNING"
+            // Fakturateksten viser tidligere betalt, som skal være det samme beløpet som krediteres
+            val forskuddsvisBetalt = Regex("forskuddsvis betalt trygdeavgift (-?[0-9.]+)")
+                .find(fakturaBody["beskrivelse"].asText()).shouldNotBeNull().groupValues[1].toBigDecimal()
+            forskuddsvisBetalt shouldBeEqualComparingTo forventetKreditering
         }
     }
 
