@@ -71,6 +71,18 @@ class ÅrsavregningTest {
     }
 
     @Test
+    fun `beregnTilFaktureringsBeloep uten endelig avgift nuller gammelt beløp til fakturering`() {
+        val årsavregning = Årsavregning.forTest {
+            tidligereFakturertBeloep = BigDecimal(1500)
+            tilFaktureringBeloep = BigDecimal(-500)
+        }
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
+
+        årsavregning.tilFaktureringBeloep shouldBe null
+    }
+
+    @Test
     fun `hentTidligereBetaltTotalt er endelig avgift minus beløp til fakturering, uten dobbelt innbetalt`() {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)

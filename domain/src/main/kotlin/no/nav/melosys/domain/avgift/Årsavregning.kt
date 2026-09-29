@@ -78,11 +78,17 @@ class Årsavregning(
      * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år,
      * og skal bare oppgis når [tidligereFakturertBeloep] er hentet fra den samme årsavregningen. Da inngår innbetalingen
      * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null når det ikke
-     * er oppgitt beløp i avgiftssystemet.
+     * er oppgitt beløp i avgiftssystemet. Uten endelig avgift nulles beløpet, så et gammelt beløp ikke blir stående.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
-        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
+        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) {
+            tilFaktureringBeloep = null
+            return
+        }
 
+        // TODO MELOSYS-8052: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
+        //  melosys.arsavregning.eos_pensjonist lar innbetalt erstatte tidligere fakturert for EØS-pensjonister.
+        //  Toggle er av i prod; backend og frontend må samkjøres før den slås på.
         tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)!!
             .subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
             .subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
