@@ -213,7 +213,6 @@ class VedtaksmetadataFiksIT(
 
         mockMvc.perform(
             post(angreUrl)
-                .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
         )
             .andExpect(status().isOk)
@@ -459,19 +458,18 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
+    fun `endepunktene krever bearer token med driftsgruppe`() {
         // AdminControllerTilgangsstyringIT dekker kun GET; disse er POST
         listOf(fiksUrl, angreUrl).forEach { url ->
             mockMvc.perform(
                 post(url)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = emptyList())}")
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isForbidden)
 
             mockMvc.perform(
                 post(url)
-                    .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isUnauthorized)
@@ -663,13 +661,14 @@ class VedtaksmetadataFiksIT(
 
     private fun kall(url: String, body: String) = mockMvc.perform(
         post(url)
-            .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(body)
     )
 
-    private fun hentBearerToken(): String = mockOAuth2Server.issueToken(
+    private fun hentBearerToken(
+        grupper: List<String> = listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+    ): String = mockOAuth2Server.issueToken(
         issuerId = "issuer1",
         subject = "testbruker",
         audience = "dumbdumb",
@@ -677,7 +676,7 @@ class VedtaksmetadataFiksIT(
             "oid" to "test-oid",
             "azp" to "test-azp",
             "NAVident" to "test123",
-            "groups" to listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+            "groups" to grupper
         )
     ).serialize()
 

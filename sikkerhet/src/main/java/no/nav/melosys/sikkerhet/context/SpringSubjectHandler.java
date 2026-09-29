@@ -63,6 +63,9 @@ public class SpringSubjectHandler extends SubjectHandler {
         return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_ID_TYPE) : null;
     }
 
+    // TODO MELOSYS-8271 (rød sone): overstyr getAzp() og les azp-claimet fra det validerte aad-tokenet,
+    //  på samme måte som getTokenIdType(). Returner null når det ikke finnes et gyldig token.
+
     private String findSystemNameIfM2MToken() {
         if (!hasValidToken()) {
             return null;

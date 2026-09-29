@@ -32,6 +32,13 @@ public abstract class SubjectHandler {
         return null;
     }
 
+    /**
+     * Klient-ID-en (azp) til applikasjonen som ba om tokenet.
+     */
+    public String getAzp() {
+        return null;
+    }
+
     public static String getSaksbehandlerIdent() {
         return getInstance().getUserID();
     }
