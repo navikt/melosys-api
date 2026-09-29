@@ -152,6 +152,7 @@ class ÅrsavregningController(
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
                 innbetaltTrygdeavgift = årsavregningModel.innbetaltTrygdeavgift,
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
+                tilbakelagtInnbetaltTrygdeavgift = årsavregningModel.tilbakelagtInnbetaltTrygdeavgift,
             ),
             harInnbetaltTrygdeavgift = årsavregningModel.harInnbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name,
@@ -338,4 +339,6 @@ data class AvregningDto(
     val tilFaktureringBeloep: BigDecimal?,
     val innbetaltTrygdeavgift: BigDecimal?,
     val manueltAvgiftBeloep: BigDecimal?,
+    /** Kun i respons: innbetalt fra forrige årsavregning som er lagt tilbake i tilFaktureringBeloep. */
+    val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
 )
