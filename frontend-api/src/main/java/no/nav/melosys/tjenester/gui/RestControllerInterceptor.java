@@ -20,9 +20,9 @@ public class RestControllerInterceptor implements HandlerInterceptor {
     }
 
     private boolean isAdminRequest(HttpServletRequest request) {
-        // TODO MELOSYS-8271 (rød sone): admin-kall når stien starter med /admin/, uavhengig av
-        //  nøkkelheaderen. Alle /admin/**-kall har passert AdminTilgangInterceptor og @Protected
-        //  før controlleren kjører. Se RestControllerInterceptorTest.
-        return false;
+        // Alle kall under /admin/ har passert AdminTilgangInterceptor og @Protected før controlleren kjører.
+        // /api/admin/** går ikke gjennom AdminTilgangInterceptor, og skal derfor ikke regnes som admin-kall.
+        return request.getRequestURI().startsWith("/admin/");
     }
 }
+

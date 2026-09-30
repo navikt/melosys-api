@@ -15,6 +15,7 @@ public class SpringSubjectHandler extends SubjectHandler {
     private static final String JWT_TOKEN_CLAIM_GROUPS = "groups";
     private static final String JWT_TOKEN_ID_TYPE = "idtyp";
     private static final String JWT_TOKEN_CLAIM_AZP_NAME = "azp_name"; //  (authorized party name)
+    private static final String JWT_TOKEN_CLAIM_AZP = "azp"; //  (authorized party) Klient-ID-en til applikasjonen som ba om tokenet.
 
     private final SpringTokenValidationContextHolder contextHolder;
 
@@ -63,8 +64,10 @@ public class SpringSubjectHandler extends SubjectHandler {
         return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_ID_TYPE) : null;
     }
 
-    // TODO MELOSYS-8271 (rød sone): overstyr getAzp() og les azp-claimet fra det validerte aad-tokenet,
-    //  på samme måte som getTokenIdType(). Returner null når det ikke finnes et gyldig token.
+    @Override
+    public String getAzp() {
+        return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_CLAIM_AZP) : null;
+    }
 
     private String findSystemNameIfM2MToken() {
         if (!hasValidToken()) {

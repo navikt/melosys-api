@@ -5,7 +5,11 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.Application
 import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.MANGLER_DRIFTSGRUPPE
 import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.UKJENT_KLIENT
+import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.oauth2.sdk.TokenRequest
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
+import no.nav.security.mock.oauth2.token.OAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,28 +62,46 @@ class AdminControllerTilgangsstyringIT(
         private const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
     }
 
+    /**
+     * mock-oauth2-server overstyrer `azp` i claims med klient-ID-en tokenet utstedes til,
+     * så `azp` må settes via `clientId`. Med `azp = null` fjernes claimet helt.
+     */
+    private fun utstedToken(subject: String, azp: String?, claims: Map<String, Any>): SignedJWT {
+        val callback = DefaultOAuth2TokenCallback(
+            issuerId = "issuer1",
+            subject = subject,
+            audience = listOf("dumbdumb"),
+            claims = claims
+        )
+        val callbackUtenAzp = object : OAuth2TokenCallback by callback {
+            override fun addClaims(tokenRequest: TokenRequest): Map<String, Any> =
+                callback.addClaims(tokenRequest) - "azp"
+        }
+        return mockOAuth2Server.issueToken(
+            "issuer1",
+            azp ?: "ubrukt",
+            if (azp == null) callbackUtenAzp else callback
+        )
+    }
+
     private fun hentPersonToken(
         grupper: List<String> = listOf(DRIFTSGRUPPE_ID),
         azp: String? = CONSOLE_KLIENT_ID
-    ): String = mockOAuth2Server.issueToken(
-        issuerId = "issuer1",
+    ): String = utstedToken(
         subject = "testbruker",
-        audience = "dumbdumb",
-        claims = buildMap<String, Any> {
-            put("oid", "test-oid")
-            azp?.let { put("azp", it) }
-            put("NAVident", "test123")
-            put("groups", grupper)
-        }
+        azp = azp,
+        claims = mapOf(
+            "oid" to "test-oid",
+            "NAVident" to "test123",
+            "groups" to grupper
+        )
     ).serialize()
 
-    private fun hentMaskinToken(azp: String = CONSOLE_KLIENT_ID): String = mockOAuth2Server.issueToken(
-        issuerId = "issuer1",
+    private fun hentMaskinToken(azp: String = CONSOLE_KLIENT_ID): String = utstedToken(
         subject = "test-app-oid",
-        audience = "dumbdumb",
+        azp = azp,
         claims = mapOf(
             "oid" to "test-app-oid",
-            "azp" to azp,
             "azp_name" to "test-cluster:teammelosys:melosys-console",
             "idtyp" to "app",
             "roles" to listOf("access_as_application")
@@ -126,17 +148,16 @@ class AdminControllerTilgangsstyringIT(
 
     @Test
     fun `skal returnere 403 når tokenet mangler azp`() {
-        val token = mockOAuth2Server.issueToken(
-            issuerId = "issuer1",
+        val token = utstedToken(
             subject = "testbruker",
-            audience = "dumbdumb",
+            azp = null,
             claims = mapOf(
                 "oid" to "test-oid",
                 "NAVident" to "test123",
                 "groups" to listOf(DRIFTSGRUPPE_ID)
             )
         )
-        // Forutsetning: mock-serveren legger ikke til azp selv
+        // Forutsetning: tokenet har faktisk ikke azp
         token.jwtClaimsSet.getClaim("azp").shouldBeNull()
 
         hent("/admin/kafka/errors", token = token.serialize()).skalAvvisesMed(UKJENT_KLIENT)

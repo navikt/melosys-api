@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.melosys.Application
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKØR
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -666,17 +667,21 @@ class VedtaksmetadataFiksIT(
             .content(body)
     )
 
+    // mock-oauth2-server setter azp fra clientId, ikke fra claims
     private fun hentBearerToken(
         grupper: List<String> = listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
     ): String = mockOAuth2Server.issueToken(
-        issuerId = "issuer1",
-        subject = "testbruker",
-        audience = "dumbdumb",
-        claims = mapOf(
-            "oid" to "test-oid",
-            "azp" to "test-azp",
-            "NAVident" to "test123",
-            "groups" to grupper
+        "issuer1",
+        AdminControllerTilgangsstyringIT.CONSOLE_KLIENT_ID,
+        DefaultOAuth2TokenCallback(
+            issuerId = "issuer1",
+            subject = "testbruker",
+            audience = listOf("dumbdumb"),
+            claims = mapOf(
+                "oid" to "test-oid",
+                "NAVident" to "test123",
+                "groups" to grupper
+            )
         )
     ).serialize()
 

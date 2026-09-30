@@ -22,11 +22,16 @@ class AdminTilgangInterceptor(
 
         if (manglerGyldigToken(subjectHandler)) return true   // @Protected svarer 401
 
-        // TODO MELOSYS-8271 (rød sone): avvis med 403 og UKJENT_KLIENT når tokenets azp ikke er
-        //  en av consoleKlientIder. Gjelder både person- og maskinkall, så sjekken må komme før
-        //  maskinkall slippes gjennom. Logg årsak og avvist azp (klient-ID), aldri token eller NAV-ident.
+        if (!forespørselFraConsole(subjectHandler)) {
+            // azp er en klient-ID, ikke en personopplysning
+            log.warn { "Admin-kall avvist: ukjent klient (azp=${subjectHandler.azp}, ${request.method})" }
+            response.status = 403
+            response.writer.write(UKJENT_KLIENT)
+            return false
+        }
 
         if (erMaskinkall(subjectHandler)) return true
+
         if (erMedlemAvDriftsgruppe(subjectHandler)) return true
 
         log.warn { "Admin-kall avvist: personkall uten driftsgruppe (${request.method})" }
@@ -39,6 +44,8 @@ class AdminTilgangInterceptor(
     private fun manglerGyldigToken(subjectHandler: SubjectHandler) = subjectHandler.oidcTokenString == null
 
     private fun erMaskinkall(subjectHandler: SubjectHandler) = subjectHandler.tokenIdType == IDTYP_MASKIN
+
+    private fun forespørselFraConsole(subjectHandler: SubjectHandler) = subjectHandler.azp in consoleKlientIder
 
     private fun erMedlemAvDriftsgruppe(subjectHandler: SubjectHandler) = driftsgruppeId in subjectHandler.groups
 
