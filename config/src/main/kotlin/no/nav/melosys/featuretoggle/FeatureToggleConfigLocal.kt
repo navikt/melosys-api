@@ -55,8 +55,7 @@ class FeatureToggleConfigLocal {
                 .unleashAPI(unleashUrl)
                 .apiKey(unleashToken)
                 .environment(unleashEnvironment)
-                // Standard er 15 s. E2e-testene venter på at en endret toggle slår inn,
-                // og med 15 s tok det opptil 15 s per bekreftelse.
+                // I sekunder (standard 15). E2e-testene venter på at api-et ser en endret toggle.
                 .fetchTogglesInterval(1)
                 .build()
 
