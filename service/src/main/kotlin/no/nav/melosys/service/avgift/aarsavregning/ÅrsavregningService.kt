@@ -348,32 +348,26 @@ class ÅrsavregningService(
      * innbetalingen da allerede inngår i det beløpet. Kommer tidligere fakturert fra en senere vurdering med egne
      * avgiftsperioder, dekker det bare det Melosys fakturerte, og innbetalingen skal trekkes fra uten tilbakelegging.
      * Oppslaget er det samme som [opprettEllerOppdaterÅrsavregning] arver fra.
-     */
-    internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
-        val behandlingsresultat = årsavregning.hentBehandlingsresultat
-        årsavregning.beregnTilFaktureringsBeloep(
-            tilbakelagtInnbetalt(
-                behandlingsresultat.hentBehandling().fagsak.saksnummer,
-                årsavregning.aar,
-                behandlingsresultat.vedtakMetadata?.vedtaksdato
-            )
-        )
-    }
-
-    /**
-     * Innbetalt fra siste vedtatte årsavregning for året som legges tilbake i beløpet til fakturering, eller null.
-     * Brukes både i utregningen og i modellen til skjermbildet, slik at de viser samme tall. Se [beregnTilFaktureringsBeloep].
      *
      * TODO MELOSYS-8052: Antar at innbetalt kommer i tillegg til tidligere fakturert. For EØS-pensjonister (toggle
      *  melosys.arsavregning.eos_pensjonist, av i prod) erstatter innbetalt tidligere fakturert i frontend. Må samkjøres
-     *  før toggle slås på. Merk at [hentSisteÅrsavregning] bare ser på medlemskapsperioder og ikke dekker lovvalg.
+     *  før toggle slås på.
      */
-    private fun tilbakelagtInnbetalt(saksnummer: String, år: Int, førVedtaksdato: Instant?): BigDecimal? {
-        val gjeldende = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år, førVedtaksdato)
-        val sisteÅrsavregning = gjeldende?.sisteÅrsavregning ?: return null
-        val tidligereFakturertFraSisteÅrsavregning = sisteÅrsavregning.hentÅrsavregning().manueltAvgiftBeloep != null
-            || gjeldende.sisteBehandlingsresultatMedAvgift?.id == sisteÅrsavregning.id
-        return if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning.hentÅrsavregning().innbetaltTrygdeavgift else null
+    internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
+        val behandlingsresultat = årsavregning.hentBehandlingsresultat
+        val gjeldende = hentGjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
+            årsavregning.aar,
+            behandlingsresultat.vedtakMetadata?.vedtaksdato
+        )
+        val sisteÅrsavregning = gjeldende?.sisteÅrsavregning
+        val tidligereFakturertFraSisteÅrsavregning = sisteÅrsavregning != null && (
+            sisteÅrsavregning.hentÅrsavregning().manueltAvgiftBeloep != null
+                || gjeldende.sisteBehandlingsresultatMedAvgift?.id == sisteÅrsavregning.id
+            )
+        årsavregning.beregnTilFaktureringsBeloep(
+            if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning.hentÅrsavregning().innbetaltTrygdeavgift else null
+        )
     }
 
     private fun replikerMedlemskapsperioder(
@@ -457,7 +451,7 @@ class ÅrsavregningService(
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
-            tilbakelagtInnbetaltTrygdeavgift = tilbakelagtInnbetalt(saksnummer, år, vedtaksDato),
+            tilbakelagtInnbetaltTrygdeavgift = årsavregning.tilbakelagtInnbetalt,
             harInnbetaltTrygdeavgift = årsavregning.harInnbetaltTrygdeavgift,
             innbetaltTrygdeavgift = årsavregning.innbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
@@ -706,7 +700,7 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
-    /** Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], se [ÅrsavregningService.beregnTilFaktureringsBeloep]. */
+    /** Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], se [Årsavregning.tilbakelagtInnbetalt]. */
     val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
     val harInnbetaltTrygdeavgift: Boolean? = null,
     val innbetaltTrygdeavgift: BigDecimal? = null,
