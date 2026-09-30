@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen
 
 import no.nav.melosys.integrasjon.felles.errorFilter
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
+import no.nav.melosys.integrasjon.felles.lagException
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import tools.jackson.databind.json.JsonMapper
 import org.springframework.beans.factory.annotation.Value
@@ -28,7 +30,15 @@ class DokgenClientProducer(
                     configurer.defaultCodecs()
                         .jacksonJsonEncoder(JacksonJsonEncoder(dokgenJsonMapper))
                 }
-                .filter(errorFilter("Kall mot dokumentgenereringstjeneste feilet."))
+                .filter(
+                    errorFilter("Kall mot dokumentgenereringstjeneste feilet.") { feilmelding, statusCode, errorBody ->
+                        if (statusCode.is4xxClientError) {
+                            IkkeRetrybarIntegrasjonException("$feilmelding $statusCode - $errorBody")
+                        } else {
+                            lagException(feilmelding, statusCode, errorBody)
+                        }
+                    }
+                )
                 .filter(correlationIdOutgoingFilter)
                 .build()
         )

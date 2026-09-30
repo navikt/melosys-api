@@ -3,13 +3,19 @@ package no.nav.melosys.integrasjon.dokgen
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
+import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 private val log = KotlinLogging.logger {}
 
-@Retryable
+@Retryable(
+    noRetryFor = [IkkeRetrybarIntegrasjonException::class],
+    maxAttempts = 3,
+    backoff = Backoff(delay = 500, multiplier = 2.0, maxDelay = 4000, random = true)
+)
 open class DokgenClient(private val webClient: WebClient) {
 
     open fun lagPdf(
