@@ -22,7 +22,7 @@ class AdminTilgangInterceptor(
 
         if (manglerGyldigToken(subjectHandler)) return true   // @Protected svarer 401
 
-        if (!forespørselFraConsole(subjectHandler)) {
+        if (!erFraConsole(subjectHandler)) {
             // azp er en klient-ID, ikke en personopplysning
             log.warn { "Admin-kall avvist: ukjent klient (azp=${subjectHandler.azp}, ${request.method})" }
             response.status = 403
@@ -31,7 +31,6 @@ class AdminTilgangInterceptor(
         }
 
         if (erMaskinkall(subjectHandler)) return true
-
         if (erMedlemAvDriftsgruppe(subjectHandler)) return true
 
         log.warn { "Admin-kall avvist: personkall uten driftsgruppe (${request.method})" }
@@ -43,9 +42,9 @@ class AdminTilgangInterceptor(
     // Gjelder alle tokens: OBO-token (personkall via Console) og M2M-token (maskinkall, idtyp = "app")
     private fun manglerGyldigToken(subjectHandler: SubjectHandler) = subjectHandler.oidcTokenString == null
 
-    private fun erMaskinkall(subjectHandler: SubjectHandler) = subjectHandler.tokenIdType == IDTYP_MASKIN
+    private fun erFraConsole(subjectHandler: SubjectHandler) = subjectHandler.azp in consoleKlientIder
 
-    private fun forespørselFraConsole(subjectHandler: SubjectHandler) = subjectHandler.azp in consoleKlientIder
+    private fun erMaskinkall(subjectHandler: SubjectHandler) = subjectHandler.tokenIdType == IDTYP_MASKIN
 
     private fun erMedlemAvDriftsgruppe(subjectHandler: SubjectHandler) = driftsgruppeId in subjectHandler.groups
 

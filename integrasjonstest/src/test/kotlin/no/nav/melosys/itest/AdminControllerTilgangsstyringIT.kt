@@ -1,12 +1,12 @@
 package no.nav.melosys.itest
 
+import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.oauth2.sdk.TokenRequest
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.Application
 import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.MANGLER_DRIFTSGRUPPE
 import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.UKJENT_KLIENT
-import com.nimbusds.jwt.SignedJWT
-import com.nimbusds.oauth2.sdk.TokenRequest
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.mock.oauth2.token.OAuth2TokenCallback
@@ -62,10 +62,8 @@ class AdminControllerTilgangsstyringIT(
         private const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
     }
 
-    /**
-     * mock-oauth2-server overstyrer `azp` i claims med klient-ID-en tokenet utstedes til,
-     * så `azp` må settes via `clientId`. Med `azp = null` fjernes claimet helt.
-     */
+    // mock-oauth2-server overskriver azp i claims med klient-ID-en tokenet utstedes til,
+    // så azp settes via clientId. Med azp = null fjernes claimet helt.
     private fun utstedToken(subject: String, azp: String?, claims: Map<String, Any>): SignedJWT {
         val callback = DefaultOAuth2TokenCallback(
             issuerId = "issuer1",

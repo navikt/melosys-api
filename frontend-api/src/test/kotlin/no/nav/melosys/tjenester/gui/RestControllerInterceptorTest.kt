@@ -6,10 +6,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 
-/**
- * MELOSYS-8271: Om et kall regnes som admin-kall (og dermed bruker systemtoken videre)
- * avgjøres av stien, ikke av den fjernede adminnøkkelen.
- */
 class RestControllerInterceptorTest {
 
     private val interceptor = RestControllerInterceptor()
