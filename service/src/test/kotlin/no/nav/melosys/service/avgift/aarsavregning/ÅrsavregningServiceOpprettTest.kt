@@ -562,6 +562,26 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
     }
 
     @Test
+    fun `opprettÅrsavregning - ny årsavregning som arver manuelt beløp har beløp til fakturering med en gang`() {
+        // Forrige årsavregning: manuelt 7000, 300 innbetalt i Avgiftssystemet (allerede trukket fra i de 7000).
+        // Ny årsavregning arver manuelt beløp 7000 og innbetalt 300:
+        // 7000 − 7000 − 300 + 300 (lagt tilbake, ellers trukket fra to ganger) = 0
+        val arvetManueltBeløp = BigDecimal("7000")
+        val innbetaltIAvgiftssystemet = BigDecimal("300")
+
+        val (nyÅrsavregning, _) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = true)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            manueltAvgiftBeloep shouldBe arvetManueltBeløp
+            tidligereFakturertBeloep shouldBe arvetManueltBeløp
+            innbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal.ZERO
+        }
+        årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+            .tilbakelagtInnbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
+    }
+
+    @Test
     fun `beregnTilFaktureringsBeloep - ny vurdering mellom årsavregningene trekker ikke arvet innbetalt fra to ganger`() {
         val (nyÅrsavregning, nyVurdering) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = true)
 

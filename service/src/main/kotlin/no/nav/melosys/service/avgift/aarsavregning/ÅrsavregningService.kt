@@ -194,6 +194,7 @@ class ÅrsavregningService(
         }
 
         settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
