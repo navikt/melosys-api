@@ -86,10 +86,13 @@ class Årsavregning(
     override fun hashCode(): Int = id.hashCode()
 
     /**
-     * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år,
-     * og skal bare oppgis når [tidligereFakturertBeloep] er hentet fra den samme årsavregningen. Da inngår innbetalingen
-     * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null når det ikke
-     * er oppgitt beløp i avgiftssystemet.
+     * Setter beløp til fakturering: endelig avgift − tidligere fakturert − innbetalt + [tidligereÅrsavregningInnbetalt].
+     * Uten endelig avgift (verken beregnet eller manuelt beløp) settes beløpet til null.
+     *
+     * [tidligereÅrsavregningInnbetalt] er det som var innbetalt i Avgiftssystemet i forrige vedtatte årsavregning for året.
+     * Når [tidligereFakturertBeloep] er endelig avgift fra den årsavregningen, inngår innbetalingen i det beløpet, og den
+     * legges tilbake så den ikke trekkes fra to ganger. Når [tidligereFakturertBeloep] er avgiften fra en ny vurdering,
+     * inngår ikke innbetalingen, og [tidligereÅrsavregningInnbetalt] er null.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
         // TODO MELOSYS-8052: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
