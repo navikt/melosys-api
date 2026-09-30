@@ -339,6 +339,5 @@ data class AvregningDto(
     val tilFaktureringBeloep: BigDecimal?,
     val innbetaltTrygdeavgift: BigDecimal?,
     val manueltAvgiftBeloep: BigDecimal?,
-    /** Kun i respons: innbetalt fra forrige årsavregning som er lagt tilbake i tilFaktureringBeloep. */
     val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
 )
