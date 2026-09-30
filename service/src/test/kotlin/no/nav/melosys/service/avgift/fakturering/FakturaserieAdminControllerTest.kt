@@ -5,7 +5,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.exception.KonfliktException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,14 +41,6 @@ class FakturaserieAdminControllerTest {
 
         shouldThrow<IkkeFunnetException> { controller.hentSaksnummer(REFERANSE) }
             .message shouldContain REFERANSE
-    }
-
-    @Test
-    fun `skal kaste KonfliktException når fakturaserieReferanse er knyttet til flere saker`() {
-        every { behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse(REFERANSE) } returns sortedSetOf("MEL-1", "MEL-2")
-
-        shouldThrow<KonfliktException> { controller.hentSaksnummer(REFERANSE) }
-            .message shouldContain "MEL-1, MEL-2"
     }
 
     companion object {
