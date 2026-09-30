@@ -52,6 +52,12 @@ class BehandlingsresultatService(
     fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
+    @Transactional(readOnly = true)
+    fun finnSaksnumreMedFakturaserieReferanse(fakturaserieReferanse: String): Set<String> =
+        behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
+            .map { it.hentBehandling().fagsak.saksnummer }
+            .toSortedSet()
+
     fun finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år: Int): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllWithVedtakMetadataAndMedlemskapsperiodeOverlappingYear(år)
 

@@ -42,6 +42,33 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
+    fun `finnSaksnumreMedFakturaserieReferanse returnerer unike saksnumre`() {
+        val referanse = "fakturaserie-ref"
+        fun resultatForSak(saksnr: String, behandlingID: Long) = Behandlingsresultat.forTest {
+            id = behandlingID
+            fakturaserieReferanse = referanse
+            behandling {
+                id = behandlingID
+                fagsak { saksnummer = saksnr }
+            }
+        }
+        every { behandlingsresultatRepo.findAllByFakturaserieReferanse(referanse) } returns listOf(
+            resultatForSak("MEL-2", 1L),
+            resultatForSak("MEL-1", 2L),
+            resultatForSak("MEL-1", 3L)
+        )
+
+        behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse(referanse) shouldBe setOf("MEL-1", "MEL-2")
+    }
+
+    @Test
+    fun `finnSaksnumreMedFakturaserieReferanse returnerer tomt sett når ingen treff`() {
+        every { behandlingsresultatRepo.findAllByFakturaserieReferanse(any()) } returns emptyList()
+
+        behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse("ukjent").shouldBeEmpty()
+    }
+
+    @Test
     fun tømBehandlingsresultat() {
         val behandlingID = 1L
         val behandlingsresultat = Behandlingsresultat.forTest {
