@@ -27,6 +27,8 @@ import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
@@ -89,6 +91,7 @@ class MelosysSkjemaApiClientTest(
               "skjema": {
                 "id": "550e8400-e29b-41d4-a716-446655440000",
                 "status": "SENDT",
+                "skjemaDefinisjonVersjon": "2",
                 "type": "UTSENDT_ARBEIDSTAKER",
                 "fnr": "12345678901",
                 "orgnr": "123456789",
@@ -145,6 +148,7 @@ class MelosysSkjemaApiClientTest(
             skjema = UtsendtArbeidstakerSkjemaDto(
                 id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
                 status = SkjemaStatus.SENDT,
+                skjemaDefinisjonVersjon = "2",
                 type = SkjemaType.UTSENDT_ARBEIDSTAKER,
                 fnr = "12345678901",
                 orgnr = "123456789",
@@ -189,7 +193,59 @@ class MelosysSkjemaApiClientTest(
             WireMock.getRequestedFor(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
                 .withHeader("Authorization", WireMock.matching("Bearer .+"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader("X-Skjema-Definisjon-Versjon", WireMock.absent())
         )
+    }
+
+    @ParameterizedTest
+    @CsvSource("skjema,1", "skjema,3", "skjema,", "kobletSkjema,1", "kobletSkjema,3", "tidligereInnsendteSkjema,1")
+    fun `leser kompatible skjemadata uavhengig av opprinnelig versjon`(del: String, versjon: String?) {
+        val skjemaId = UUID.randomUUID()
+        fun skjemaJson(skjemaVersjon: String?): String = """
+            {
+              "id": "$skjemaId",
+              "status": "SENDT",
+              "type": "UTSENDT_ARBEIDSTAKER",
+              ${skjemaVersjon?.let { "\"skjemaDefinisjonVersjon\": \"$it\"," }.orEmpty()}
+              "fnr": "12345678901",
+              "orgnr": "123456789",
+              "opprettetDato": "2024-01-15T10:00:00",
+              "endretDato": "2024-01-15T10:30:00",
+              "metadata": {
+                "metadatatype": "UTSENDT_ARBEIDSTAKER_DEG_SELV",
+                "skjemadel": "ARBEIDSTAKERS_DEL",
+                "arbeidsgiverNavn": "Test AS",
+                "juridiskEnhetOrgnr": "987654321",
+                "arbeidstakerNavn": "Test Arbeidstaker"
+              },
+              "data": {"type": "UTSENDT_ARBEIDSTAKER_ARBEIDSTAKERS_DEL"}
+            }
+        """.trimIndent()
+
+        val responseJson = """
+            {
+              "skjema": ${skjemaJson(if (del == "skjema") versjon else "2")},
+              "kobletSkjema": ${if (del == "kobletSkjema") skjemaJson(versjon) else "null"},
+              "tidligereInnsendteSkjema": [${if (del == "tidligereInnsendteSkjema") skjemaJson(versjon) else ""}],
+              "referanseId": "MEL-TEST",
+              "innsendtTidspunkt": "2024-01-15T10:30:00",
+              "innsenderFnr": "12345678901",
+              "dokumentTittel": "Test"
+            }
+        """.trimIndent()
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlPathEqualTo("/m2m/api/skjema/utsendt-arbeidstaker/$skjemaId/data"))
+                .willReturn(WireMock.okJson(responseJson))
+        )
+
+        val resultat = melosysSkjemaApiClient.hentUtsendtArbeidstakerSkjema(skjemaId)
+        val skjema = when (del) {
+            "skjema" -> resultat.skjema
+            "kobletSkjema" -> requireNotNull(resultat.kobletSkjema)
+            else -> resultat.tidligereInnsendteSkjema.single()
+        }
+        skjema.id shouldBe skjemaId
+        skjema.skjemaDefinisjonVersjon shouldBe (versjon ?: "1")
     }
 
     @Test
