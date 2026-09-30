@@ -67,8 +67,11 @@ class Årsavregning(
             .subtract(hentTilFaktureringBeloep)
 
     /**
-     * Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], utledet fra lagret beløp.
-     * Regnes som [tilFaktureringBeloep] minus [differanseFørTilbakelegging], samme ledd som [beregnTilFaktureringsBeloep] bruker.
+     * Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep]. Trengs for å vise hvordan
+     * [tilFaktureringBeloep] er satt sammen, fordi tilbakeleggingen ikke er lagret som eget beløp.
+     *
+     * Regnes som [tilFaktureringBeloep] minus [differanseFørTilbakelegging] i stedet for å slås opp på nytt, slik at det
+     * alltid stemmer med det som ble fakturert, også for årsavregninger regnet ut med en eldre formel.
      */
     val tilbakelagtInnbetalt: BigDecimal?
         get() {
