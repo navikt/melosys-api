@@ -66,10 +66,7 @@ class Årsavregning(
         get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: error("Endelig avgift er ikke satt for årsavregning med id: $id"))
             .subtract(hentTilFaktureringBeloep)
 
-    /**
-     * Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], eller null. Utledes fra lagret
-     * beløp til fakturering, slik at skjermbildet viser det som faktisk ble regnet med, også etter vedtak.
-     */
+    /** Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], utledet fra lagret beløp. */
     val tilbakelagtInnbetalt: BigDecimal?
         get() {
             val endelig = manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: return null
@@ -92,7 +89,7 @@ class Årsavregning(
      * [tidligereÅrsavregningInnbetalt] er innbetalt beløp fra Avgiftssystemet i siste vedtatte årsavregning for samme år,
      * og skal bare oppgis når [tidligereFakturertBeloep] er hentet fra den samme årsavregningen. Da inngår innbetalingen
      * allerede i tidligere fakturert, og legges tilbake slik at bare ny innbetaling trekkes fra. Ellers null når det ikke
-     * er oppgitt beløp i avgiftssystemet. Uten endelig avgift nulles beløpet, så et gammelt beløp ikke blir stående.
+     * er oppgitt beløp i avgiftssystemet.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
         // TODO MELOSYS-8052: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle

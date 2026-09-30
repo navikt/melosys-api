@@ -551,7 +551,6 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             // 0 - 7000 - 300 + 300: innbetalingen inngår i de 7000 og trekkes ikke fra en gang til
             tilFaktureringBeloep shouldBe BigDecimal("-7000")
 
-            // Skjermbildet får det samme tilbakelagte beløpet som utregningen bruker
             årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
                 .tilbakelagtInnbetaltTrygdeavgift shouldBe BigDecimal("300")
 
@@ -658,7 +657,6 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             beregnetAvgiftBelop = BigDecimal("6000")
             årsavregningService.beregnTilFaktureringsBeloep(this)
 
-            // Skjermbildet viser heller ingen tilbakelegging
             årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
                 .tilbakelagtInnbetaltTrygdeavgift shouldBe null
 

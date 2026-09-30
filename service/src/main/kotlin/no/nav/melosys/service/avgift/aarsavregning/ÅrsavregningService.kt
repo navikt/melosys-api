@@ -348,10 +348,6 @@ class ÅrsavregningService(
      * innbetalingen da allerede inngår i det beløpet. Kommer tidligere fakturert fra en senere vurdering med egne
      * avgiftsperioder, dekker det bare det Melosys fakturerte, og innbetalingen skal trekkes fra uten tilbakelegging.
      * Oppslaget er det samme som [opprettEllerOppdaterÅrsavregning] arver fra.
-     *
-     * TODO MELOSYS-8052: Antar at innbetalt kommer i tillegg til tidligere fakturert. For EØS-pensjonister (toggle
-     *  melosys.arsavregning.eos_pensjonist, av i prod) erstatter innbetalt tidligere fakturert i frontend. Må samkjøres
-     *  før toggle slås på.
      */
     internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
         val behandlingsresultat = årsavregning.hentBehandlingsresultat
@@ -700,7 +696,6 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
-    /** Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], se [Årsavregning.tilbakelagtInnbetalt]. */
     val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
     val harInnbetaltTrygdeavgift: Boolean? = null,
     val innbetaltTrygdeavgift: BigDecimal? = null,
