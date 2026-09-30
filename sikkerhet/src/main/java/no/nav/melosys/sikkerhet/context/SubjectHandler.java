@@ -28,6 +28,10 @@ public abstract class SubjectHandler {
 
     public abstract List<String> getGroups();
 
+    public String getTokenIdType() {
+        return null;
+    }
+
     public static String getSaksbehandlerIdent() {
         return getInstance().getUserID();
     }

@@ -1,7 +1,10 @@
 package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
+import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.aarsavregning.SkattepliktigAarsavregningOpprettelseService
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
 import java.util.Collections
 import java.util.UUID
 
@@ -32,6 +36,7 @@ class SkattepliktigeAarsavregningKjoering(
     private val årsavregningService: ÅrsavregningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val utfoerer: SkattepliktigeAarsavregningUtfoerer,
+    private val skattehendelserClient: SkattehendelserClient,
 ) {
     // Skrives fra @Async-tråden mens /rapport kan lese samtidig.
     val resultater: MutableList<SakResultat> = Collections.synchronizedList(mutableListOf())
@@ -54,36 +59,86 @@ class SkattepliktigeAarsavregningKjoering(
         skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
+        hoppOverSakerMedÅrsavregning: Boolean = false,
     ) {
-        prosesserSkattehendelser(skattehendelser, skarp, maksAntall)
+        prosesserSkattehendelser(skattehendelser, skarp, maksAntall, hoppOverSakerMedÅrsavregning)
     }
 
-    // readOnly gir FlushMode.MANUAL, og er garantien for at simuleringen ikke skriver: alle
-    // skrivninger går gjennom utfoerer i egne transaksjoner. Metoden over kaller denne som
-    // selvkall, så det er annotasjonen der som gjelder for controller-stien.
+    /**
+     * Som [prosesserSkattehendelserAsynkront], men henter hendelsene fra melosys-skattehendelser.
+     * Hendelsene hentes inne i jobben, så /status viser isRunning=true mens de hentes. Hvis
+     * hentingen feiler, blir rapporten tom og feilen står i feilVedHenting.
+     */
+    @Async("taskExecutor")
+    @Transactional(readOnly = true)
+    fun prosesserSkattepliktigeFraSkattehendelserAsynkront(
+        gjelderÅr: Int,
+        årFilter: ÅrFilter,
+        publisertEtter: LocalDateTime?,
+        skarp: Boolean = false,
+        maksAntall: Int? = null,
+        hoppOverSakerMedÅrsavregning: Boolean = false,
+        personIder: Set<Long>? = null,
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedÅrsavregning) {
+        val hentet = skattehendelserClient.hentSkattepliktige(gjelderÅr, årFilter, publisertEtter).skattepliktige
+        val valgte = if (personIder == null) hentet else hentet.filter { it.personId in personIder }
+        if (personIder != null) {
+            personIderIkkeFunnet = (personIder - valgte.map { it.personId }.toSet()).sorted()
+        }
+        valgte.map { SkattehendelseItem(it.gjelderPeriode, it.identifikator, it.personId) }
+    }
+
+    // readOnly gir FlushMode.MANUAL, så simuleringen skriver ikke til basen. Alle skrivinger går
+    // gjennom utføreren, i egne transaksjoner. Fordi metoden kalles fra samme klasse, virker ikke
+    // @Transactional her. Transaksjonen kommer fra annotasjonene på de asynkrone metodene over.
     @Transactional(readOnly = true)
     fun prosesserSkattehendelser(
         skattehendelser: List<SkattehendelseItem>,
         skarp: Boolean = false,
         maksAntall: Int? = null,
+        /**
+         * Hopper over saker som har en årsavregning for året, aktiv eller avsluttet. Uten dette får en
+         * sak med avsluttet årsavregning en ny årsavregning og et nytt innhentingsbrev, og en aktiv
+         * behandling settes til VURDER_DOKUMENT.
+         */
+        hoppOverSakerMedÅrsavregning: Boolean = false,
+    ) = kjør(skarp, maksAntall, hoppOverSakerMedÅrsavregning) { skattehendelser }
+
+    private fun kjør(
+        skarp: Boolean,
+        maksAntall: Int?,
+        hoppOverSakerMedÅrsavregning: Boolean,
+        hentSkattehendelser: JobStatus.() -> List<SkattehendelseItem>,
     ) = runAsSystem {
         val modus = if (skarp) "SKARP" else "DRYRUN"
-        log.info { "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall" }
 
         // execute avviser en andre kjøring framfor å køe den — en køet kjøring ville startet skarpt
         // mot en base den første nettopp endret.
         jobMonitor.execute(maxErrorsBeforeStop = 100) {
             // Etter execute: en avvist kjøring skal ikke slette rapporten fra den som kjører.
             resultater.clear()
-            antallInputHendelser = skattehendelser.size
             this.skarp = skarp
             this.maksAntall = maksAntall
+            this.hoppOverSakerMedAarsavregning = hoppOverSakerMedÅrsavregning
+            val skattehendelser = try {
+                hentSkattehendelser()
+            } catch (e: Exception) {
+                log.error(e) { "Henting av skattehendelser feilet, $modus ble ikke kjørt" }
+                feilVedHenting = e.message ?: e.javaClass.simpleName
+                jobMonitor.registerException(e)
+                return@execute
+            }
+            log.info {
+                "Starter $modus for ${skattehendelser.size} skattehendelser, maksAntall=$maksAntall, " +
+                    "hoppOverSakerMedAarsavregning=$hoppOverSakerMedÅrsavregning"
+            }
+            antallInputHendelser = skattehendelser.size
 
             // Opprettelsen er ikke idempotent på sak og år: saga-steget revaliderer ikke, og en
             // prosessinstans som bare ligger i kø er usynlig for finnAktivÅrsavregningBehandling.
             // To hendelser for samme person og år gir da to årsavregninger og to brev til samme
-            // borger. Dedupliseringen lukker det innenfor én kjøring; overlappende kjøringer har
-            // samme hull og må håndteres i prosedyren.
+            // borger. Dedupliseringen på ident og år, og på sak og år i løkka, lukker det innenfor
+            // én kjøring; overlappende kjøringer har samme hull og må håndteres i prosedyren.
             //
             // Året parses først: input bygges for hånd fra en SQL-dump, så «2023» og «02023»
             // forekommer om hverandre og er samme år.
@@ -92,10 +147,12 @@ class SkattepliktigeAarsavregningKjoering(
                 .partition { (_, år) -> år != null }
             antallUgyldigInput = ugyldige.size
             ugyldige.forEach { (hendelse, _) ->
-                log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode} for identifikator ${hendelse.identifikator}" }
+                log.warn { "Ugyldig gjelderPeriode: ${hendelse.gjelderPeriode}, personId=${hendelse.personId}" }
             }
 
-            val unikeHendelser = gyldige.map { (hendelse, år) -> NormalisertHendelse(hendelse.identifikator, år!!) }.distinct()
+            val unikeHendelser = gyldige
+                .map { (hendelse, år) -> NormalisertHendelse(hendelse.identifikator, år!!, hendelse.personId) }
+                .distinctBy { it.identifikator to it.år }
             antallUnikeHendelser = unikeHendelser.size
             antallDuplikaterFjernet = gyldige.size - unikeHendelser.size
             if (antallDuplikaterFjernet > 0) {
@@ -104,6 +161,9 @@ class SkattepliktigeAarsavregningKjoering(
                         "av ${gyldige.size} gyldige — de ville gitt doble årsavregninger og doble brev"
                 }
             }
+
+            // To identer kan gi samme sak, for eksempel etter bytte fra dnr til fnr.
+            val vurderteSaker = mutableSetOf<Pair<String, Int>>()
 
             fun taketErFylt() = maksAntall != null &&
                 (antallVilleOpprettetProsessinstans + antallVilleOppdatertStatus) >= maksAntall
@@ -135,7 +195,7 @@ class SkattepliktigeAarsavregningKjoering(
                                     SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
-                                        identifikator = hendelse.identifikator,
+                                        personId = hendelse.personId,
                                         harAktivAarsavregning = null,
                                         aarsavregningBehandlingStatus = null,
                                         trygdeavgiftMottaker = null,
@@ -152,7 +212,7 @@ class SkattepliktigeAarsavregningKjoering(
                             // Bare når alle sakene ble vurdert: feilet noen, vet vi ikke om aktøren
                             // har en sak med trygdeavgift, og «uten treff» ville sagt at den er avklart.
                             if (sakerFeiletIFilter == 0) {
-                                log.debug { "Fant ingen sak med trygdeavgift for aktør: ${hendelse.identifikator}" }
+                                log.debug { "Fant ingen sak med trygdeavgift for personId=${hendelse.personId}, år $år" }
                                 antallUtenTreff++
                             }
                             return@hendelseLoop
@@ -163,8 +223,31 @@ class SkattepliktigeAarsavregningKjoering(
                                 avbruttAarsak = "for mange feil"
                                 return@hendelser
                             }
+                            if (!vurderteSaker.add(fagsak.saksnummer to år)) {
+                                antallSakerAlleredeVurdert++
+                                log.info { "Sak ${fagsak.saksnummer}, år $år er allerede tatt i denne kjøringen, personId=${hendelse.personId}" }
+                                return@sakLoop
+                            }
                             antallSakerFunnet++
                             try {
+                                if (hoppOverSakerMedÅrsavregning && opprettelseService.harÅrsavregningForÅr(fagsak, år)) {
+                                    antallSakerHoppetOverPgaAarsavregning++
+                                    resultater.add(
+                                        SakResultat(
+                                            saksnummer = fagsak.saksnummer,
+                                            gjelderAr = år,
+                                            personId = hendelse.personId,
+                                            harAktivAarsavregning = null,
+                                            aarsavregningBehandlingStatus = null,
+                                            trygdeavgiftMottaker = null,
+                                            villeOpprettetProsessinstans = null,
+                                            villeOppdatertStatus = null,
+                                            behandlingId = null,
+                                            hoppetOverAarsak = "har årsavregning for $år",
+                                        )
+                                    )
+                                    return@sakLoop
+                                }
                                 val aktivÅrsavregning = opprettelseService.finnAktivÅrsavregningBehandling(fagsak, år)
                                 val villeOpprettetProsessinstans = aktivÅrsavregning == null
                                 val villeOppdatertStatus = aktivÅrsavregning != null &&
@@ -179,7 +262,7 @@ class SkattepliktigeAarsavregningKjoering(
                                         SakResultat(
                                             saksnummer = fagsak.saksnummer,
                                             gjelderAr = år,
-                                            identifikator = hendelse.identifikator,
+                                            personId = hendelse.personId,
                                             harAktivAarsavregning = aktivÅrsavregning != null,
                                             aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
                                             trygdeavgiftMottaker = null,
@@ -264,7 +347,7 @@ class SkattepliktigeAarsavregningKjoering(
                                     SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
-                                        identifikator = hendelse.identifikator,
+                                        personId = hendelse.personId,
                                         harAktivAarsavregning = aktivÅrsavregning != null,
                                         aarsavregningBehandlingStatus = aktivÅrsavregning?.status?.name,
                                         trygdeavgiftMottaker = trygdeavgiftMottaker?.name,
@@ -285,7 +368,7 @@ class SkattepliktigeAarsavregningKjoering(
                                     SakResultat(
                                         saksnummer = fagsak.saksnummer,
                                         gjelderAr = år,
-                                        identifikator = hendelse.identifikator,
+                                        personId = hendelse.personId,
                                         harAktivAarsavregning = null,
                                         aarsavregningBehandlingStatus = null,
                                         trygdeavgiftMottaker = null,
@@ -299,7 +382,7 @@ class SkattepliktigeAarsavregningKjoering(
                             }
                         }
                     } catch (e: Exception) {
-                        log.warn(e) { "Feil ved prosessering av hendelse for identifikator ${hendelse.identifikator}" }
+                        log.warn(e) { "Feil ved prosessering av hendelse for personId=${hendelse.personId}, år $år" }
                         jobMonitor.registerException(e)
                     }
                 }
@@ -309,6 +392,9 @@ class SkattepliktigeAarsavregningKjoering(
                 "modus" to modus,
                 "skarp" to skarp,
                 "maksAntall" to maksAntall,
+                "hoppOverSakerMedAarsavregning" to hoppOverSakerMedÅrsavregning,
+                "feilVedHenting" to feilVedHenting,
+                "personIderIkkeFunnet" to personIderIkkeFunnet,
                 "antallInputHendelser" to antallInputHendelser,
                 "antallDuplikaterFjernet" to antallDuplikaterFjernet,
                 "antallUgyldigInput" to antallUgyldigInput,
@@ -324,6 +410,8 @@ class SkattepliktigeAarsavregningKjoering(
                 "antallSakerFeilet" to antallSakerFeilet,
                 "antallBerikelseFeilet" to antallBerikelseFeilet,
                 "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+                "antallSakerHoppetOverPgaAarsavregning" to antallSakerHoppetOverPgaAarsavregning,
+                "antallSakerAlleredeVurdert" to antallSakerAlleredeVurdert,
                 "antallHendelserProsessert" to antallHendelserProsessert,
                 "antallUnikeHendelser" to antallUnikeHendelser,
                 "avbruttAarsak" to avbruttAarsak,
@@ -347,24 +435,29 @@ class SkattepliktigeAarsavregningKjoering(
      * /status til pod B, ser den siste en tom kjøring, og vakten mot samtidige kjøringer gjelder
      * bare per pod. `pod` er her for at den som kjører skal se hvilken pod svaret kommer fra.
      *
-     * `isRunning` er dessuten false så lenge kjøringen ligger i kø. `taskExecutor` har én tråd delt
-     * av ni @Async-metoder, to av dem drevet av løpende saksbehandling, så det vinduet kan være
-     * langt — og 409-vakten i controlleren ser ingenting å avvise i det. Å reservere plassen
-     * synkront ville lukket det, men gjør en feilet transaksjonsstart til en lås som bare en
-     * pod-omstart løser; prosedyren er derfor å sende /run én gang og lese /rapport.
+     * `isRunning` er også false mens kjøringen venter i kø. `taskExecutor` har én tråd som deles med
+     * andre @Async-metoder, også fra saksbehandlingen, så ventetiden kan bli lang, og controlleren
+     * avviser ikke et nytt /run med 409 i den tiden. Å reservere plassen synkront ville hindret det,
+     * men da ville en feilet transaksjonsstart låse jobben til poden startes på nytt. Send derfor
+     * /run én gang og sjekk /rapport.
      */
     fun status() = jobMonitor.status() + mapOf("pod" to (System.getenv("HOSTNAME") ?: "ukjent"))
 
     inner class JobStatus(
         @Volatile var skarp: Boolean = false,
         @Volatile var maksAntall: Int? = null,
+        @Volatile var hoppOverSakerMedAarsavregning: Boolean = false,
+        /** Satt når hentingen fra melosys-skattehendelser feilet; da er ingen saker vurdert. */
+        @Volatile var feilVedHenting: String? = null,
+        /** Id-er fra personIder som ikke kom med i hentingen fra melosys-skattehendelser. */
+        @Volatile var personIderIkkeFunnet: List<Long> = emptyList(),
         @Volatile var antallInputHendelser: Int = 0,
         @Volatile var antallDuplikaterFjernet: Int = 0,
         @Volatile var antallUgyldigInput: Int = 0,
         /**
-         * Saker som passerte filteret. Deles mellom [antallVilleOpprettetProsessinstans],
-         * [antallMedEksisterendeAarsavregning], [antallSakerFeilet] og
-         * [antallSakerHoppetOverPgaTak] — de fire summerer til denne.
+         * Saker som passerte filteret, uten dem i [antallSakerAlleredeVurdert]. Deles mellom
+         * [antallVilleOpprettetProsessinstans], [antallMedEksisterendeAarsavregning], [antallSakerFeilet],
+         * [antallSakerHoppetOverPgaTak] og [antallSakerHoppetOverPgaAarsavregning] — de fem summerer til denne.
          */
         @Volatile var antallSakerFunnet: Int = 0,
         /** Saker uten aktiv årsavregning for året. */
@@ -383,10 +476,14 @@ class SkattepliktigeAarsavregningKjoering(
         @Volatile var antallSakerIkkeVurdert: Int = 0,
         /** Saker som feilet under vurderingen — de er med i [antallSakerFunnet]. */
         @Volatile var antallSakerFeilet: Int = 0,
-        /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fire. */
+        /** Saker der bare rapportoppslaget feilet. Ikke en kategori — saken er talt i en av de fem. */
         @Volatile var antallBerikelseFeilet: Int = 0,
         /** Nådd etter at taket var fylt, derfor ikke vurdert — med i [antallSakerFunnet]. */
         @Volatile var antallSakerHoppetOverPgaTak: Int = 0,
+        /** Saker med årsavregning for året, hoppet over fordi hoppOverSakerMedAarsavregning var satt. */
+        @Volatile var antallSakerHoppetOverPgaAarsavregning: Int = 0,
+        /** Saker som en annen ident allerede har gitt i samme kjøring. Ikke med i [antallSakerFunnet]. */
+        @Volatile var antallSakerAlleredeVurdert: Int = 0,
         /** Hvor mange av [antallUnikeHendelser] som ble kjørt. Lavere betyr avbrudd, se [avbruttAarsak]. */
         @Volatile var antallHendelserProsessert: Int = 0,
         /** Det [antallHendelserProsessert] skal måles mot — ikke [antallInputHendelser]. */
@@ -399,6 +496,9 @@ class SkattepliktigeAarsavregningKjoering(
         override fun reset() {
             skarp = false
             maksAntall = null
+            hoppOverSakerMedAarsavregning = false
+            feilVedHenting = null
+            personIderIkkeFunnet = emptyList()
             antallInputHendelser = 0
             antallDuplikaterFjernet = 0
             antallUgyldigInput = 0
@@ -414,6 +514,8 @@ class SkattepliktigeAarsavregningKjoering(
             antallSakerFeilet = 0
             antallBerikelseFeilet = 0
             antallSakerHoppetOverPgaTak = 0
+            antallSakerHoppetOverPgaAarsavregning = 0
+            antallSakerAlleredeVurdert = 0
             antallHendelserProsessert = 0
             antallUnikeHendelser = 0
             avbruttAarsak = null
@@ -424,6 +526,9 @@ class SkattepliktigeAarsavregningKjoering(
         override fun asMap(): Map<String, Any?> = mapOf(
             "skarp" to skarp,
             "maksAntall" to maksAntall,
+            "hoppOverSakerMedAarsavregning" to hoppOverSakerMedAarsavregning,
+            "feilVedHenting" to feilVedHenting,
+            "personIderIkkeFunnet" to personIderIkkeFunnet,
             "antallInputHendelser" to antallInputHendelser,
             "antallDuplikaterFjernet" to antallDuplikaterFjernet,
             "antallUgyldigInput" to antallUgyldigInput,
@@ -439,6 +544,8 @@ class SkattepliktigeAarsavregningKjoering(
             "antallSakerFeilet" to antallSakerFeilet,
             "antallBerikelseFeilet" to antallBerikelseFeilet,
             "antallSakerHoppetOverPgaTak" to antallSakerHoppetOverPgaTak,
+            "antallSakerHoppetOverPgaAarsavregning" to antallSakerHoppetOverPgaAarsavregning,
+            "antallSakerAlleredeVurdert" to antallSakerAlleredeVurdert,
             "antallUnikeHendelser" to antallUnikeHendelser,
             "antallHendelserProsessert" to antallHendelserProsessert,
             "avbruttAarsak" to avbruttAarsak,
@@ -450,7 +557,8 @@ class SkattepliktigeAarsavregningKjoering(
     data class SakResultat(
         val saksnummer: String,
         val gjelderAr: Int,
-        val identifikator: String,
+        /** Null ved kjøring med manuell liste. */
+        val personId: Long?,
         val harAktivAarsavregning: Boolean?,
         /** Status slik den ble observert før en eventuell skarp statusoppdatering; se [statusOppdatert]. */
         val aarsavregningBehandlingStatus: String?,
@@ -468,10 +576,13 @@ class SkattepliktigeAarsavregningKjoering(
     )
 }
 
-/** Hendelsen med året parset, så det er nøkkelen dedupliseringen bruker. */
-private data class NormalisertHendelse(val identifikator: String, val år: Int)
+/** Hendelsen med året parset. Identifikator og år er nøkkelen dedupliseringen bruker. */
+private data class NormalisertHendelse(val identifikator: String, val år: Int, val personId: Long?)
 
 data class SkattehendelseItem(
     val gjelderPeriode: String,
-    val identifikator: String
+    val identifikator: String,
+    /** Settes bare ved henting fra melosys-skattehendelser. /run ignorerer feltet. */
+    @field:JsonIgnore @get:JsonIgnore
+    val personId: Long? = null,
 )

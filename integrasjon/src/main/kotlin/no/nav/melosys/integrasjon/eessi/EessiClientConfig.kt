@@ -1,12 +1,15 @@
 package no.nav.melosys.integrasjon.eessi
 
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
+import no.nav.melosys.integrasjon.felles.lagException
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -24,7 +27,17 @@ class EessiClientConfig(
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot eessi feilet"))
+            .filter(errorFilter("Kall mot eessi feilet") { feilmelding, statusCode, errorBody ->
+                val retrybareStatuser = setOf(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    HttpStatus.FORBIDDEN.value(),
+                    HttpStatus.REQUEST_TIMEOUT.value()
+                )
+                if (statusCode.is4xxClientError && statusCode.value() !in retrybareStatuser)
+                    IkkeRetrybarIntegrasjonException("$feilmelding $statusCode - $errorBody")
+                else
+                    lagException(feilmelding, statusCode, errorBody)
+            })
             .defaultHeaders { headers ->
                 headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

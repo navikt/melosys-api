@@ -320,16 +320,26 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
+        val perioderMedInntekt = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag()
         val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+            val gruppertePerioder = perioderMedInntekt.groupBy { it.periodeTil.year }
             val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
             gruppertePerioder[valgtÅr] ?: emptyList()
         } else {
-            behandlingsresultat.trygdeavgiftsperioder.toList()
+            perioderMedInntekt
         }
 
         return perioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
     }
+
+    /**
+     * Trygdeavgiftsperioder uten inntektsgrunnlag kan oppstå fordi bruker er skattepliktig
+     * (pliktig medlem, skattepliktig, ingen inntekt – se SkattepliktigTrygdeavgiftsperiodeSplitter.kt).
+     * De har ingen avgift og ingen inntektskilde å vise i beregningstabellen, og kan ikke mappes
+     * til avgiftsperiode-DTO-ene som krever inntektskildetype.
+     */
+    private fun Behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag(): List<Trygdeavgiftsperiode> =
+        trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
 
     private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int = when {
         inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
@@ -352,7 +362,7 @@ class InnvilgelseFtrlMapper(
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
-        val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioder.groupBy { it.periodeTil.year }
+        val gruppertePerioder = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag().groupBy { it.periodeTil.year }
         val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
 
         return gruppertePerioder[valgtÅr]
@@ -363,7 +373,7 @@ class InnvilgelseFtrlMapper(
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskildetype = it.hentGrunnlagInntekstperiode().type.name,
-                    trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().beskrivelse,
+                    trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().name,
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
@@ -382,7 +392,7 @@ class InnvilgelseFtrlMapper(
         if (trygdeavgiftmottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
             return true
         }
-        return behandlingsresultat.trygdeavgiftsperioder.any { it.hentGrunnlagInntekstperiode().isArbeidsgiversavgiftBetalesTilSkatt }
+        return behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag().any { it.hentGrunnlagInntekstperiode().isArbeidsgiversavgiftBetalesTilSkatt }
     }
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {

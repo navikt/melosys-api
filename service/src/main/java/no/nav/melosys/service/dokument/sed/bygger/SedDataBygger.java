@@ -114,7 +114,7 @@ public class SedDataBygger {
         var arbeidsland = hentArbeidsland(grunnlagMedSøknad);
         sedDataDto.setArbeidsland(arbeidsland);
         sedDataDto.setHarFastArbeidssted(
-            arbeidsland.stream().anyMatch(Arbeidsland::harFastArbeidssted)
+            arbeidsland.isEmpty() ? null : arbeidsland.stream().anyMatch(Arbeidsland::harFastArbeidssted)
         );
 
         sedDataDto.setAvklartBostedsland(

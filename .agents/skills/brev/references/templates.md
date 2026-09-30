@@ -128,6 +128,21 @@ data class MottakerDto(
 )
 ```
 
+## Kodeverk og enum-tekst i DTO-er
+
+**Dokgen eier brevteksten. Api sender koder.**
+
+Send enum-navn (`.name`) eller enum-konstanter i DTO-feltene til dokgen når det er mulig, ikke
+oversatt/beskrivelse-tekst (`.beskrivelse`). Dokgen skal selv slå opp kodeverk-tekst
+mot `melosys-internt-kodeverk` (samme artefakt som api bruker), og mapper
+api-domene-enumer (f.eks. `Avgiftsdel`) i en dedikert Handlebars-helper i
+dokgen — se f.eks. `AvgiftstabellHelper`/`InntektskildeHelper` og bruken i
+`InnvilgelseFtrlMapper.mapAvgiftsperioderPensjonist`
+
+Begrunnelse:
+- Dokgen skal ha ansvar for presentasjon
+- Dette unngår at brevtekst dupliseres eller kommer ut av synk mellom api og dokgen
+
 ## Specific Mappers
 
 ### InnvilgelseFtrlMapper

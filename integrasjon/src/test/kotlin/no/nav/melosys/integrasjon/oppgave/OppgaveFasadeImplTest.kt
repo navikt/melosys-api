@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
+import no.nav.melosys.exception.KonfliktException
 import no.nav.melosys.integrasjon.Konstanter
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveClient
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveV2Client
@@ -211,6 +213,60 @@ internal class OppgaveFasadeImplTest {
             fristFerdigstillelse shouldBe LocalDate.now()
             mappeId shouldBe "321"
         }
+    }
+
+    @Test
+    fun `tildelOppgaveHvisEierEr oppdaterer med versjonen som ble kontrollert`() {
+        val oppgaveDto = OppgaveDto().apply {
+            id = "123"
+            versjon = 7
+            tilordnetRessurs = "Z111111"
+        }
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveClient.oppdaterOppgave(any()) } returns mockk()
+
+        val forrigeEier = oppgaveFasadeImpl.tildelOppgaveHvisEierEr("123", "Z999999", "Z111111")
+
+        forrigeEier shouldBe "Z111111"
+        val oppdatertOppgave = slot<OppgaveDto>()
+        verify { oppgaveClient.oppdaterOppgave(capture(oppdatertOppgave)) }
+        oppdatertOppgave.captured.versjon shouldBe 7
+        oppdatertOppgave.captured.tilordnetRessurs shouldBe "Z999999"
+    }
+
+    @Test
+    fun `tildelOppgaveHvisEierEr avviser endret eier`() {
+        val oppgaveDto = OppgaveDto().apply { tilordnetRessurs = "Z222222" }
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+
+        shouldThrow<KonfliktException> {
+            oppgaveFasadeImpl.tildelOppgaveHvisEierEr("123", "Z999999", "Z111111")
+        }
+
+        verify(exactly = 0) { oppgaveClient.oppdaterOppgave(any()) }
+    }
+
+    @Test
+    fun `tildelOppgaveHvisEierEr lar oppgaven stå når den allerede er min`() {
+        val oppgaveDto = OppgaveDto().apply { tilordnetRessurs = "Z999999" }
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+
+        val forrigeEier = oppgaveFasadeImpl.tildelOppgaveHvisEierEr("123", "Z999999", "Z999999")
+
+        forrigeEier shouldBe "Z999999"
+        verify(exactly = 0) { oppgaveClient.oppdaterOppgave(any()) }
+    }
+
+    @Test
+    fun `tildelOppgaveHvisEierEr avviser tildeling av oppgave som ikke lenger er ledig`() {
+        val oppgaveDto = OppgaveDto().apply { tilordnetRessurs = "Z222222" }
+        every { oppgaveClient.hentOppgave("123") } returns oppgaveDto
+
+        shouldThrow<KonfliktException> {
+            oppgaveFasadeImpl.tildelOppgaveHvisEierEr("123", "Z999999", null)
+        }
+
+        verify(exactly = 0) { oppgaveClient.oppdaterOppgave(any()) }
     }
 
     @Test

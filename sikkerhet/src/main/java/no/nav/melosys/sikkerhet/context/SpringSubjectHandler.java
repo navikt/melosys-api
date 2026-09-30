@@ -1,9 +1,7 @@
 package no.nav.melosys.sikkerhet.context;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import net.minidev.json.JSONArray;
 import no.nav.security.token.support.core.context.TokenValidationContext;
 import no.nav.security.token.support.core.jwt.JwtToken;
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;
@@ -51,15 +49,18 @@ public class SpringSubjectHandler extends SubjectHandler {
 
     @Override
     public List<String> getGroups() {
-        ArrayList<String> groups = new ArrayList<>();
-        JSONArray jArray = (JSONArray) azureActiveDirectoryToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_GROUPS);
-
-        if (jArray != null) {
-            for (Object o : jArray) {
-                groups.add(o.toString());
-            }
+        if (!hasValidToken()) {
+            return List.of();
         }
-        return groups;
+
+        List<String> groups = azureActiveDirectoryToken().getJwtTokenClaims().getAsList(JWT_TOKEN_CLAIM_GROUPS);
+
+        return groups != null ? groups : List.of();
+    }
+
+    @Override
+    public String getTokenIdType() {
+        return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_ID_TYPE) : null;
     }
 
     private String findSystemNameIfM2MToken() {

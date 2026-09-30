@@ -37,11 +37,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <kotlin.version>2.4.10</kotlin.version>
+        <kotlin.version>2.4.20</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.345</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.351</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.09.21-dfcd5bed27f4</melosys-skjema-api-types.version>
 
@@ -70,7 +70,7 @@
         <javax.ws.rs-api.version>3.0.0</javax.ws.rs-api.version>
         <json-smart.version>2.6.0</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <kotest.version>6.2.4</kotest.version>
+        <kotest.version>6.2.5</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
         <mockito-kotlin.version>6.3.0</mockito-kotlin.version>
         <mockk.version>1.14.11</mockk.version>
@@ -83,14 +83,14 @@
         <papertrailapp-syslog.version>1.0.0</papertrailapp-syslog.version> <!-- Fra august 2014, men er den som brukes hos NAV -->
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>7.9.0</shedlock.version>
+        <shedlock.version>7.10.1</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.13</spring-retry.version>
         <unleash.version>12.3.0</unleash.version>
-        <bcpkix-jdk15on.version>1.85</bcpkix-jdk15on.version>
-        <bouncycastle-jdk18on.version>1.85</bouncycastle-jdk18on.version>
+        <bcpkix-jdk15on.version>1.86</bcpkix-jdk15on.version>
+        <bouncycastle-jdk18on.version>1.86</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
-        <neethi.version>3.2.3</neethi.version>
+        <neethi.version>3.2.4</neethi.version>
         <jaxws-rt.version>4.0.5</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
@@ -115,7 +115,7 @@
 
         <hibernate.version>7.1.16.Final</hibernate.version>
         <antlr4.version>4.13.2</antlr4.version>
-        <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
+        <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.10.1</asm.version>

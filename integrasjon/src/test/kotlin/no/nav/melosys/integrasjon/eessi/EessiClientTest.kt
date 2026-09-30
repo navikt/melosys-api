@@ -30,6 +30,7 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.domain.eessi.sed.VedleggReferanse
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
@@ -51,10 +52,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.retry.annotation.EnableRetry
 import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
+@EnableRetry(proxyTargetClass = true)
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
@@ -163,6 +166,33 @@ class EessiClientTest(
         shouldThrow<TekniskException> {
             eessiClient.opprettBucOgSedV2(opprettBucOgSedDtoV2)
         }.message.shouldContain("Kall mot eessi feilet")
+
+        serviceUnderTestMockServer.verify(3, WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v2/buc")))
+    }
+
+    @Test
+    fun opprettBucOgSedV2_med422_forventIkkeRetrybarExceptionOgIngenRetry() {
+        val opprettBucOgSedDtoV2 = OpprettBucOgSedDtoV2(
+            bucType = BucType.LA_BUC_01,
+            sedDataDto = SedDataDto(),
+            vedlegg = emptySet(),
+            sendAutomatisk = false,
+            oppdaterEksisterende = false
+        )
+
+        serviceUnderTestMockServer.stubFor(
+            WireMock.any(WireMock.urlMatching(".*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(422)
+                )
+        )
+
+        shouldThrow<IkkeRetrybarIntegrasjonException> {
+            eessiClient.opprettBucOgSedV2(opprettBucOgSedDtoV2)
+        }.message.shouldContain("Kall mot eessi feilet")
+
+        serviceUnderTestMockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/api/v2/buc")))
     }
 
     @Test

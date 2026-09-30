@@ -3,7 +3,9 @@ package no.nav.melosys.saksflyt.steg.soknad
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Innretningstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
@@ -48,7 +50,16 @@ internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean 
  */
 object DigitalSøknadMapper {
 
-    fun tilSoeknad(dto: UtsendtArbeidstakerSkjemaM2MDto): Soeknad = Soeknad().also { søknad ->
+    fun tilSoeknad(dto: UtsendtArbeidstakerSkjemaM2MDto): Soeknad = tilMottatteOpplysningerData(dto, Soeknad())
+
+    /** Samme felt som [tilSoeknad], for behandlinger på trygdeavtale- og FTRL-saker. */
+    fun tilSøknadUtenforEøs(dto: UtsendtArbeidstakerSkjemaM2MDto): SøknadNorgeEllerUtenforEØS =
+        tilMottatteOpplysningerData(dto, SøknadNorgeEllerUtenforEØS())
+
+    private fun <T : MottatteOpplysningerData> tilMottatteOpplysningerData(
+        dto: UtsendtArbeidstakerSkjemaM2MDto,
+        data: T
+    ): T = data.also { søknad ->
         val arbeidstakersDel = hentArbeidstakersData(dto)
         val arbeidsgiversDel = hentArbeidsgiversData(dto)
 
@@ -194,7 +205,7 @@ object DigitalSøknadMapper {
             )
         }
 
-    private fun mapArbeidssteder(søknad: Soeknad, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
+    private fun mapArbeidssteder(søknad: MottatteOpplysningerData, arbeidssted: ArbeidsstedIUtlandetDto?, utsendelseLand: LandKode?) {
         if (arbeidssted == null) return
         søknad.arbeidPaaLand = ArbeidPaaLand()
         søknad.maritimtArbeid = mutableListOf()

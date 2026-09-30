@@ -18,6 +18,18 @@ import no.nav.melosys.integrasjon.kafka.ObjectMapperSerializer
 @TestConfiguration
 class KafkaTestConfig {
 
+    /**
+     * Overstyrer den produksjonsmessige 20 sek-pausen mellom konsumerte digital-søknad-meldinger
+     * (se MELOSYS-8290-kommentar i DigitalSøknadMottattConsumer.standardKonsumeringDelay) med en
+     * no-op i integrasjonstester. `DigitalSøknadMottattConsumer` blir fortsatt opprettet av
+     * komponentskanning (ikke her) — Spring matcher denne bønnen mot konstruktørparameteren
+     * `konsumeringDelay` siden Kotlin sin default-verdi kun brukes når ingen bønne av typen finnes.
+     * Bevisst IKKE en @Primary-bønne av selve DigitalSøknadMottattConsumer, da det ville gitt to
+     * @KafkaListener-registreringer for samme topic/gruppe.
+     */
+    @Bean
+    fun konsumeringDelay(): () -> Unit = { }
+
     @Bean
     @Qualifier("melosysEessiMelding")
     fun melosysEessiMeldingKafkaTemplate(

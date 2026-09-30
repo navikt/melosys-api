@@ -30,7 +30,9 @@ class DigitalSøknadMottattConsumerTest {
 
     @BeforeEach
     fun setUp() {
-        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(prosessinstansService, skjemaSakMappingService)
+        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(
+            prosessinstansService, skjemaSakMappingService, konsumeringDelay = {}
+        )
     }
 
     @Test
@@ -39,13 +41,13 @@ class DigitalSøknadMottattConsumerTest {
         val melding = SkjemaMottattMelding(skjemaId)
         val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
 
-        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns null
+        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(any()) } returns false
         every { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
         verify { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(any(), any()) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(any()) }
     }
 
     @Test
@@ -54,12 +56,12 @@ class DigitalSøknadMottattConsumerTest {
         val melding = SkjemaMottattMelding(skjemaId)
         val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
 
-        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(any()) } returns "MEL-1"
-        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-1") } just Runs
+        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(any()) } returns true
+        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        verify { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-1") }
+        verify { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) }
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(any()) }
     }
 
@@ -68,11 +70,11 @@ class DigitalSøknadMottattConsumerTest {
         val skjemaId = UUID.randomUUID()
         val relatertId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId, listOf(relatertId))
-        val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
+        val consumerRecord = ConsumerRecord("topic", 0, 0, "key", melding)
         val alleIderSlot = slot<Collection<UUID>>()
 
-        every { skjemaSakMappingService.finnGyldigSaksnummerForSkjemaIder(capture(alleIderSlot)) } returns "MEL-99"
-        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding, "MEL-99") } just Runs
+        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(capture(alleIderSlot)) } returns true
+        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 

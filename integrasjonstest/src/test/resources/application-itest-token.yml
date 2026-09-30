@@ -13,6 +13,7 @@ SAF:
 SakAPI_v1:
   url: http://localhost:${mockserver.port}/api/v1/saker
 MELOSYS_SKJEMA_API_URL: http://localhost:${mockserver.port}
+MELOSYS_SKATTEHENDELSER_URL: http://localhost:${mockserver.port}
 UNLEASH:
   token: faketoken
 arbeidsforhold:

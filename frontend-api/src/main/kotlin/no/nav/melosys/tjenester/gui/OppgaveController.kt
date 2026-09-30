@@ -1,11 +1,13 @@
 package no.nav.melosys.tjenester.gui
 
+import io.getunleash.Unleash
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.oppgave.OppgaveSoekFilter
 import no.nav.melosys.service.oppgave.Oppgaveplukker
@@ -13,6 +15,8 @@ import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto
+import no.nav.melosys.service.oppgave.dto.TildelOppgaveDto
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto
@@ -33,7 +37,9 @@ import org.springframework.web.context.WebApplicationContext
 class OppgaveController(
     private val oppgaveplukker: Oppgaveplukker,
     private val oppgaveService: OppgaveService,
-    private val oppgaveSoekFilter: OppgaveSoekFilter
+    private val oppgaveSoekFilter: OppgaveSoekFilter,
+    private val aksesskontroll: Aksesskontroll,
+    private val unleash: Unleash
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -70,6 +76,26 @@ class OppgaveController(
     fun leggTilbakeOppgave(@RequestBody tilbakelegging: TilbakeleggingDto): ResponseEntity<Void> {
         val ident = SubjectHandler.getInstance().getUserID()
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/tildel")
+    @Operation(
+        summary = "Tildeler behandlingsoppgaven på en gitt behandling til innlogget saksbehandler.",
+        description = "Overtar oppgaven også når den er tildelt en annen saksbehandler. " +
+            "Frontend advarer om overtakelsen i bekreftelsesdialogen."
+    )
+    fun tildelOppgaveTilMeg(@RequestBody tildeling: TildelOppgaveDto): ResponseEntity<Void> {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_TILDEL_OPPGAVE)) {
+            throw IkkeFunnetException("Tildeling av oppgave er ikke aktivert")
+        }
+        val ident = SubjectHandler.getInstance().getUserID()
+        aksesskontroll.autoriserSkriv(tildeling.behandlingID)
+        oppgaveplukker.tildelOppgaveTilSaksbehandler(
+            ident,
+            tildeling.behandlingID,
+            tildeling.forventetTilordnetIdent
+        )
         return ResponseEntity.noContent().build()
     }
 

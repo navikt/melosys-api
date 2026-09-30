@@ -142,7 +142,8 @@ class ÅrsavregningVedtakMapper(
                 avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi(),
                 avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),
                 inntektskilde = grunnlagsInntektsperiode.type.beskrivelse,
-                trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning().beskrivelse.orEmpty(),
+                trygdedekning = trygdeavgiftsperiode.hentGrunnlagAvgiftsperiode().hentTrygdedekning().name,
+                avgiftsdel = trygdeavgiftsperiode.avgiftsdel,
                 arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt(
                     medlemskapsTypePliktig,
                     grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,

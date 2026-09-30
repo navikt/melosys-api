@@ -27,5 +27,7 @@
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "development",
   "APP_NAME_MELOSYS_SKJEMA_API": "melosys-skjema-api",
+  "APP_NAME_SKATTEHENDELSER": "skattehendelser-q1",
+  "MELOSYS_SKATTEHENDELSER_URL": "https://skattehendelser-q1.intern.dev.nav.no",
   "APP_NAME_POPP": "pensjon-popp-q2"
 }

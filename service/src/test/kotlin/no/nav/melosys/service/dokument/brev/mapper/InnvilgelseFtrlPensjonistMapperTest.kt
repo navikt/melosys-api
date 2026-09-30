@@ -3,9 +3,11 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -26,6 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.MinstebeløpService
+import no.nav.melosys.service.avgift.SkattepliktigTrygdeavgiftsperiodeSplitter
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -573,6 +576,28 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
             avgiftsperioder.shouldNotBeEmpty()
             avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
+        }
+    }
+
+    @Test
+    fun `mapPensjonistPliktig skattepliktig uten inntekt gir tomme avgiftsperioder og feiler ikke`() {
+        // Gjenskaper prod-tilfellet: trygdeavgiftsperiodene lages av skattepliktig-snarveien og har ikke inntektsgrunnlag
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.PLIKTIG, Avgiftsberegningsregel.ORDINÆR
+        ).apply {
+            val medlemskapsperiode = medlemskapsperioder.single()
+            medlemskapsperiode.trygdeavgiftsperioder.clear()
+            medlemskapsperiode.trygdeavgiftsperioder.addAll(SkattepliktigTrygdeavgiftsperiodeSplitter.splittPåÅr(medlemskapsperiode))
+            trygdeavgiftsperioder.shouldHaveSize(2)
+            trygdeavgiftsperioder.forEach { it.grunnlagInntekstperiode.shouldBeNull() }
+        }
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldBeEmpty()
+            trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
         }
     }
 

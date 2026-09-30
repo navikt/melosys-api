@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.KonfliktException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.ValideringException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -40,6 +41,10 @@ class ExceptionMapper {
     @ExceptionHandler(NoResourceFoundException::class)
     fun håndter(e: NoResourceFoundException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
         håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
+
+    @ExceptionHandler(KonfliktException::class)
+    fun håndter(e: KonfliktException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.CONFLICT, Level.WARN)
 
     @ExceptionHandler(FunksjonellException::class)
     fun håndter(e: FunksjonellException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =

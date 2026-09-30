@@ -65,9 +65,11 @@ melosys:
 
 Melosys-admin:
   apikey: dummy
+  driftsgruppe: 00000000-0000-0000-0000-000000000001
 MelosysSoknadMottak:
   url: dummy
 MELOSYS_SKJEMA_API_URL: http://localhost:8094
+MELOSYS_SKATTEHENDELSER_URL: http://localhost:8094
 UNLEASH:
   token: faketoken
 dokumentproduksjon:
@@ -252,6 +254,14 @@ melosystrygdeavgift:
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            melosys-skattehendelser:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
             dokarkiv:
               authentication:
                 client-auth-method: client_secret_basic
@@ -269,7 +279,8 @@ melosystrygdeavgift:
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
         issuer:
-          isso:
+          # Samme navn som i Nais (aad), slik at SpringSubjectHandler finner tokenet i testene
+          aad:
             accepted-audience: dumbdumb
             discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
 persist:

@@ -26,6 +26,7 @@ import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.MinstebeløpService
+import no.nav.melosys.service.avgift.SkattepliktigTrygdeavgiftsperiodeSplitter
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
@@ -807,6 +808,67 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             avgiftsperioder.all { it.beregningsregel == Avgiftsberegningsregel.ORDINÆR }.shouldBeTrue()
         }
     }
+
+    @Test
+    fun `mapYrkesaktivPliktig skattepliktig uten inntekt gir tomme avgiftsperioder og feiler ikke`() {
+        val behandlingsresultat = lagPliktigSkattepliktigBehandlingsresultatUtenInntekt()
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldBeEmpty()
+            trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            skatteplikttype shouldBe Skatteplikttype.SKATTEPLIKTIG
+            betalerArbeidsgiveravgift.shouldBeTrue()
+            harMinstebelopPeriode.shouldBeFalse()
+            har25ProsentRegelPeriode.shouldBeFalse()
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivPliktig skattepliktig uten inntekt gir tomme avgiftsperioder og feiler ikke TOGGLE på`() {
+        unleash.enableAll()
+        val behandlingsresultat = lagPliktigSkattepliktigBehandlingsresultatUtenInntekt()
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(LocalDate.of(1980, 1, 1))
+
+        innvilgelseFtrlMapper.mapYrkesaktivPliktig(lagBrevbestilling()).apply {
+            avgiftsperioder.shouldBeEmpty()
+            trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        }
+    }
+
+    /**
+     * Gjenskaper prod-tilfellet: pliktig medlem, skattepliktig, ingen inntekt. Trygdeavgiftsperiodene lages
+     * av skattepliktig-snarveien (samme kode som TrygdeavgiftsberegningService bruker) og har ikke inntektsgrunnlag.
+     */
+    private fun lagPliktigSkattepliktigBehandlingsresultatUtenInntekt(): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.EPOCH.plusMonths(1)
+                tom = LocalDate.EPOCH.plusYears(1).plusMonths(4)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelseFritekst = VILKAAR_BEGRUNNELSE_FRITEKST
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }.apply {
+            val medlemskapsperiode = medlemskapsperioder.single()
+            medlemskapsperiode.trygdeavgiftsperioder.addAll(SkattepliktigTrygdeavgiftsperiodeSplitter.splittPåÅr(medlemskapsperiode))
+            trygdeavgiftsperioder.shouldHaveSize(2)
+            trygdeavgiftsperioder.forEach { it.grunnlagInntekstperiode.shouldBeNull() }
+        }
 
     private fun lagPliktigBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
         Behandlingsresultat.forTest {

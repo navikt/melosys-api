@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -36,6 +37,8 @@ import java.util.UUID
  * 3. Consumer finner eksisterende sak via mapping og starter eksisterende-sak-flyt
  * 4. HåndterEksisterendeSakSøknad finner åpen FØRSTEGANG-behandling i OPPRETTET-status
  *    og oppdaterer mottatte opplysninger (uten statusendring, fordi OPPRETTET ikke trigger reset)
+ *
+ * Dekker også at en søknad som er relatert til flere åpne saker havner på den sist opprettede.
  */
 class DigitalSøknadEksisterendeSakIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -129,6 +132,50 @@ class DigitalSøknadEksisterendeSakIT(
             brev.hentData<DokgenBrevbestilling>(ProsessDataKey.BREVBESTILLING)
                 .produserbartdokument shouldBe Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
         }
+    }
+
+    @Test
+    fun `mottak av digital søknad som er relatert til flere åpne saker journalføres på sist opprettede sak`() {
+        // To innsendinger uten relasjon → to separate åpne saker for samme person
+        val (eldsteSkjemaId, eldsteSaksnummer) = sendSøknadPåNySak()
+        val (nyesteSkjemaId, nyesteSaksnummer) = sendSøknadPåNySak()
+        eldsteSaksnummer shouldNotBe nyesteSaksnummer
+
+        // Ny innsending med periode som overlapper begge → relatert til skjema i begge sakene
+        val relaterteSkjemaIder = listOf(eldsteSkjemaId, nyesteSkjemaId)
+
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto { fnr = testFnr }
+        val skjemaId = søknadsdata.skjema.id
+        stubSkjemaEndpoints(skjemaId, søknadsdata)
+
+        kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId, relaterteSkjemaIder))
+
+        await.atMost(Duration.ofSeconds(10)).until {
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
+                .firstOrNull()?.status == ProsessStatus.FERDIG
+        }
+
+        val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
+        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        prosessinstans.hendelser.shouldHaveSize(0)
+        prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer shouldBe nyesteSaksnummer
+    }
+
+    private fun sendSøknadPåNySak(): Pair<UUID, String> {
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto { fnr = testFnr }
+        val skjemaId = søknadsdata.skjema.id
+        stubSkjemaEndpoints(skjemaId, søknadsdata)
+
+        kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId))
+
+        await.atMost(Duration.ofSeconds(10)).until {
+            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
+                .firstOrNull()?.status == ProsessStatus.FERDIG
+        }
+
+        val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
+        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        return skjemaId to prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
     }
 
     private fun stubSkjemaEndpoints(skjemaId: UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {

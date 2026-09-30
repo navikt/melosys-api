@@ -6,6 +6,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.sed.OpprettBucOgSedDtoV2
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
 import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
@@ -17,7 +18,10 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 // Klasse og metoder må være open for at retry skal funke og at webClient ikke skal bli null
 // https://github.com/spring-projects/spring-framework/issues/26729
-@Retryable
+// Retry'er ikke IkkeRetrybarIntegrasjonException: dette er varige valideringsfeil (4xx fra
+// melosys-eessi/eux-rina-api) som aldri vil lykkes ved nytt forsøk. Å retry'e disse fører kun
+// til unødvendig støy og duplikate BUC-er/SED-er opprettet og slettet igjen i RINA.
+@Retryable(noRetryFor = [IkkeRetrybarIntegrasjonException::class])
 open class EessiClient(private val webClient: WebClient) : JsonRestIntegrasjon {
 
     open fun opprettBucOgSedV2(opprettBucOgSedDtoV2: OpprettBucOgSedDtoV2) =

@@ -190,6 +190,11 @@ data class DokumentproduksjonsInfo(
 | `VB` | Vedtaksbrev | Decision letters |
 | `IB` | Infobrev | Information/notice letters |
 
+### Kodeverk og enum-tekst i DTO-er
+
+**Dokgen har ansvar for presentasjon av malene og eier brevteksten. Api sender koder når det er mulig** (enum-navn), ikke ferdig
+oversatt tekst. Se [Templates: Kodeverk og enum-tekst i DTO-er](references/templates.md#kodeverk-og-enum-tekst-i-dto-er).
+
 ## Adding New Letter Types
 
 1. **Add enum** in `melosys-internt-kodeverk`:

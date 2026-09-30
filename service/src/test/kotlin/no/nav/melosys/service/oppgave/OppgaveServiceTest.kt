@@ -727,6 +727,18 @@ internal class OppgaveServiceTest {
             .shouldBeFalse()
     }
 
+    @Test
+    fun `finner behandlingens oppgave når saken har flere aktive oppgaver`() {
+        val behandling = lagBehandling(oppgaveId = "aarsavregning")
+        val ordinærOppgave = Oppgave.Builder().setOppgaveId("ordinaer").build()
+        val årsavregningsoppgave = Oppgave.Builder().setOppgaveId("aarsavregning").build()
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(behandling.fagsak.saksnummer) } returns
+            listOf(ordinærOppgave, årsavregningsoppgave)
+
+        oppgaveService.finnBehandlingsoppgaveForBehandlingID(behandling.id) shouldBe årsavregningsoppgave
+    }
+
     companion object {
         private const val BEH_OPPG_ID = "1"
         private const val JFR_OPPG_ID = "2"

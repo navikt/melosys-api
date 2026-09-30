@@ -609,6 +609,27 @@ class SedDataByggerTest {
     }
 
     @Test
+    fun `lag arbeidslandErUkjent harFastArbeidsstedBlirNull`() {
+        val behandling = DataByggerStubs.hentBehandlingStub().apply {
+            mottatteOpplysninger!!.mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder = emptyList()
+            mottatteOpplysninger!!.mottatteOpplysningerData.maritimtArbeid = emptyList()
+        }
+
+        val sedData = lagSedData(behandlingsresultat = lagStandardBehandlingsresultat(behandling))
+
+        sedData.arbeidsland.shouldBeEmpty()
+        sedData.harFastArbeidssted.shouldBeNull()
+    }
+
+    @Test
+    fun `lag arbeidslandErKjent harFastArbeidsstedReflektererArbeidssted`() {
+        val sedData = lagSedData()
+
+        sedData.arbeidsland.shouldNotBeEmpty()
+        sedData.harFastArbeidssted shouldBe true
+    }
+
+    @Test
     fun `lagUtkast medLuftfartBase arbeidsstedBlirSatt`() {
         val luftfartBase = LuftfartBase(
             hjemmebaseNavn = "hjemmebaseNavn",
