@@ -83,16 +83,18 @@ class ÅrsavregningTest {
     }
 
     @Test
-    fun `tilbakelagtInnbetalt utledes fra lagret beløp til fakturering`() {
+    fun `tilbakelagtInnbetalt er beløpet som ble lagt tilbake, eller null når ingenting ble lagt tilbake`() {
         val årsavregning = Årsavregning.forTest {
-            beregnetAvgiftBelop = BigDecimal(1000)
-            harInnbetaltTrygdeavgift = true
+            manueltAvgiftBeloep = BigDecimal(1000)
             innbetaltTrygdeavgift = BigDecimal(300)
             tidligereFakturertBeloep = BigDecimal(1500)
         }
 
         årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal(300))
         årsavregning.tilbakelagtInnbetalt shouldBe BigDecimal(300)
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal.ZERO)
+        årsavregning.tilbakelagtInnbetalt shouldBe null
 
         årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
         årsavregning.tilbakelagtInnbetalt shouldBe null

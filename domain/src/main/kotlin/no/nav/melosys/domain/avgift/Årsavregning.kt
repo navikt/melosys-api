@@ -66,16 +66,21 @@ class Årsavregning(
         get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: error("Endelig avgift er ikke satt for årsavregning med id: $id"))
             .subtract(hentTilFaktureringBeloep)
 
-    /** Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], utledet fra lagret beløp. */
+    /**
+     * Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep], utledet fra lagret beløp.
+     * Regnes som [tilFaktureringBeloep] minus [differanseFørTilbakelegging], samme ledd som [beregnTilFaktureringsBeloep] bruker.
+     */
     val tilbakelagtInnbetalt: BigDecimal?
         get() {
-            val endelig = manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: return null
-            val tilFakturering = tilFaktureringBeloep ?: return null
-            return tilFakturering.subtract(endelig)
-                .add(tidligereFakturertBeloep ?: BigDecimal.ZERO)
-                .add(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
-                .takeIf { it.signum() != 0 }
+            val utenTilbakelegging = differanseFørTilbakelegging ?: return null
+            return tilFaktureringBeloep?.subtract(utenTilbakelegging)?.takeIf { it.signum() != 0 }
         }
+
+    /** Endelig avgift − tidligere fakturert − innbetalt, før tilbakelegging. Null uten endelig avgift. */
+    private val differanseFørTilbakelegging: BigDecimal?
+        get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)
+            ?.subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
+            ?.subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -98,10 +103,7 @@ class Årsavregning(
         // TODO MELOSYS-8052: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
         //  melosys.arsavregning.eos_pensjonist lar innbetalt erstatte tidligere fakturert for EØS-pensjonister.
         //  Toggle er av i prod; backend og frontend må samkjøres før den slås på.
-        tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)
-            ?.subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
-            ?.subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
-            ?.add(tidligereÅrsavregningInnbetalt ?: BigDecimal.ZERO)
+        tilFaktureringBeloep = differanseFørTilbakelegging?.add(tidligereÅrsavregningInnbetalt ?: BigDecimal.ZERO)
     }
 
     companion object // for å kunne legge på test forTest DSL
