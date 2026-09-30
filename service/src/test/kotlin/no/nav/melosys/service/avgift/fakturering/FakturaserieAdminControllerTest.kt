@@ -4,6 +4,10 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.Test
@@ -28,7 +32,12 @@ class FakturaserieAdminControllerTest {
 
     @Test
     fun `skal returnere saksnummer for fakturaserieReferanse`() {
-        every { behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse(REFERANSE) } returns setOf("MEL-1")
+        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(REFERANSE) } returns listOf(
+            Behandlingsresultat.forTest {
+                fakturaserieReferanse = REFERANSE
+                behandling { fagsak { saksnummer = "MEL-1" } }
+            }
+        )
 
         mockMvc.perform(get("/admin/fakturaserier/$REFERANSE/saksnummer"))
             .andExpect(status().isOk)
@@ -37,7 +46,7 @@ class FakturaserieAdminControllerTest {
 
     @Test
     fun `skal kaste IkkeFunnetException når ingen sak har fakturaserieReferanse`() {
-        every { behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse(REFERANSE) } returns emptySet()
+        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(REFERANSE) } returns emptyList()
 
         shouldThrow<IkkeFunnetException> { controller.hentSaksnummer(REFERANSE) }
             .message shouldContain REFERANSE

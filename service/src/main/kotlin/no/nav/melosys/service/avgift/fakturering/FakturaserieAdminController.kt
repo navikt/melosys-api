@@ -33,11 +33,11 @@ class FakturaserieAdminController(
     )
     fun hentSaksnummer(@PathVariable fakturaserieReferanse: String): ResponseEntity<SaksnummerDto> {
         log.info("Admin: Henter saksnummer for fakturaserieReferanse $fakturaserieReferanse")
-        val saksnumre = behandlingsresultatService.finnSaksnumreMedFakturaserieReferanse(fakturaserieReferanse)
-        if (saksnumre.isEmpty()) {
-            throw IkkeFunnetException("Fant ingen sak med fakturaserieReferanse $fakturaserieReferanse")
-        }
-        return ResponseEntity.ok(SaksnummerDto(saksnumre.first()))
+        val saksnummer = behandlingsresultatService
+            .finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)
+            .firstOrNull()?.hentBehandling()?.fagsak?.saksnummer
+            ?: throw IkkeFunnetException("Fant ingen sak med fakturaserieReferanse $fakturaserieReferanse")
+        return ResponseEntity.ok(SaksnummerDto(saksnummer))
     }
 
     data class SaksnummerDto(val saksnummer: String)
