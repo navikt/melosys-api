@@ -8,13 +8,17 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER
 import no.nav.melosys.domain.kodeverk.Mottakerroller.FULLMEKTIG
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.brev.BrevAdresse
+import no.nav.melosys.service.brev.TilBrevAdresseService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
@@ -29,6 +33,15 @@ class ProduserBrevServiceTest {
 
     @MockK
     private lateinit var hentBrevAdresseTilMottakereService: HentBrevAdresseTilMottakereService
+
+    @MockK
+    private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var tilBrevAdresseService: TilBrevAdresseService
+
+    @MockK
+    private lateinit var behandling: Behandling
 
     @InjectMockKs
     private lateinit var produserBrevService: ProduserBrevService
@@ -68,8 +81,9 @@ class ProduserBrevServiceTest {
             produserbardokument = MANGELBREV_ARBEIDSGIVER
             kopiMottakere = listOf(KopiMottakerDto(BRUKER, null, "aktørId", null))
         }
-        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(333L, BRUKER) } returns
-            listOf(BrevAdresse("Bruker", null, null, null, null, null, "NO"))
+        every { behandlingService.hentBehandlingMedSaksopplysninger(333L) } returns behandling
+        every { tilBrevAdresseService.tilBrevAdresse(any<Mottaker>(), behandling) } returns
+            BrevAdresse("Bruker", null, null, null, null, null, "NO")
 
 
         val exception = shouldThrow<FunksjonellException> {
@@ -108,14 +122,56 @@ class ProduserBrevServiceTest {
             produserbardokument = MANGELBREV_ARBEIDSGIVER
             kopiMottakere = listOf(KopiMottakerDto(BRUKER, null, "aktørId", null))
         }
-        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(333L, BRUKER) } returns
-            listOf(BrevAdresse("Bruker", null, listOf("Gate 1"), "0123", "Oslo", null, "NO"))
+        every { behandlingService.hentBehandlingMedSaksopplysninger(333L) } returns behandling
+        every { tilBrevAdresseService.tilBrevAdresse(any<Mottaker>(), behandling) } returns
+            BrevAdresse("Bruker", null, listOf("Gate 1"), "0123", "Oslo", null, "NO")
         every { dokumentServiceFasade.produserDokument(any(), any()) } returns Unit
 
 
         produserBrevService.produserBrev(333L, brevbestillingDto)
 
 
+        verify { dokumentServiceFasade.produserDokument(333L, brevbestillingDto) }
+    }
+
+    @Test
+    fun `kopi til bruker sjekker bruker selv om fullmektig har gyldig adresse`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = MANGELBREV_ARBEIDSGIVER
+            kopiMottakere = listOf(KopiMottakerDto(BRUKER, null, "aktørId", null))
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(333L) } returns behandling
+        every { tilBrevAdresseService.tilBrevAdresse(any<Mottaker>(), behandling) } returns
+            BrevAdresse("Bruker", null, null, null, null, null, "NO")
+        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(333L, BRUKER) } returns
+            listOf(BrevAdresse("Fullmektig", null, listOf("Gate 2"), "0123", "Oslo", null, "NO"))
+
+        shouldThrow<FunksjonellException> {
+            produserBrevService.produserBrev(333L, brevbestillingDto)
+        }
+
+        verify { tilBrevAdresseService.tilBrevAdresse(match { it.rolle == BRUKER }, behandling) }
+        verify(exactly = 0) { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(any(), any()) }
+        verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
+    }
+
+    @Test
+    fun `kopi til bruker tillates selv om fullmektig mangler adresse`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = MANGELBREV_ARBEIDSGIVER
+            kopiMottakere = listOf(KopiMottakerDto(BRUKER, null, "aktørId", null))
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(333L) } returns behandling
+        every { tilBrevAdresseService.tilBrevAdresse(any<Mottaker>(), behandling) } returns
+            BrevAdresse("Bruker", null, listOf("Gate 1"), "0123", "Oslo", null, "NO")
+        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(333L, BRUKER) } returns
+            listOf(BrevAdresse("Fullmektig", null, null, null, null, null, "NO"))
+        every { dokumentServiceFasade.produserDokument(any(), any()) } returns Unit
+
+        produserBrevService.produserBrev(333L, brevbestillingDto)
+
+        verify { tilBrevAdresseService.tilBrevAdresse(match { it.rolle == BRUKER }, behandling) }
+        verify(exactly = 0) { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(any(), any()) }
         verify { dokumentServiceFasade.produserDokument(333L, brevbestillingDto) }
     }
 

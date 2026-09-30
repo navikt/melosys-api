@@ -1,12 +1,15 @@
 package no.nav.melosys.service.brev.bestilling
 
+import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.brev.BrevAdresse
+import no.nav.melosys.service.brev.TilBrevAdresseService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
@@ -16,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class ProduserBrevService(
     private val dokumentServiceFasade: DokumentServiceFasade,
-    private val hentBrevAdresseTilMottakereService: HentBrevAdresseTilMottakereService
+    private val hentBrevAdresseTilMottakereService: HentBrevAdresseTilMottakereService,
+    private val behandlingService: BehandlingService,
+    private val tilBrevAdresseService: TilBrevAdresseService
 ) {
 
     @Transactional
@@ -34,7 +39,12 @@ class ProduserBrevService(
 
     private fun validerAdresseTilKopiTilBrukerEllerFullmektig(behandlingId: Long, kopiMottakere: List<KopiMottakerDto>) {
         kopiMottakere.filter { it.erBrukerEllerPrivatFullmektig() }.forEach { kopiMottaker ->
-            val brevAdresser = hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, kopiMottaker.rolle())
+            val brevAdresser = if (kopiMottaker.rolle() == Mottakerroller.BRUKER) {
+                val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
+                listOf(tilBrevAdresseService.tilBrevAdresse(Mottaker.medRolle(Mottakerroller.BRUKER), behandling))
+            } else {
+                hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, kopiMottaker.rolle())
+            }
             if (brevAdresser.all(BrevAdresse::ugyldig)) {
                 throw FunksjonellException(manglendeAdresseBegrunnelse(kopiMottaker.rolle()).beskrivelse)
             }
