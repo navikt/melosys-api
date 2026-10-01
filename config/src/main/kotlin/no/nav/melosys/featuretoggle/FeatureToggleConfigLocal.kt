@@ -55,6 +55,8 @@ class FeatureToggleConfigLocal {
                 .unleashAPI(unleashUrl)
                 .apiKey(unleashToken)
                 .environment(unleashEnvironment)
+                // I sekunder (standard 15). E2e-testene venter på at api-et ser en endret toggle.
+                .fetchTogglesInterval(1)
                 .build()
 
             val defaultUnleash = DefaultUnleash(config)
