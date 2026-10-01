@@ -551,11 +551,34 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             // 0 - 7000 - 300 + 300: innbetalingen inngår i de 7000 og trekkes ikke fra en gang til
             tilFaktureringBeloep shouldBe BigDecimal("-7000")
 
+            årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+                .tilbakelagtInnbetaltTrygdeavgift shouldBe BigDecimal("300")
+
             // Saksbehandler finner at det er betalt 500 totalt i Avgiftssystemet: bare de 200 nye krediteres i tillegg
             innbetaltTrygdeavgift = BigDecimal("500")
             årsavregningService.beregnTilFaktureringsBeloep(this)
             tilFaktureringBeloep shouldBe BigDecimal("-7200")
         }
+    }
+
+    @Test
+    fun `opprettÅrsavregning - ny årsavregning som arver manuelt beløp har beløp til fakturering med en gang`() {
+        // Forrige årsavregning: manuelt 7000, 300 innbetalt i Avgiftssystemet (allerede trukket fra i de 7000).
+        // Ny årsavregning arver manuelt beløp 7000 og innbetalt 300:
+        // 7000 − 7000 − 300 + 300 (lagt tilbake, ellers trukket fra to ganger) = 0
+        val arvetManueltBeløp = BigDecimal("7000")
+        val innbetaltIAvgiftssystemet = BigDecimal("300")
+
+        val (nyÅrsavregning, _) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = true)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            manueltAvgiftBeloep shouldBe arvetManueltBeløp
+            tidligereFakturertBeloep shouldBe arvetManueltBeløp
+            innbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal.ZERO
+        }
+        årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+            .tilbakelagtInnbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
     }
 
     @Test
@@ -653,6 +676,9 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
             beregnetAvgiftBelop = BigDecimal("6000")
             årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+                .tilbakelagtInnbetaltTrygdeavgift shouldBe null
 
             // 6000 - tidligere fakturert - 300, uten tilbakelegging
             tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo

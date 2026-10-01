@@ -71,6 +71,36 @@ class ÅrsavregningTest {
     }
 
     @Test
+    fun `beregnTilFaktureringsBeloep uten endelig avgift nuller gammelt beløp til fakturering`() {
+        val årsavregning = Årsavregning.forTest {
+            tidligereFakturertBeloep = BigDecimal(1500)
+            tilFaktureringBeloep = BigDecimal(-500)
+        }
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
+
+        årsavregning.tilFaktureringBeloep shouldBe null
+    }
+
+    @Test
+    fun `tilbakelagtInnbetalt er beløpet som ble lagt tilbake, eller null når ingenting ble lagt tilbake`() {
+        val årsavregning = Årsavregning.forTest {
+            manueltAvgiftBeloep = BigDecimal(1000)
+            innbetaltTrygdeavgift = BigDecimal(300)
+            tidligereFakturertBeloep = BigDecimal(1500)
+        }
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal(300))
+        årsavregning.tilbakelagtInnbetalt shouldBe BigDecimal(300)
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = BigDecimal.ZERO)
+        årsavregning.tilbakelagtInnbetalt shouldBe null
+
+        årsavregning.beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt = null)
+        årsavregning.tilbakelagtInnbetalt shouldBe null
+    }
+
+    @Test
     fun `hentTidligereBetaltTotalt er endelig avgift minus beløp til fakturering, uten dobbelt innbetalt`() {
         val årsavregning = Årsavregning.forTest {
             beregnetAvgiftBelop = BigDecimal(1000)

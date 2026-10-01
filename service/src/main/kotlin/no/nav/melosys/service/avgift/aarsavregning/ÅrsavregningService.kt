@@ -194,6 +194,7 @@ class ÅrsavregningService(
         }
 
         settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
@@ -447,6 +448,7 @@ class ÅrsavregningService(
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
+            tilbakelagtInnbetaltTrygdeavgift = årsavregning.tilbakelagtInnbetalt,
             harInnbetaltTrygdeavgift = årsavregning.harInnbetaltTrygdeavgift,
             innbetaltTrygdeavgift = årsavregning.innbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
@@ -695,6 +697,7 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
+    val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
     val harInnbetaltTrygdeavgift: Boolean? = null,
     val innbetaltTrygdeavgift: BigDecimal? = null,
     val endeligAvgiftValg: EndeligAvgiftValg? = null,
