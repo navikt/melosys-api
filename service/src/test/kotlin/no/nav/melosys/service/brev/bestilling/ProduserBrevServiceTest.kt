@@ -76,6 +76,17 @@ class ProduserBrevServiceTest {
     }
 
     @Test
+    fun `produserBrev uten produserbart dokument skalIkkeTillates`() {
+        val brevbestillingDto = BrevbestillingDto()
+
+        val exception = shouldThrow<FunksjonellException> {
+            produserBrevService.produserBrev(333L, brevbestillingDto)
+        }
+
+        exception.message shouldBe "Manuell bestilling av null er ikke støttet."
+    }
+
+    @Test
     fun `produserBrev kopi til bruker uten gyldig adresse skalIkkeTillates`() {
         val brevbestillingDto = BrevbestillingDto().apply {
             produserbardokument = MANGELBREV_ARBEIDSGIVER

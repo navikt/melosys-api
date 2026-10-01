@@ -31,8 +31,8 @@ class ProduserBrevService(
         dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto)
     }
 
-    private fun validerAtBrevKanProduseres(produserbardokument: Produserbaredokumenter) {
-        if (produserbardokument !in DOKUMENTER_SOM_KAN_PRODUSERES_UAVHENGIG_AV_FLYT) {
+    private fun validerAtBrevKanProduseres(produserbardokument: Produserbaredokumenter?) {
+        if (produserbardokument == null || produserbardokument !in DOKUMENTER_SOM_KAN_PRODUSERES_UAVHENGIG_AV_FLYT) {
             throw FunksjonellException("Manuell bestilling av $produserbardokument er ikke støttet.")
         }
     }

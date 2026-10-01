@@ -210,13 +210,15 @@ class BrevmalListeBygger(
         } catch (e: TekniskException) {
             if ("Finner ikke arbeidsforholddokument" == e.message) {
                 mottakerDto.feilmelding = FeilmeldingDto(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE)
-            } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
-                mottakerDto.feilmelding = FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE)
             } else {
                 log.error(e) {
-                    "Kunne ikke hente mottakeropplysninger for behandling $behandlingId og rolle $rolle"
+                    "Kunne ikke hente mottakeropplysninger for behandling $behandlingId og rolle $rolle: ${e.message}"
                 }
-                mottakerDto.feilmelding = FeilmeldingDto(KUNNE_IKKE_HENTE_MOTTAKEROPPLYSNINGER)
+                mottakerDto.feilmelding = if (rolle == Mottakerroller.ARBEIDSGIVER) {
+                    FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE)
+                } else {
+                    FeilmeldingDto(KUNNE_IKKE_HENTE_MOTTAKEROPPLYSNINGER)
+                }
             }
         }
     }
