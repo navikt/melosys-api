@@ -103,7 +103,7 @@ class Årsavregning(
      * inngår ikke innbetalingen, og [tidligereÅrsavregningInnbetalt] er null.
      */
     fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
-        // TODO MELOSYS-8052: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
+        // TODO MELOSYS-8235: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
         //  melosys.arsavregning.eos_pensjonist lar innbetalt erstatte tidligere fakturert for EØS-pensjonister.
         //  Toggle er av i prod; backend og frontend må samkjøres før den slås på.
         tilFaktureringBeloep = differanseFørTilbakelegging?.add(tidligereÅrsavregningInnbetalt ?: BigDecimal.ZERO)
