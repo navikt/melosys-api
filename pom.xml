@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.351</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.352</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.09.21-dfcd5bed27f4</melosys-skjema-api-types.version>
 
@@ -49,7 +49,7 @@
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>45-26485e1</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.12</token-support.version>
+        <token-support.version>6.0.13</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
@@ -72,7 +72,7 @@
         <jms-api.version>2.0.1</jms-api.version>
         <kotest.version>6.2.5</kotest.version>
         <kotlin-logging.version>3.0.5</kotlin-logging.version>
-        <mockito-kotlin.version>6.3.0</mockito-kotlin.version>
+        <mockito-kotlin.version>6.4.0</mockito-kotlin.version>
         <mockk.version>1.14.11</mockk.version>
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>3.0.7</networknt.json-schema-validator.version>
@@ -89,7 +89,7 @@
         <unleash.version>12.3.0</unleash.version>
         <bcpkix-jdk15on.version>1.86</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.86</bouncycastle-jdk18on.version>
-        <nimbus-jose-jwt.version>10.9.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
         <neethi.version>3.2.4</neethi.version>
         <jaxws-rt.version>4.0.5</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
@@ -119,7 +119,7 @@
 
         <!-- Transitive avhengigheter -->
         <asm.version>9.10.1</asm.version>
-        <joda-time.version>2.14.3</joda-time.version>
+        <joda-time.version>2.14.4</joda-time.version>
         <woodstox.version>7.2.2</woodstox.version>
         <woodstox.stax2.version>4.3.0</woodstox.stax2.version>
         <xmlsec.version>4.0.4</xmlsec.version>
