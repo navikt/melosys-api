@@ -72,7 +72,8 @@ object DigitalSøknadMapper {
         mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
 
         // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
-        søknad.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiverNorge(dto)
+        søknad.juridiskArbeidsgiverNorge =
+            mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
         // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra både arbeidsgivers
         // lønnsliste og arbeidstakers virksomhetsliste. Identiske oppføringer dedupliseres.
@@ -145,9 +146,20 @@ object DigitalSøknadMapper {
         val arbeidsstedIUtlandet: ArbeidsstedIUtlandetDto?
     )
 
-    private fun mapJuridiskArbeidsgiverNorge(dto: UtsendtArbeidstakerSkjemaM2MDto): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
+    private fun mapJuridiskArbeidsgiverNorge(
+        dto: UtsendtArbeidstakerSkjemaM2MDto,
+        virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
+    ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
         erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
+        // Antall ansatte er hentet fra EREG (juridisk enhet), resten er oppgitt av arbeidsgiver
+        antallAnsatte = listOfNotNull(dto.skjema, dto.kobletSkjema).firstNotNullOfOrNull { it.metadata.antallAnsatte }
+        antallAdmAnsatte = virksomhetINorge?.antallAdministrativtAnsatte
+        antallUtsendte = virksomhetINorge?.antallUtsendteArbeidstakere
+        andelRekruttertINorge = virksomhetINorge?.andelAnsatteRekruttertINorge?.toBigDecimal()
+        andelOmsetningINorge = virksomhetINorge?.andelOmsetningINorge?.toBigDecimal()
+        andelOppdragINorge = virksomhetINorge?.andelOppdragUtfortINorge?.toBigDecimal()
+        andelKontrakterINorge = virksomhetINorge?.andelOppdragskontrakterInngattINorge?.toBigDecimal()
     }
 
     private fun hentHovedarbeidsgiversOrgnr(dto: UtsendtArbeidstakerSkjemaM2MDto): String? {
