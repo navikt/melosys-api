@@ -358,6 +358,9 @@ class InnvilgelseFtrlMapper(
             inntektskildetype = inntektsperiode.type,
             avgiftspliktigInntektPerMd = inntektsperiode.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             beregningsregel = beregningsregel,
+            // Null-tolerant: brevet skal ikke feile på perioder uten medlemskapsperiode (f.eks. pliktige med lovvalgsperiode)
+            trygdedekning = grunnlagMedlemskapsperiode?.trygdedekning?.name,
+            avgiftsdel = avgiftsdel,
         )
     }
 
@@ -374,6 +377,7 @@ class InnvilgelseFtrlMapper(
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskildetype = it.hentGrunnlagInntekstperiode().type.name,
                     trygdedekning = it.hentGrunnlagMedlemskapsperiode().hentTrygdedekning().name,
+                    avgiftsdel = it.avgiftsdel,
                     avgiftspliktigInntektPerMd = it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                     skatteplikt = it.hentGrunnlagSkatteforholdTilNorge().skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
