@@ -8,9 +8,9 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.service.avgift.SammenslåttGrunnlagBeregner
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
-import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.aarsavregning.dto.AvgiftspliktigPeriodeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
@@ -167,7 +167,7 @@ class ÅrsavregningController(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
                     trygdeavgiftsperioder = mapTilTrygdeavgiftperiodeDto(trygdeavgiftsperioder),
-                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(trygdeavgiftsperioder),
+                    totalInntekt = SammenslåttGrunnlagBeregner.totalinntekt(trygdeavgiftsperioder),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
             )
@@ -182,7 +182,7 @@ class ÅrsavregningController(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
                     trygdeavgiftsperioder = mapTilTrygdeavgiftperiodeDto(årsavregningModel.tidligereAvgift),
-                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(årsavregningModel.tidligereAvgift),
+                    totalInntekt = SammenslåttGrunnlagBeregner.totalinntekt(årsavregningModel.tidligereAvgift),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(årsavregningModel.tidligereAvgift) ?: BigDecimal.ZERO
                 ),
                 tidligereInnbetaltTrygdeavgift = årsavregningModel.tidligereInnbetaltTrygdeavgift,
@@ -193,15 +193,13 @@ class ÅrsavregningController(
 
     private fun mapTilTrygdeavgiftperiodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
         trygdeavgiftsperioder.map { periode ->
-            val avgiftspliktigMndInntekt = periode.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true) ?: BigDecimal.ZERO
-
             TrygdeavgiftsperiodeDto(
                 fom = periode.fom,
                 tom = periode.tom,
                 trygdedekning = periode.hentGrunnlagAvgiftsperiode().hentTrygdedekning(),
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
-                inntektPerMd = avgiftspliktigMndInntekt,
-                arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
+                inntektPerMd = SammenslåttGrunnlagBeregner.bruttoinntektPerMd(periode, verdiAvrundet = true),
+                arbeidsgiversavgiftBetales = SammenslåttGrunnlagBeregner.arbeidsgiversavgiftBetales(periode),
                 avgiftssats = periode.trygdesats?.toDouble(),
                 avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact(),
                 beregningsregel = periode.beregningsregel,
