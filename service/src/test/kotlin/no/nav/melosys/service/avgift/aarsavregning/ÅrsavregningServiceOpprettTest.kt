@@ -686,6 +686,68 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
     }
 
+    @Test
+    fun `opprettÅrsavregning - tidligere fakturert fra forrige årsavregnings perioder legger tilbake innbetalt`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+        // Forrige årsavregning er siste behandling med avgift for året, så tidligere fakturert hentes derfra
+        val forrigeÅrsavregning = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+            medlemskapsperiode("2024-01-01", "2024-12-31")
+            årsavregning {
+                id = 10
+                aar = 2024
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET_MED_PERIODE_FRA_AVGIFTSSYSTEMET
+                harInnbetaltTrygdeavgift = true
+                innbetaltTrygdeavgift = BigDecimal("300")
+            }
+        }
+        val nyÅrsavregning = Behandlingsresultat.forTest {
+            id = 2L
+            behandling = fagsak.behandlinger[1]
+        }
+        val etterId = mapOf(1L to forrigeÅrsavregning, 2L to nyÅrsavregning)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers { etterId.getValue(firstArg()) }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers { etterId.getValue(firstArg()) }
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2024) } returns 0
+        every { behandlingsresultatService.lagre(any()) } answers { firstArg() }
+
+        årsavregningService.opprettÅrsavregning(2, 2024)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+            // 12 måneder à 5000 fra forrige årsavregnings trygdeavgiftsperiode
+            tidligereFakturertBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("60000")
+
+            beregnetAvgiftBelop = BigDecimal("6000")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            // Innbetalingen inngår i tidligere fakturert, så den legges tilbake: 6000 - 60000 - 300 + 300
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("-54000")
+        }
+        årsavregningService.finnÅrsavregningForBehandling(2).shouldNotBeNull()
+            .tilbakelagtInnbetaltTrygdeavgift.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("300")
+    }
+
     /**
      * Årsavregning for 2025 med 300 innbetalt i Avgiftssystemet, fastsatt manuelt til [tidligereManuelt] (eller beregnet
      * når null), deretter en ny vurdering, deretter ny årsavregning for 2025. Den nye vurderingen blir «tidligere
