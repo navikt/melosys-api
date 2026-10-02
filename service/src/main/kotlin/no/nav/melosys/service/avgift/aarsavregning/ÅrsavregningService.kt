@@ -218,7 +218,6 @@ class ÅrsavregningService(
         }
 
         årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
-        beregnTilFaktureringsBeloep(årsavregning)
     }
 
     /**
@@ -329,6 +328,7 @@ class ÅrsavregningService(
         // Året kan være fjernet av en senere vurdering; da skal endelig avgift fortsatt være 0 etter nullstillingen over
         if (erÅretFjernetAvSenereVurdering(årsavregning)) {
             settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+            beregnTilFaktureringsBeloep(årsavregning)
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
