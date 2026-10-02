@@ -318,7 +318,11 @@ class LovligeKombinasjonerSaksbehandlingService(
                     sisteBehandling?.fagsak?.status
                 )
 
-                if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && sakstype == Sakstyper.FTRL))) {
+                if ((sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
+                    && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG
+                ) {
+                    typer
+                } else if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && sakstype == Sakstyper.FTRL))) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
                 } else if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST) && sakstype == Sakstyper.EU_EOS && behandlingstema == Behandlingstema.PENSJONIST) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
@@ -358,6 +362,7 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         if ((sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
             && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG
+            && unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
             && behandlingstema != Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
             && behandlingstema != Behandlingstema.TRYGDETID
             && behandlingstyper.isNotEmpty()
