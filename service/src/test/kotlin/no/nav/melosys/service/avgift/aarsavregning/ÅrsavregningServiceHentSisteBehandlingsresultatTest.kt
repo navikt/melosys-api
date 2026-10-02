@@ -732,8 +732,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     /**
      * En behandling avsluttet fra behandlingsmenyen får resultattype uten at det fattes vedtak i Melosys,
-     * så raden i vedtak_metadata finnes ikke. Fag (MELOSYS-8308) har avgjort at slike behandlinger aldri
-     * skal tas hensyn til ved årsavregning.
+     * så raden i vedtak_metadata finnes ikke. Slike behandlinger skal aldri tas hensyn til ved årsavregning.
      */
     @Test
     fun `bruker vedtaket når en nyere behandling mangler vedtak, og logger antallet som hoppes over`() {

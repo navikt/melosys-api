@@ -420,6 +420,7 @@ class ÅrsavregningService(
      * Henter siste relevante behandlingsresultater for årsavregning.
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
+     * Behandlinger uten vedtak i Melosys (uten vedtaksmetadata) tas ikke med.
      *
      * For å finne gjeldende avgiftspliktig periode brukes den nyeste behandlingen med avgiftspliktige perioder,
      * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
