@@ -453,7 +453,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .loggBehandlingerUtenVedtaksdato(saksnummer)
+            .kunBehandlingerMedVedtak(saksnummer)
             .filter { førVedtaksdato == null || vedtaksdato(it)?.isBefore(førVedtaksdato) == true }
             .sortedWith(eldsteVedtakFørst)
 
@@ -493,11 +493,13 @@ class ÅrsavregningService(
         )
     }
 
-    private fun List<Behandlingsresultat>.loggBehandlingerUtenVedtaksdato(saksnummer: String): List<Behandlingsresultat> = also {
-        val antall = count { vedtaksdato(it) == null }
-        if (antall > 0) {
-            log.info { "$antall behandling(er) uten vedtaksdato i sak $saksnummer ved oppslag for årsavregning" }
+    // En behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke årsavregnes.
+    private fun List<Behandlingsresultat>.kunBehandlingerMedVedtak(saksnummer: String): List<Behandlingsresultat> {
+        val (medVedtak, utenVedtak) = partition { it.harVedtak() }
+        if (utenVedtak.isNotEmpty()) {
+            log.info { "Hopper over ${utenVedtak.size} behandling(er) uten vedtak i sak $saksnummer ved oppslag for årsavregning" }
         }
+        return medVedtak
     }
 
     // En avsluttet behandling kan mangle vedtak, f.eks. når den er avsluttet fra behandlingsmenyen.
