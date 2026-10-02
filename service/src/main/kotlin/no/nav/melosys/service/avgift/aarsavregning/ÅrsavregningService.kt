@@ -175,15 +175,7 @@ class ÅrsavregningService(
             aar = gjelderÅr,
             behandlingsresultat = behandlingsresultat,
             tidligereBehandlingsresultat = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
-            tidligereFakturertBeloep =
-                sisteÅrsavregning?.manueltAvgiftBeloep
-                    ?: TotalbeløpBeregner.hentTotalavgift(
-                        sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
-                            it.overlapperMedÅr(
-                                gjelderÅr
-                            )
-                        }.orEmpty()
-                    ),
+            tidligereFakturertBeloep = utledTidligereFakturert(sisteRelevanteBehandlinger, gjelderÅr).beløp,
             endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             harInnbetaltTrygdeavgift = sisteÅrsavregning?.let { it.harInnbetaltTrygdeavgift ?: true },
             innbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
@@ -343,13 +335,7 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
-    /**
-     * Beregner beløp til fakturering. Innbetalt fra siste vedtatte årsavregning for året legges tilbake bare når
-     * tidligere fakturert beløp kom fra den årsavregningen (manuelt beløp eller dens trygdeavgiftsperioder), fordi
-     * innbetalingen da allerede inngår i det beløpet. Kommer tidligere fakturert fra en senere vurdering med egne
-     * avgiftsperioder, dekker det bare det Melosys fakturerte, og innbetalingen skal trekkes fra uten tilbakelegging.
-     * Oppslaget er det samme som [opprettEllerOppdaterÅrsavregning] arver fra.
-     */
+    /** Vedtaksdato er null før vedtak, så oppslaget gir samme svar som ved opprettelse. */
     internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
         val behandlingsresultat = årsavregning.hentBehandlingsresultat
         val gjeldende = hentGjeldendeBehandlingsresultaterForÅrsavregning(
@@ -357,15 +343,38 @@ class ÅrsavregningService(
             årsavregning.aar,
             behandlingsresultat.vedtakMetadata?.vedtaksdato
         )
+        årsavregning.beregnTilFaktureringsBeloep(utledTidligereFakturert(gjeldende, årsavregning.aar).innbetaltSomLeggesTilbake)
+    }
+
+    /**
+     * Tidligere fakturert for [år]: manuelt beløp på forrige årsavregning, ellers avgiften i siste behandling med avgift.
+     * Kom beløpet fra forrige årsavregning, inneholder det også innbetalt derfra. Innbetalt legges da tilbake,
+     * så det ikke trekkes fra to ganger.
+     */
+    private fun utledTidligereFakturert(
+        gjeldende: GjeldendeBehandlingsresultaterForÅrsavregning?,
+        år: Int,
+    ): TidligereFakturert {
         val sisteÅrsavregning = gjeldende?.sisteÅrsavregning
-        val tidligereFakturertFraSisteÅrsavregning = sisteÅrsavregning != null && (
-            sisteÅrsavregning.hentÅrsavregning().manueltAvgiftBeloep != null
-                || gjeldende.sisteBehandlingsresultatMedAvgift?.id == sisteÅrsavregning.id
-            )
-        årsavregning.beregnTilFaktureringsBeloep(
-            if (tidligereFakturertFraSisteÅrsavregning) sisteÅrsavregning.hentÅrsavregning().innbetaltTrygdeavgift else null
+        val forrigeÅrsavregning = sisteÅrsavregning?.hentÅrsavregning()
+        val sisteResultatMedAvgift = gjeldende?.sisteBehandlingsresultatMedAvgift
+
+        val fraForrigeÅrsavregning = forrigeÅrsavregning != null &&
+            (forrigeÅrsavregning.manueltAvgiftBeloep != null || sisteResultatMedAvgift?.id == sisteÅrsavregning?.id)
+
+        return TidligereFakturert(
+            beløp = forrigeÅrsavregning?.manueltAvgiftBeloep
+                ?: TotalbeløpBeregner.hentTotalavgift(
+                    sisteResultatMedAvgift?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty()
+                ),
+            innbetaltSomLeggesTilbake = if (fraForrigeÅrsavregning) forrigeÅrsavregning.innbetaltTrygdeavgift else null,
         )
     }
+
+    private data class TidligereFakturert(
+        val beløp: BigDecimal?,
+        val innbetaltSomLeggesTilbake: BigDecimal?,
+    )
 
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,
