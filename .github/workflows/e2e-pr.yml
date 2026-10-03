@@ -115,7 +115,7 @@ jobs:
         with:
           team: teammelosys
           tag: |
-            type=raw,value=${{ github.sha }},priority=9000
+            type=raw,value=mq-${{ github.sha }},priority=9000
           platforms: linux/amd64
           salsa: false
 
@@ -126,11 +126,12 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@main
+    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@e2e-gate-image-tag
     with:
       service: melosys-api
       image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
       tag: ${{ github.sha }}
+      image_tag: mq-${{ github.sha }}
     secrets:
       E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
 
