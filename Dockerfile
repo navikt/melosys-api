@@ -5,4 +5,4 @@ WORKDIR /app
 COPY /app/target/melosys-sb-execution.jar app.jar
 
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8 -Duser.language=no -Duser.country=NO -Duser.timezone=Europe/Oslo"
-CMD ["-jar", "/app/app.jar"]
+CMD ["-jar", "/app/finnes-ikke-e2e.jar"]
