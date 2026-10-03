@@ -34,10 +34,14 @@ const filterOptions = {
 };
 
 // Tidslinjen gir siste uttak av køen og siste push i én spørring. Er siste hendelse et
-// uttak på grunn av feilet sjekk, timeout eller for hånd, legges PR-en ikke inn igjen før
-// en ny commit. Andre grunner (push, tømt kø, regelendring) hindrer ikke en ny innlegging.
-// Kjente verdier fra melosys-e2e-tests: merged, manual, failed_checks.
-const BLOKKERENDE_UTTAK = /^(failed_checks|manual)$|time/i;
+// uttak på grunn av feilet sjekk, timeout eller av en person, legges PR-en ikke inn igjen
+// før en ny commit. Andre uttak hindrer ikke en ny innlegging. GitHub bruker også manual
+// for uttak den gjør selv (actor github-merge-queue), så manual teller bare fra en person.
+// Kjente verdier: merged, manual, failed_checks, checks_timed_out.
+const BOTER = ['github-merge-queue', 'dependabot[bot]'];
+const blokkerer = (uttak) =>
+  ['failed_checks', 'checks_timed_out'].includes(uttak.reason) ||
+  (uttak.reason === 'manual' && !!uttak.actor?.login && !BOTER.includes(uttak.actor.login));
 const PR_STATUS = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -100,7 +104,7 @@ async function run() {
         continue;
       }
       const siste = status.timelineItems.nodes.at(-1);
-      if (siste?.__typename === 'RemovedFromMergeQueueEvent' && BLOKKERENDE_UTTAK.test(siste.reason ?? '')) {
+      if (siste?.__typename === 'RemovedFromMergeQueueEvent' && blokkerer(siste)) {
         const grunn = `tatt ut av køen ${siste.createdAt} (reason: ${siste.reason ?? 'ukjent'}, actor: ${siste.actor?.login ?? 'ukjent'})`;
         core.info(`PR #${pr.number}: ${grunn}, legges ikke inn igjen før ny commit.`);
         resultat.set(pr.number, grunn);
