@@ -3,11 +3,7 @@ package no.nav.melosys.service.avgift
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -29,6 +25,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftClient
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -70,6 +67,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     private val unleash: FakeUnleash = FakeUnleash()
 
 
+    private val mockÅrsavregningService = mockk<ÅrsavregningService>(relaxed = true)
+
     @BeforeEach
     fun setup() {
         trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
@@ -82,7 +81,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             trygdeavgiftMottakerService,
             mockPersondataService,
             mockTrygdeavgiftClient,
-            unleash
+            unleash,
+            mockÅrsavregningService
         )
         trygdeavgiftService = TrygdeavgiftService(
             mockFagsakService,
@@ -2565,14 +2565,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             )
 
-            // Assert: Verifiser at årsavregning.beregnetAvgiftBelop er satt
-            val årsavregning = behandlingsresultat.årsavregning
-            årsavregning.shouldNotBeNull()
-            årsavregning.beregnetAvgiftBelop.shouldNotBeNull()
-            // Totalbeløp = månedsavgift * antall måneder i perioden
-            årsavregning.beregnetAvgiftBelop!!.compareTo(BigDecimal.ZERO) shouldBe 1 // > 0
-            årsavregning.tilFaktureringBeloep.shouldNotBeNull()
-            årsavregning.tilFaktureringBeloep shouldBe årsavregning.beregnetAvgiftBelop
+            // Assert: årsavregningen får totalbeløpet (månedsavgift * antall måneder i perioden)
+            val årsavregning = behandlingsresultat.årsavregning.shouldNotBeNull()
+            verify { mockÅrsavregningService.oppdaterBeregnetAvgift(årsavregning, match { it > BigDecimal.ZERO }) }
         }
 
         @Test

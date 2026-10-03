@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -189,8 +190,51 @@ class ÅrsavregningVedtakMapperTest {
         result.shouldNotBeNull()
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
-        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBeEqualComparingTo BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
+        result.erNyÅrsavregning shouldBe false
+    }
+
+    @Test
+    fun `mapÅrsavregning bruker tidligere betalt totalt når innbetalt ble lagt tilbake`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
+        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+
+
+        // kun reelle verdier for (tidligereFakturertBeloep, innbetaltTrygdeavgift, beregnetAvgiftBelop, tilFaktureringBeloep)
+        val årsavregningModel = ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
+            tidligereAvgift = tidligereAvgift,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
+            endeligAvgift = endeligAvgift,
+            tidligereFakturertBeloep = BigDecimal(2652),
+            beregnetAvgiftBelop = BigDecimal(11699.91),
+            tilFaktureringBeloep = BigDecimal(9047.91),
+            // 11699.91 - 2652 - 2000 + 2000 lagt tilbake fra forrige årsavregning
+            harInnbetaltTrygdeavgift = true,
+            innbetaltTrygdeavgift = BigDecimal(2000),
+            manueltAvgiftBeloep = BigDecimal(0),
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            tidligereInnbetaltTrygdeavgift = null,
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = false
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBeEqualComparingTo BigDecimal(2652)
+        result.differansebeløp shouldBe BigDecimal(9047.91)
         result.erNyÅrsavregning shouldBe false
     }
 
@@ -214,7 +258,7 @@ class ÅrsavregningVedtakMapperTest {
             endeligAvgift = endeligAvgift,
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
-            tilFaktureringBeloep = BigDecimal(7047.91),
+            tilFaktureringBeloep = BigDecimal(-3000),
             harInnbetaltTrygdeavgift = true,
             innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),
@@ -233,7 +277,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgift shouldBe emptyList()
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
-        result.differansebeløp shouldBe BigDecimal(7047.91)
+        result.differansebeløp shouldBe BigDecimal(-3000)
         result.erNyÅrsavregning shouldBe false
     }
 
@@ -346,7 +390,7 @@ class ÅrsavregningVedtakMapperTest {
             endeligAvgift = endeligAvgift,
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
-            tilFaktureringBeloep = BigDecimal(7047.91),
+            tilFaktureringBeloep = BigDecimal(-3000),
             harInnbetaltTrygdeavgift = true,
             innbetaltTrygdeavgift = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),

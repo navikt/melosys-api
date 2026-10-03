@@ -57,6 +57,34 @@ class Årsavregning(
     val hentTilFaktureringBeloep: BigDecimal
         get() = tilFaktureringBeloep ?: error("tilFaktureringBeloep er ikke satt for årsavregning med id: $id")
 
+    /**
+     * Det som er betalt for året før denne årsavregningen: tidligere fakturert pluss innbetalt i Avgiftssystemet, minus
+     * innbetaling som allerede inngikk i tidligere fakturert. Utledes som endelig avgift minus [tilFaktureringBeloep],
+     * slik at tallet som vises alltid stemmer med beløpet som faktureres.
+     */
+    val hentTidligereBetaltTotalt: BigDecimal
+        get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop ?: error("Endelig avgift er ikke satt for årsavregning med id: $id"))
+            .subtract(hentTilFaktureringBeloep)
+
+    /**
+     * Innbetalt fra forrige årsavregning som er lagt tilbake i [tilFaktureringBeloep]. Trengs for å vise hvordan
+     * [tilFaktureringBeloep] er satt sammen, fordi tilbakeleggingen ikke er lagret som eget beløp.
+     *
+     * Regnes som [tilFaktureringBeloep] minus [differanseFørTilbakelegging] i stedet for å slås opp på nytt, slik at det
+     * alltid stemmer med det som ble fakturert, også for årsavregninger regnet ut med en eldre formel.
+     */
+    val tilbakelagtInnbetalt: BigDecimal?
+        get() {
+            val utenTilbakelegging = differanseFørTilbakelegging ?: return null
+            return tilFaktureringBeloep?.subtract(utenTilbakelegging)?.takeIf { it.signum() != 0 }
+        }
+
+    /** Endelig avgift − tidligere fakturert − innbetalt, før tilbakelegging. Null uten endelig avgift. */
+    private val differanseFørTilbakelegging: BigDecimal?
+        get() = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)
+            ?.subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
+            ?.subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Årsavregning) return false
@@ -65,21 +93,20 @@ class Årsavregning(
 
     override fun hashCode(): Int = id.hashCode()
 
-    fun beregnTilFaktureringsBeloep() {
-        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
-
-        tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)!!
-            .subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
-            .subtract(innbetaltTrygdeavgift ?: BigDecimal.ZERO)
-            .add(hentTidligereInnbetaltTrygdeavgift())
-    }
-
-    private fun hentTidligereInnbetaltTrygdeavgift(): BigDecimal {
-        if (tidligereBehandlingsresultat?.årsavregning == null) {
-            return BigDecimal.ZERO
-        }
-
-        return tidligereBehandlingsresultat!!.årsavregning!!.innbetaltTrygdeavgift ?: BigDecimal.ZERO
+    /**
+     * Setter beløp til fakturering: endelig avgift − tidligere fakturert − innbetalt + [tidligereÅrsavregningInnbetalt].
+     * Uten endelig avgift (verken beregnet eller manuelt beløp) settes beløpet til null.
+     *
+     * [tidligereÅrsavregningInnbetalt] er det som var innbetalt i Avgiftssystemet i forrige vedtatte årsavregning for året.
+     * Når [tidligereFakturertBeloep] er endelig avgift fra den årsavregningen, inngår innbetalingen i det beløpet, og den
+     * legges tilbake så den ikke trekkes fra to ganger. Når [tidligereFakturertBeloep] er avgiften fra en ny vurdering,
+     * inngår ikke innbetalingen, og [tidligereÅrsavregningInnbetalt] er null.
+     */
+    fun beregnTilFaktureringsBeloep(tidligereÅrsavregningInnbetalt: BigDecimal?) {
+        // TODO MELOSYS-8235: Formelen trekker innbetalt fra i tillegg til tidligere fakturert. Frontend bak toggle
+        //  melosys.arsavregning.eos_pensjonist lar innbetalt erstatte tidligere fakturert for EØS-pensjonister.
+        //  Toggle er av i prod; backend og frontend må samkjøres før den slås på.
+        tilFaktureringBeloep = differanseFørTilbakelegging?.add(tidligereÅrsavregningInnbetalt ?: BigDecimal.ZERO)
     }
 
     companion object // for å kunne legge på test forTest DSL

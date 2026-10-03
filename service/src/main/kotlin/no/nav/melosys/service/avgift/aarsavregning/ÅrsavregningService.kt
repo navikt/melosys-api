@@ -19,6 +19,7 @@ import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
@@ -174,15 +175,7 @@ class ÅrsavregningService(
             aar = gjelderÅr,
             behandlingsresultat = behandlingsresultat,
             tidligereBehandlingsresultat = sisteBehandlingsresultatMedAvgiftspliktigPeriode,
-            tidligereFakturertBeloep =
-                sisteÅrsavregning?.manueltAvgiftBeloep
-                    ?: TotalbeløpBeregner.hentTotalavgift(
-                        sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
-                            it.overlapperMedÅr(
-                                gjelderÅr
-                            )
-                        }.orEmpty()
-                    ),
+            tidligereFakturertBeloep = utledTidligereFakturert(sisteRelevanteBehandlinger, gjelderÅr).beløp,
             endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             harInnbetaltTrygdeavgift = sisteÅrsavregning?.let { it.harInnbetaltTrygdeavgift ?: true },
             innbetaltTrygdeavgift = sisteÅrsavregning?.innbetaltTrygdeavgift,
@@ -193,6 +186,7 @@ class ÅrsavregningService(
         }
 
         settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
@@ -224,7 +218,6 @@ class ÅrsavregningService(
         }
 
         årsavregning.beregnetAvgiftBelop = BigDecimal.ZERO
-        årsavregning.beregnTilFaktureringsBeloep()
     }
 
     /**
@@ -235,6 +228,22 @@ class ÅrsavregningService(
         val sisteVurdering = årsavregning.tidligereBehandlingsresultat ?: return false
         return sisteVurdering.behandling?.erÅrsavregning() == false
             && !sisteVurdering.harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(årsavregning.aar)
+    }
+
+    /**
+     * Setter beregnet avgift etter en ny trygdeavgiftsberegning og regner ut beløp til fakturering.
+     * Manuelt fastsatt endelig avgift røres ikke. Endrer en entitet kalleren eier, så kalleren må ha en aktiv transaksjon.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    fun oppdaterBeregnetAvgift(årsavregning: Årsavregning, totalAvgift: BigDecimal?) {
+        if (årsavregning.endeligAvgiftValg == EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) return
+
+        årsavregning.beregnetAvgiftBelop = totalAvgift
+        if (totalAvgift != null) {
+            beregnTilFaktureringsBeloep(årsavregning)
+        } else {
+            årsavregning.tilFaktureringBeloep = null
+        }
     }
 
     fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
@@ -319,11 +328,53 @@ class ÅrsavregningService(
         // Året kan være fjernet av en senere vurdering; da skal endelig avgift fortsatt være 0 etter nullstillingen over
         if (erÅretFjernetAvSenereVurdering(årsavregning)) {
             settEndeligAvgiftTilNullDersomIngenAvgiftspliktigPeriode(behandlingsresultat, årsavregning)
+            beregnTilFaktureringsBeloep(årsavregning)
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
+
+    /** Vedtaksdato er null før vedtak, så oppslaget gir samme svar som ved opprettelse. */
+    internal fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
+        val behandlingsresultat = årsavregning.hentBehandlingsresultat
+        val gjeldende = hentGjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
+            årsavregning.aar,
+            behandlingsresultat.vedtakMetadata?.vedtaksdato
+        )
+        årsavregning.beregnTilFaktureringsBeloep(utledTidligereFakturert(gjeldende, årsavregning.aar).innbetaltSomLeggesTilbake)
+    }
+
+    /**
+     * Tidligere fakturert for [år]: manuelt beløp på forrige årsavregning, ellers avgiften i siste behandling med avgift.
+     * Kom beløpet fra forrige årsavregning, inneholder det også innbetalt derfra. Innbetalt legges da tilbake,
+     * så det ikke trekkes fra to ganger.
+     */
+    private fun utledTidligereFakturert(
+        gjeldende: GjeldendeBehandlingsresultaterForÅrsavregning?,
+        år: Int,
+    ): TidligereFakturert {
+        val sisteÅrsavregning = gjeldende?.sisteÅrsavregning
+        val forrigeÅrsavregning = sisteÅrsavregning?.hentÅrsavregning()
+        val sisteResultatMedAvgift = gjeldende?.sisteBehandlingsresultatMedAvgift
+
+        val fraForrigeÅrsavregning = forrigeÅrsavregning != null &&
+            (forrigeÅrsavregning.manueltAvgiftBeloep != null || sisteResultatMedAvgift?.id == sisteÅrsavregning?.id)
+
+        return TidligereFakturert(
+            beløp = forrigeÅrsavregning?.manueltAvgiftBeloep
+                ?: TotalbeløpBeregner.hentTotalavgift(
+                    sisteResultatMedAvgift?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty()
+                ),
+            innbetaltSomLeggesTilbake = if (fraForrigeÅrsavregning) forrigeÅrsavregning.innbetaltTrygdeavgift else null,
+        )
+    }
+
+    private data class TidligereFakturert(
+        val beløp: BigDecimal?,
+        val innbetaltSomLeggesTilbake: BigDecimal?,
+    )
 
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,
@@ -406,6 +457,7 @@ class ÅrsavregningService(
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
+            tilbakelagtInnbetaltTrygdeavgift = årsavregning.tilbakelagtInnbetalt,
             harInnbetaltTrygdeavgift = årsavregning.harInnbetaltTrygdeavgift,
             innbetaltTrygdeavgift = årsavregning.innbetaltTrygdeavgift,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
@@ -633,7 +685,7 @@ class ÅrsavregningService(
             }
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
@@ -654,6 +706,7 @@ data class ÅrsavregningModel(
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
     val tilFaktureringBeloep: BigDecimal? = null,
+    val tilbakelagtInnbetaltTrygdeavgift: BigDecimal? = null,
     val harInnbetaltTrygdeavgift: Boolean? = null,
     val innbetaltTrygdeavgift: BigDecimal? = null,
     val endeligAvgiftValg: EndeligAvgiftValg? = null,

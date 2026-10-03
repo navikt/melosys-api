@@ -3,6 +3,9 @@ package no.nav.melosys.service.avgift.aarsavregning
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.forTest
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.util.*
@@ -125,5 +128,54 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
 
 
         behandlingsresultat.hentÅrsavregning().harInnbetaltTrygdeavgift shouldBe null
+    }
+
+    @Test
+    fun `oppdaterBeregnetAvgift - rører ikke manuelt fastsatt avgift`() {
+        val årsavregning = Årsavregning.forTest {
+            endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
+            manueltAvgiftBeloep = BigDecimal("5000")
+            tilFaktureringBeloep = BigDecimal("-100")
+        }
+
+        årsavregningService.oppdaterBeregnetAvgift(årsavregning, BigDecimal("9000"))
+
+        årsavregning.beregnetAvgiftBelop shouldBe null
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal("-100")
+    }
+
+    @Test
+    fun `oppdaterBeregnetAvgift - uten totalavgift nullstilles beløp til fakturering`() {
+        val årsavregning = Årsavregning.forTest {
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            beregnetAvgiftBelop = BigDecimal("1000")
+            tilFaktureringBeloep = BigDecimal("1000")
+        }
+
+        årsavregningService.oppdaterBeregnetAvgift(årsavregning, null)
+
+        årsavregning.beregnetAvgiftBelop shouldBe null
+        årsavregning.tilFaktureringBeloep shouldBe null
+    }
+
+    @Test
+    fun `oppdaterBeregnetAvgift - setter beregnet avgift og regner ut beløp til fakturering`() {
+        val fagsak = Fagsak.forTest { }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                this.fagsak = fagsak
+            }
+            årsavregning {
+                aar = 2023
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+                tidligereFakturertBeloep = BigDecimal("1000")
+            }
+        }
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+
+        årsavregningService.oppdaterBeregnetAvgift(behandlingsresultat.hentÅrsavregning(), BigDecimal("1500"))
+
+        behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop shouldBe BigDecimal("1500")
+        behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal("500")
     }
 }
