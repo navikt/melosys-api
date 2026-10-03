@@ -70,14 +70,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-fss
           RESOURCE: nais/unleash-apitoken.yml
           VARS: nais/vars-q2.json
       - name: Deploy til dev (Q2)
         id: deploy-q2
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         continue-on-error: true
         env:
           CLUSTER: dev-fss
@@ -87,7 +87,7 @@ jobs:
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
       - name: Deploy Unleash Apikey to q1
         if: steps.deploy-q2.outcome == 'success'
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-fss
           RESOURCE: nais/unleash-apitoken.yml
@@ -95,7 +95,7 @@ jobs:
       - name: Deploy til dev (Q1)
         id: deploy-q1
         if: steps.deploy-q2.outcome == 'success'
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         continue-on-error: true
         env:
           CLUSTER: dev-fss
