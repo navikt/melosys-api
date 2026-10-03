@@ -1,0 +1,203 @@
+name: E2E før merge
+
+# Merge queue krever sjekken e2e-for-merge (ruleset e2e-merge-queue). På pull_request
+# svarer den grønt med én gang, fordi køen krever sjekken på PR-en før den kan legges i kø.
+# På merge_group kjører e2e for køens commit, med mindre nøyaktig samme kode er testet
+# grønt før (markøren e2e-ok-<tree>, for eksempel fra labelen e2e). Commiten som lander
+# på master har samme tree, så deploy-dev finner markøren og hopper over e2e-dispatch.
+# Køens image tagges mq-<sha>, aldri <sha> eller latest, så det aldri kan deployes.
+# Gaten: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+
+jobs:
+  endringer:
+    name: Bare dokumentasjon?
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      bare_docs: ${{ steps.diff.outputs.bare_docs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      # Samme filer som paths-ignore i deploy-dev.yaml: endrer gruppen bare dem, kjører
+      # ikke deploy-dev, og da trengs ingen e2e.
+      - name: Sammenlign med base
+        id: diff
+        env:
+          BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.merge_group.head_sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          FILER=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          BARE_DOCS=false
+          if [ -n "$FILER" ]; then
+            BARE_DOCS=true
+            while IFS= read -r fil; do
+              case "$fil" in
+                *.md|.gitignore|LICENCE|CODEOWNERS) ;;
+                *) BARE_DOCS=false; break ;;
+              esac
+            done <<< "$FILER"
+          fi
+          echo "bare_docs=$BARE_DOCS" >> "$GITHUB_OUTPUT"
+          echo "bare_docs=$BARE_DOCS ($(printf '%s\n' "$FILER" | grep -c .) filer endret)" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  e2e-marker:
+    name: Slå opp markør
+    needs: endringer
+    if: needs.endringer.outputs.bare_docs == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      hit: ${{ steps.marker.outputs.hit }}
+    steps:
+      # Feiler innloggingen, feiler også oppslaget, og det regnes som bom.
+      - name: Login to NAIS registry
+        uses: nais/login@v0
+        continue-on-error: true
+        with:
+          team: teammelosys
+
+      - name: Finnes e2e-ok-<tree>?
+        id: marker
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.merge_group.head_sha }}
+        run: |
+          TREE=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA" --jq .commit.tree.sha 2>/dev/null || true)
+          if [[ "$TREE" =~ ^[0-9a-f]{40}$ ]] && docker manifest inspect "$IMAGE:e2e-ok-$TREE" > /dev/null 2>&1; then
+            hit=true
+          else
+            hit=false
+          fi
+          echo "hit=$hit" >> "$GITHUB_OUTPUT"
+          echo "e2e-marker: hit=$hit (sha $SHA, tree ${TREE:-ukjent})" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # Ikke «build»: det navnet bruker andre repoer som påkrevd sjekk.
+  build:
+    name: Bygg image
+    needs: e2e-marker
+    if: needs.e2e-marker.outputs.hit == 'false'
+    runs-on: ubuntu-latest-8-cores
+    # packages: read fordi Maven henter fra github-package-registry-navikt med
+    # GITHUB_TOKEN (.github/settings.xml), som pull-request.yml.
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PASSWORD: ${{ secrets.READER_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Maven
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.0.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.READER_TOKEN }}
+      # Bare bygg; testene kjører i pull-request.yml («Maven Test»).
+      - name: Build
+        run: mvn clean package --threads=8 -DskipTests -B -e -U --settings .github/settings.xml
+      # GitHub avbryter ikke kjøringer for en gruppe som er kastet eller bygges på nytt.
+      # Uten denne sjekken ville bygget pushet et image ingen trenger.
+      - name: Finnes køoppføringen fortsatt?
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUEUE_REF: ${{ github.event.merge_group.head_ref }}
+        run: |
+          REF="${QUEUE_REF#refs/heads/}"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$REF" --silent 2> "$RUNNER_TEMP/ref.err" \
+             && grep -q "HTTP 404" "$RUNNER_TEMP/ref.err"; then
+            echo "::error::Køoppføringen er borte ($REF). Imaget pushes ikke."
+            exit 1
+          fi
+      # mq-<sha>, aldri <sha> eller latest: deploy-manuelt hopper over bygget når :<sha>
+      # finnes, og da kunne køens image nådd prod. nais/docker-build-push legger i
+      # tillegg på en dato-tag, som ingen deploy-workflow bruker.
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        with:
+          team: teammelosys
+          tag: |
+            type=raw,value=mq-${{ github.event.merge_group.head_sha }},priority=9000
+          platforms: linux/amd64
+          salsa: false
+
+  gate:
+    name: E2E
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@main
+    with:
+      service: melosys-api
+      image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+      tag: ${{ github.event.merge_group.head_sha }}
+      image_tag: mq-${{ github.event.merge_group.head_sha }}
+      queue_ref: ${{ github.event.merge_group.head_ref }}
+    secrets:
+      E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
+
+  e2e-for-merge:
+    name: e2e-for-merge
+    needs: [endringer, e2e-marker, build, gate]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Samle resultat
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BARE_DOCS: ${{ needs.endringer.outputs.bare_docs }}
+          MARKER: ${{ needs.e2e-marker.result }}
+          HIT: ${{ needs.e2e-marker.outputs.hit }}
+          BUILD: ${{ needs.build.result }}
+          GATE: ${{ needs.gate.result }}
+        run: |
+          if [ "$EVENT_NAME" != "merge_group" ]; then
+            echo "✅ E2E kjører når PR-en legges i merge queue."
+            exit 0
+          fi
+          if [ "$BARE_DOCS" = "true" ]; then
+            echo "✅ Gruppen endrer bare filer som deploy-dev ignorerer. Ingen e2e."
+            exit 0
+          fi
+          if [ "$MARKER" = "success" ] && [ "$HIT" = "true" ]; then
+            echo "✅ Nøyaktig denne koden har bestått e2e før."
+            exit 0
+          fi
+          if [ "$GATE" = "success" ]; then
+            echo "✅ E2E grønn."
+            exit 0
+          fi
+          echo "❌ E2E ikke grønn: markør=$MARKER, bygg=$BUILD, gate=$GATE."
+          exit 1
