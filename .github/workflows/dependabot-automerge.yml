@@ -1,5 +1,10 @@
 name: Dependabot Automerge
 
+# Legger Dependabot-PR-er i merge queue, så bumpene også går gjennom e2e.
+# navikt/automerge-dependabot merger med REST, og det avviser køen. Skriptet bruker
+# actionens utvalg (src/ på v1.5.1) og legger PR-ene i kø med GraphQL; se
+# .github/scripts/dependabot-enqueue.mjs.
+
 on:
   schedule:
     - cron: '0 4 * * 1-5'
@@ -10,21 +15,42 @@ permissions: {}
 jobs:
   automerge:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # GITHUB_TOKEN brukes bare til utsjekk; resten går med app-tokenet.
     permissions:
-      contents: write
-      pull-requests: write
-      checks: read
-      statuses: read
+      contents: read
     steps:
       - uses: actions/create-github-app-token@v3.2.0
         id: app-token
         with:
           client-id: ${{ vars.CLIENT_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
-      - name: Automerge Dependabot PRs
-        uses: navikt/automerge-dependabot@v1.5.1
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          blackout-periods: 'Sat,Sun,Dec 24-Jan 2'
-          semver-filter: 'patch,minor'
-          merge-method: 'squash'
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Checkout automerge-dependabot v1.5.1
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: navikt/automerge-dependabot
+          ref: 0e342d25820ca0d2941dcdcad4b7bbb59ad59122 # v1.5.1
+          path: automerge-dependabot
+          persist-credentials: false
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+      # Repoet bruker pnpm; --ignore-scripts fordi prepare kjører husky, som er en dev-avhengighet.
+      # Eget steg, så app-tokenet ikke er i miljøet mens pnpm lastes ned og kjører.
+      - name: Installer automerge-dependabot
+        working-directory: automerge-dependabot
+        run: npx --yes pnpm@10.17.1 install --frozen-lockfile --prod --ignore-scripts
+      - name: Legg Dependabot-PR-er i kø
+        working-directory: automerge-dependabot
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+          BLACKOUT_PERIODS: 'Sat,Sun,Dec 24-Jan 2'
+          SEMVER_FILTER: 'patch,minor'
+        run: |
+          cp ../.github/scripts/dependabot-enqueue.mjs .
+          node dependabot-enqueue.mjs
