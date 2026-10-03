@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 public class RestControllerInterceptor implements HandlerInterceptor {
@@ -21,9 +20,9 @@ public class RestControllerInterceptor implements HandlerInterceptor {
     }
 
     private boolean isAdminRequest(HttpServletRequest request) {
-        boolean hasApiKeyHeader = request.getHeader(ApiKeyInterceptor.API_KEY_HEADER) != null;
-        boolean requestStartsWithAdmin = request.getRequestURI().startsWith("/admin/");
-        return hasApiKeyHeader && requestStartsWithAdmin;
+        // Alle kall under /admin/ har passert AdminTilgangInterceptor og @Protected før controlleren kjører.
+        // /api/admin/** går ikke gjennom AdminTilgangInterceptor, og skal derfor ikke regnes som admin-kall.
+        return request.getRequestURI().startsWith("/admin/");
     }
 }
 
