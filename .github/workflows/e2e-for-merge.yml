@@ -42,7 +42,8 @@ jobs:
           HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          FILER=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          # quotePath=false: ellers kommer filnavn med æøå i anførselstegn og matcher ikke *.md.
+          FILER=$(git -c core.quotePath=false diff --name-only "$BASE_SHA" "$HEAD_SHA")
           BARE_DOCS=false
           if [ -n "$FILER" ]; then
             BARE_DOCS=true
@@ -88,11 +89,17 @@ jobs:
           echo "e2e-marker: hit=$hit (sha $SHA, tree ${TREE:-ukjent})" | tee -a "$GITHUB_STEP_SUMMARY"
 
   # Ikke «build»: det navnet bruker andre repoer som påkrevd sjekk.
+  # Feiler eller henger oppslaget, er hit tom, og da bygges og testes det, som i deploy-dev.
   build:
     name: Bygg image
-    needs: e2e-marker
-    if: needs.e2e-marker.outputs.hit == 'false'
+    needs: [endringer, e2e-marker]
+    if: >-
+      !cancelled()
+      && needs.endringer.result == 'success'
+      && needs.endringer.outputs.bare_docs == 'false'
+      && needs.e2e-marker.outputs.hit != 'true'
     runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 30
     # packages: read fordi Maven henter fra github-package-registry-navikt med
     # GITHUB_TOKEN (.github/settings.xml), som pull-request.yml.
     permissions:
@@ -154,6 +161,7 @@ jobs:
   gate:
     name: E2E
     needs: build
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     permissions:
       id-token: write
       contents: read
