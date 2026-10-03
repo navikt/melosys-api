@@ -34,14 +34,13 @@ const filterOptions = {
 };
 
 // Tidslinjen gir siste uttak av køen og siste push i én spørring. Er siste hendelse et
-// uttak på grunn av feilet sjekk, timeout eller av en person, legges PR-en ikke inn igjen
-// før en ny commit. Andre uttak hindrer ikke en ny innlegging. GitHub bruker også manual
-// for uttak den gjør selv (actor github-merge-queue), så manual teller bare fra en person.
-// Kjente verdier: merged, manual, failed_checks, checks_timed_out.
-const BOTER = ['github-merge-queue', 'dependabot[bot]'];
+// uttak på grunn av feilet sjekk eller timeout, eller manual av noe annet enn en bot, legges
+// PR-en ikke inn igjen før en ny commit. GitHub bruker også manual for uttak den gjør selv
+// (actor github-merge-queue, typen Bot). Andre grunner, som merged og merge_conflict,
+// hindrer ikke ny innlegging.
 const blokkerer = (uttak) =>
   ['failed_checks', 'checks_timed_out'].includes(uttak.reason) ||
-  (uttak.reason === 'manual' && !!uttak.actor?.login && !BOTER.includes(uttak.actor.login));
+  (uttak.reason === 'manual' && uttak.actor?.__typename !== 'Bot');
 const PR_STATUS = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
@@ -51,7 +50,7 @@ const PR_STATUS = `
         timelineItems(last: 20, itemTypes: [REMOVED_FROM_MERGE_QUEUE_EVENT, HEAD_REF_FORCE_PUSHED_EVENT, PULL_REQUEST_COMMIT]) {
           nodes {
             __typename
-            ... on RemovedFromMergeQueueEvent { createdAt reason actor { login } }
+            ... on RemovedFromMergeQueueEvent { createdAt reason actor { __typename login } }
           }
         }
       }
