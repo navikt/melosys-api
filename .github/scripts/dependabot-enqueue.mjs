@@ -93,6 +93,7 @@ async function run() {
   const { eligiblePRs, initialPRs } = await findMergeablePRs(octokit, owner, repo, minimumAgeInDays, retryDelayMs);
   const utvalgt = eligiblePRs.length > 0 ? applyFilters(eligiblePRs, filterOptions) : [];
   const resultat = new Map();
+  let feilet = 0;
 
   for (const pr of utvalgt) {
     try {
@@ -115,6 +116,7 @@ async function run() {
       }
       if (autoApprove && !(await approvePullRequest(octokit, owner, repo, pr.number))) {
         resultat.set(pr.number, 'godkjenning feilet');
+        feilet++;
         continue;
       }
       const svar = await octokit.graphql(ENQUEUE, { id: status.id, headOid: pr.head.sha });
@@ -124,6 +126,7 @@ async function run() {
     } catch (error) {
       core.warning(`Klarte ikke legge PR #${pr.number} i kø: ${error.message}`);
       resultat.set(pr.number, `feilet: ${error.message}`);
+      feilet++;
     }
   }
 
@@ -138,6 +141,9 @@ async function run() {
     .addTable([[{ data: 'PR', header: true }, { data: 'Tittel', header: true }, { data: 'Resultat', header: true }], ...rader])
     .write()
     .catch(() => rader.forEach((rad) => core.info(rad.join('  '))));
+
+  // Resten av PR-ene behandles først, men kjøringen blir rød, så feilen blir sett.
+  if (feilet > 0) core.setFailed(`${feilet} PR-er ble ikke lagt i kø; se advarslene over.`);
 }
 
 run().catch((error) => core.setFailed(`Feilet: ${error.message}`));
