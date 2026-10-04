@@ -1,9 +1,10 @@
 name: Build and Push Image
+run-name: ${{ inputs.correlation_id && format('Build and Push Image · {0}', inputs.correlation_id) || '' }}
 on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Custom image tag (e.g., e2e-test-123, feature-x)'
+        description: 'Custom image tag (e.g., e2e-test-123, feature-x; latest, mq-* and e2e-ok-* are reserved)'
         required: true
         type: string
       skip_tests:
@@ -11,6 +12,11 @@ on:
         required: false
         type: boolean
         default: true
+      correlation_id:
+        description: "Optional. Set by e2e-brancher.yml in melosys-e2e-tests to find this run by its title."
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -30,6 +36,23 @@ jobs:
       image: ${{ steps.docker-push.outputs.image }}
       custom_tag: ${{ github.event.inputs.image_tag }}
     steps:
+      - name: Validate image tag
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "::error::Use a valid Docker tag: 1-128 letters, digits, underscores, periods or hyphens, starting with a letter, digit or underscore."
+            exit 1
+          fi
+          # latest is the master build, mq-* the merge queue image and e2e-ok-* the e2e
+          # marker. A manual e2e-ok-<tree> would make e2e skip that code.
+          case "$IMAGE_TAG" in
+            latest | mq-* | e2e-ok-*)
+              echo "::error::The tag $IMAGE_TAG is reserved (latest, mq-* and e2e-ok-*). Use another tag."
+              exit 1
+              ;;
+          esac
+
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
