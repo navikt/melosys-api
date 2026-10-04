@@ -1,5 +1,5 @@
 name: Build and Push Image
-run-name: ${{ inputs.correlation_id && format('Build and Push Image · {0}', inputs.correlation_id) || '' }}
+run-name: Build and Push Image · ${{ inputs.image_tag }}
 on:
   workflow_dispatch:
     inputs:
@@ -12,11 +12,6 @@ on:
         required: false
         type: boolean
         default: true
-      correlation_id:
-        description: "Optional. Set by e2e-brancher.yml in melosys-e2e-tests to find this run by its title."
-        required: false
-        type: string
-        default: ""
 
 permissions:
   contents: write
