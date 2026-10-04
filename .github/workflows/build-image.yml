@@ -45,7 +45,7 @@ jobs:
             echo "::error::Use a valid Docker tag: 1-128 letters, digits, underscores, periods or hyphens, starting with a letter, digit or underscore."
             exit 1
           fi
-          # Reserved: latest (built from the default branch), mq-* (merge queue images)
+          # Reserved: latest (the shared default image), mq-* (merge queue images)
           # and e2e-ok-* (the e2e marker; a manual e2e-ok-<tree> would make e2e skip that code).
           case "$IMAGE_TAG" in
             latest | mq-* | e2e-ok-*)
