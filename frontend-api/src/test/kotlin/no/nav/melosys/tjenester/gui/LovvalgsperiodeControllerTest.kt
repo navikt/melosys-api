@@ -137,7 +137,7 @@ internal class LovvalgsperiodeControllerTest {
         val lovvalgsperiodeDtos = listOf(FORVENTET)
 
         every { aksesskontroll.autoriserSkriv(42L) } returns Unit
-        every { lovvalgsperiodeService.lagreLovvalgsperioder(42L, any()) } returns emptyList()
+        every { lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(42L, any()) } returns emptyList()
 
 
         mockMvc.perform(
@@ -155,7 +155,7 @@ internal class LovvalgsperiodeControllerTest {
 
 
         verify {
-            lovvalgsperiodeService.lagreLovvalgsperioder(42L, any())
+            lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(42L, any())
             aksesskontroll.autoriserSkriv(42L)
         }
     }

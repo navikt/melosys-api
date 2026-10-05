@@ -114,7 +114,7 @@ public class LovvalgsperiodeController {
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
             .map(LovvalgsperiodeDto::til)
             .toList();
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsid, lovvalgsperioder);
+        lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(behandlingsid, lovvalgsperioder);
         return ResponseEntity.ok(lovvalgsperiodeDtoer);
     }
 

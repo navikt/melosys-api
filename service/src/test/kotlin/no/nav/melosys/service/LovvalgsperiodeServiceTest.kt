@@ -32,6 +32,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.LovvalgsperiodeTestFactory
 import no.nav.melosys.domain.lovvalgsperiodeForTest
 import no.nav.melosys.domain.PeriodeKilde
 import no.nav.melosys.domain.saksopplysning
@@ -169,6 +170,74 @@ internal class LovvalgsperiodeServiceTest {
             trygdeavgiftsperiode shouldBe kopiertAvgiftsperiode
             lovvalgsperiode shouldBeSameInstanceAs kopiertLovvalgsperiode
         }
+    }
+
+    @Test
+    fun `lagreLovvalgsperioderFraSaksbehandler tømmer trygdeavgift når perioden er forkortet`() {
+        mockBehandlingsresultatMedTrygdeavgift()
+
+
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+            BEH_ID,
+            listOf(lovvalgsperiodeForTest { tom = LovvalgsperiodeTestFactory.TOM.minusMonths(6) })
+        )
+
+
+        resultat.single().trygdeavgiftsperioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun `lagreLovvalgsperioderFraSaksbehandler tømmer trygdeavgift når innvilgelsesresultatet er endret`() {
+        mockBehandlingsresultatMedTrygdeavgift()
+
+
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+            BEH_ID,
+            listOf(lovvalgsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT })
+        )
+
+
+        resultat.single().trygdeavgiftsperioder.shouldBeEmpty()
+    }
+
+    @Test
+    fun `lagreLovvalgsperioderFraSaksbehandler beholder trygdeavgift når perioden er uendret`() {
+        mockBehandlingsresultatMedTrygdeavgift()
+
+
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+            BEH_ID,
+            listOf(lovvalgsperiodeForTest { lovvalgsland = Land_iso2.SE })
+        )
+
+
+        resultat.single().trygdeavgiftsperioder shouldHaveSize 1
+    }
+
+    @Test
+    fun `lagreLovvalgsperioder beholder trygdeavgift når perioden er endret`() {
+        mockBehandlingsresultatMedTrygdeavgift()
+
+
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioder(
+            BEH_ID,
+            listOf(lovvalgsperiodeForTest { tom = LovvalgsperiodeTestFactory.TOM.minusMonths(6) })
+        )
+
+
+        resultat.single().trygdeavgiftsperioder shouldHaveSize 1
+    }
+
+    private fun mockBehandlingsresultatMedTrygdeavgift() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEH_ID
+            behandling = Behandling.forTest { id = BEH_ID }
+        }
+        val eksisterendeLovvalgsperiode = lovvalgsperiodeForTest { trygdeavgiftsperiode {} }
+        eksisterendeLovvalgsperiode.behandlingsresultat = behandlingsresultat
+        behandlingsresultat.lovvalgsperioder.add(eksisterendeLovvalgsperiode)
+
+        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
     }
 
     @Test
