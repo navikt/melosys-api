@@ -137,6 +137,57 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
     }
 
     @Test
+    fun `opprettÅrsavregning avkorter kopiert medlemskapsperiode til årsavregningsåret`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            behandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+            tema = Sakstemaer.UNNTAK
+        }
+        val førstegangBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            registrertDato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+            medlemskapsperiode("2024-07-01", "2026-06-30")
+        }
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+            id = 2L
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[1]
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns førstegangBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns årsavregningBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(2L) } returns årsavregningBehandlingsresultat
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2L, 2025) } returns 0
+        every { behandlingsresultatService.lagreOgFlush(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagre(any()) } answers {
+            firstArg<Behandlingsresultat>().apply { årsavregning?.id = 50L }
+        }
+
+        årsavregningService.opprettÅrsavregning(2L, 2025)
+
+        // Fakturaperioden for årsavregningen hentes fra disse periodene og forutsetter at de ligger innenfor året
+        årsavregningBehandlingsresultat.medlemskapsperioder.shouldHaveSize(1).single().run {
+            fom shouldBe LocalDate.of(2025, 1, 1)
+            tom shouldBe LocalDate.of(2025, 12, 31)
+        }
+    }
+
+    @Test
     fun `opprettÅrsavregning etter delvis opphør replikerer kun innvilget medlemskapsperiode`() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
