@@ -20,7 +20,13 @@ class AdminTilgangInterceptor(
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val subjectHandler = SubjectHandler.getInstance()
 
-        if (manglerGyldigToken(subjectHandler)) return true   // @Protected svarer 401
+        // Avvis her i stedet for å stole på @Protected. RestControllerInterceptor gir systemtoken til
+        // alle kall under /admin/, så en admin-kontroller uten @Protected ville ellers kjørt anonymt.
+        if (manglerGyldigToken(subjectHandler)) {
+            response.status = 401
+            response.writer.write(MANGLER_TOKEN)
+            return false
+        }
 
         if (!erFraConsole(subjectHandler)) {
             // azp er en klient-ID, ikke en personopplysning
@@ -49,6 +55,7 @@ class AdminTilgangInterceptor(
     private fun erMedlemAvDriftsgruppe(subjectHandler: SubjectHandler) = driftsgruppeId in subjectHandler.groups
 
     companion object {
+        const val MANGLER_TOKEN = "Mangler gyldig token"
         const val MANGLER_DRIFTSGRUPPE = "Mangler tilgang til admin-endepunkter"
         const val UKJENT_KLIENT = "Kallet kommer ikke fra en godkjent klient"
         private const val IDTYP_MASKIN = "app"

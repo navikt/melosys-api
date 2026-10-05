@@ -41,7 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * - Alle kall må komme fra Console: tokenets `azp` må være Consoles klient-ID.
  * - Personkall krever i tillegg driftsgruppen i tokenets `groups`-claim.
  * - Maskinkall (`idtyp = app`) fra Console får tilgang til alle admin-endepunkter.
- * - Kall uten gyldig token avvises av `@Protected` med 401.
+ * - Kall uten gyldig token avvises med 401 av AdminTilgangInterceptor, uavhengig av `@Protected`.
  * - Adminnøkkelen er fjernet. Nøkkelheaderen påvirker ikke svaret.
  */
 @ActiveProfiles("test")
@@ -241,6 +241,20 @@ class AdminControllerTilgangsstyringIT(
     // AdminTilgangInterceptor allerede har avvist uautoriserte kall. Endepunktene hentes fra Spring,
     // så nye admin-kontrollere dekkes uten at testene må oppdateres. assertSoftly viser alle
     // endepunkter som feiler, ikke bare det første.
+
+    @Test
+    fun `skal avvise kall uten token på alle registrerte admin-endepunkter`() {
+        val endepunkter = registrerteAdminEndepunkter()
+
+        assertSoftly {
+            endepunkter.forEach { endepunkt ->
+                // Bare status: både AdminTilgangInterceptor og @Protected kan svare 401, og begge er riktige
+                withClue(endepunkt) {
+                    kall(endepunkt, token = null).status shouldBe 401
+                }
+            }
+        }
+    }
 
     @Test
     fun `skal avvise kall uten driftsgruppe på alle registrerte admin-endepunkter`() {

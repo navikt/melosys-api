@@ -20,7 +20,8 @@ public class RestControllerInterceptor implements HandlerInterceptor {
     }
 
     private boolean isAdminRequest(HttpServletRequest request) {
-        // Alle kall under /admin/ har passert AdminTilgangInterceptor og @Protected før controlleren kjører.
+        // Alle kall under /admin/ har passert AdminTilgangInterceptor før controlleren kjører.
+        // Den avviser kall uten gyldig token selv, og krever i tillegg Console-klient og driftsgruppe eller maskinkall.
         // /api/admin/** går ikke gjennom AdminTilgangInterceptor, og skal derfor ikke regnes som admin-kall.
         return request.getRequestURI().startsWith("/admin/");
     }
