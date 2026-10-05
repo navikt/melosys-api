@@ -22,7 +22,7 @@ class RestControllerInterceptorTest {
     }
 
     @Test
-    fun `admin-kall uten nøkkelheader skal bruke systemtoken`() {
+    fun `admin-kall skal bruke systemtoken`() {
         val request = MockHttpServletRequest("GET", "/admin/prosessinstanser/feilede")
 
         brukerSystemtokenUnderKall(request) shouldBe true
@@ -31,15 +31,6 @@ class RestControllerInterceptorTest {
     @Test
     fun `vanlig api-kall skal ikke bruke systemtoken`() {
         val request = MockHttpServletRequest("GET", "/api/fagsaker/MEL-1")
-
-        brukerSystemtokenUnderKall(request) shouldBe false
-    }
-
-    @Test
-    fun `nøkkelheader skal ikke gjøre et vanlig api-kall til admin-kall`() {
-        val request = MockHttpServletRequest("GET", "/api/fagsaker/MEL-1").apply {
-            addHeader("X-MELOSYS-ADMIN-APIKEY", "dummy")
-        }
 
         brukerSystemtokenUnderKall(request) shouldBe false
     }
