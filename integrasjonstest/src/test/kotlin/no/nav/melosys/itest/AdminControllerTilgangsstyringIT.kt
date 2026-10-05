@@ -2,6 +2,9 @@ package no.nav.melosys.itest
 
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.oauth2.sdk.TokenRequest
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.Application
@@ -13,18 +16,24 @@ import no.nav.security.mock.oauth2.token.OAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 
 /**
  * Tilgangsstyring for admin-endepunktene (MELOSYS-8271).
@@ -47,7 +56,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 class AdminControllerTilgangsstyringIT(
     @Autowired var mockMvc: MockMvc,
-    @Autowired var mockOAuth2Server: MockOAuth2Server
+    @Autowired var mockOAuth2Server: MockOAuth2Server,
+    @Autowired @Qualifier("requestMappingHandlerMapping") var handlerMapping: RequestMappingHandlerMapping
 ) : OracleTestContainerBase() {
 
     companion object {
@@ -224,4 +234,57 @@ class AdminControllerTilgangsstyringIT(
             hent(endepunkt, token = hentPersonToken(azp = ANNEN_KLIENT_ID)).skalAvvisesMed(UKJENT_KLIENT)
         }
     }
+
+    // --- Alle registrerte admin-endepunkter ---
+    //
+    // RestControllerInterceptor gir systemtoken til alle kall under /admin/ og stoler på at
+    // AdminTilgangInterceptor allerede har avvist uautoriserte kall. Endepunktene hentes fra Spring,
+    // så nye admin-kontrollere dekkes uten at testene må oppdateres. assertSoftly viser alle
+    // endepunkter som feiler, ikke bare det første.
+
+    @Test
+    fun `skal avvise kall uten driftsgruppe på alle registrerte admin-endepunkter`() {
+        val endepunkter = registrerteAdminEndepunkter()
+        val token = hentPersonToken(grupper = emptyList())
+
+        assertSoftly {
+            endepunkter.forEach { endepunkt ->
+                withClue(endepunkt) {
+                    val respons = kall(endepunkt, token)
+                    respons.status shouldBe 403
+                    respons.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
+                }
+            }
+        }
+    }
+
+    private data class Endepunkt(val metode: HttpMethod, val mønster: String) {
+        // Interceptoren avviser før argumentene leses, så stivariablene trenger bare å matche mønsteret
+        val url = mønster.replace(Regex("\\{[^}]+}"), "1")
+
+        override fun toString() = "$metode $mønster"
+    }
+
+    private fun registrerteAdminEndepunkter(): List<Endepunkt> {
+        val endepunkter = handlerMapping.handlerMethods.keys.flatMap { info ->
+            val metoder = info.methodsCondition.methods.ifEmpty { setOf(RequestMethod.GET) }
+            info.patternValues
+                .filter { it.startsWith("/admin/") }
+                .flatMap { mønster -> metoder.map { Endepunkt(it.asHttpMethod(), mønster) } }
+        }
+
+        // Vakt mot falsk grønn: finner oppslaget ingen endepunkter, kjører forEach i testene ingen
+        // assertions, og testene passerer uten å ha sjekket noe. De to endepunktene er hentet fra hver
+        // sin modul (integrasjon og saksflyt), så vakten viser også at oppslaget når kontrollere utenfor
+        // frontend-api.
+        endepunkter.map { it.mønster }.shouldContainAll("/admin/kafka/errors", "/admin/prosessinstanser/feilede")
+        return endepunkter
+    }
+
+    private fun kall(endepunkt: Endepunkt, token: String?): MockHttpServletResponse =
+        mockMvc.perform(
+            request(endepunkt.metode, endepunkt.url).apply {
+                token?.let { header(HttpHeaders.AUTHORIZATION, "Bearer $it") }
+            }.contentType(MediaType.APPLICATION_JSON)
+        ).andReturn().response
 }
