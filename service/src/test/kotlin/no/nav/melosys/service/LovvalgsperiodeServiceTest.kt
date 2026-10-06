@@ -173,11 +173,11 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun `lagreLovvalgsperioderFraSaksbehandler tømmer trygdeavgift når perioden er forkortet`() {
+    fun `lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring tømmer trygdeavgift når perioden er forkortet`() {
         mockBehandlingsresultatMedTrygdeavgift()
 
 
-        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring(
             BEH_ID,
             listOf(lovvalgsperiodeForTest { tom = LovvalgsperiodeTestFactory.TOM.minusMonths(6) })
         )
@@ -187,11 +187,11 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun `lagreLovvalgsperioderFraSaksbehandler tømmer trygdeavgift når innvilgelsesresultatet er endret`() {
+    fun `lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring tømmer trygdeavgift når innvilgelsesresultatet er endret`() {
         mockBehandlingsresultatMedTrygdeavgift()
 
 
-        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring(
             BEH_ID,
             listOf(lovvalgsperiodeForTest { innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT })
         )
@@ -201,11 +201,11 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun `lagreLovvalgsperioderFraSaksbehandler beholder trygdeavgift når perioden er uendret`() {
+    fun `lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring beholder trygdeavgift når perioden er uendret`() {
         mockBehandlingsresultatMedTrygdeavgift()
 
 
-        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderFraSaksbehandler(
+        val resultat = lovvalgsperiodeService.lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring(
             BEH_ID,
             listOf(lovvalgsperiodeForTest { lovvalgsland = Land_iso2.SE })
         )

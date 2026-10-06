@@ -92,7 +92,7 @@ class LovvalgsperiodeService(
 
     // Som for medlemskapsperioder i FTRL: endret periode eller resultat tømmer trygdeavgiften.
     @Transactional
-    fun lagreLovvalgsperioderFraSaksbehandler(
+    fun lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring(
         behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> = lagreLovvalgsperioder(behandlingID, lovvalgsperioder, tømTrygdeavgiftVedEndring = true)
