@@ -280,9 +280,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
         return finnFullstendigManglendeInnbetalingAvklarteFakta()?.fakta.equals(Avklartefakta.VALGT_FAKTA, ignoreCase = true)
     }
 
-    fun erInnvilgelse(): Boolean {
-        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
-            type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+    fun erInnvilgelse(): Boolean = erInnvilgelseMed(type)
+
+    /** Som [erInnvilgelse], men for en resultattype som ikke er satt ennå. */
+    fun erInnvilgelseMed(resultattype: Behandlingsresultattyper?): Boolean {
+        if (resultattype == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
+            resultattype == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
         ) {
             return finnLovvalgsperiode().map { it.erInnvilget() }.orElse(false)
         }

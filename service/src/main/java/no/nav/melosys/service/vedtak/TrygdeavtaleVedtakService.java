@@ -81,9 +81,8 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
         log.info("Fatter vedtak for (Trygdeavtale) sak: {} behandling: {}", saksnummer, behandlingID);
 
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
-        if (behandlingsresultat.erInnvilgelse()) {
+        if (behandlingsresultat.erInnvilgelseMed(request.getBehandlingsresultatTypeKode())) {
             Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
                 Sakstyper.TRYGDEAVTALE,
@@ -96,6 +95,8 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
                     kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
             }
         }
+        // Etter kontrollen: VedtaksfattingFasade ruller ikke tilbake ved ValideringException
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);

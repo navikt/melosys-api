@@ -118,6 +118,7 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : Repository<Fagsak, String>
             AND EXISTS (
                 SELECT 1 FROM Behandling b
                 JOIN Behandlingsresultat br ON b.id = br.behandling.id
+                JOIN br.vedtakMetadata vm
                 JOIN br.medlemskapsperioder mp
                 JOIN mp.trygdeavgiftsperioder tap
                 JOIN tap.grunnlagSkatteforholdTilNorge stn

@@ -18,8 +18,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
@@ -29,6 +31,7 @@ import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.validering.Kontrollfeil
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
@@ -193,6 +196,36 @@ class EosVedtakServiceKtTest {
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+    }
+
+    /**
+     * [VedtaksfattingFasade.fattVedtak] ruller ikke tilbake på [ValideringException]. En avvist
+     * vedtaksfatting skal derfor ikke ha endret resultattypen. Starttypen er IKKE_FASTSATT, slik at
+     * testen også feiler hvis innvilgelse leses fra typen på entiteten og kontrollen hoppes over.
+     */
+    @Test
+    fun `fattVedtak - kontrollfeil - etterlater ikke resultattypen`() {
+        mockBehandlingsresultat()
+        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET)
+        behandlingsresultat.type = Behandlingsresultattyper.IKKE_FASTSATT
+        every {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(any(), any(), any(), any())
+        } returns listOf(Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER))
+
+        shouldThrow<ValideringException> {
+            vedtakService.fattVedtak(
+                behandling, lagRequest(
+                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                    Vedtakstyper.FØRSTEGANGSVEDTAK,
+                    BEHANDLINGSRESULTAT_FRITEKST,
+                    null,
+                    null
+                )
+            )
+        }.message shouldBe "Feil i validering. Kan ikke fatte vedtak."
+
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
+        behandlingsresultat.vedtakMetadata.shouldBeNull()
     }
 
     @Test

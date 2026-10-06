@@ -89,13 +89,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
           RESOURCE: nais/unleash-apitoken.yml
           VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: deploy to ${{github.event.inputs.environment}}
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
           RESOURCE: nais/nais.yml

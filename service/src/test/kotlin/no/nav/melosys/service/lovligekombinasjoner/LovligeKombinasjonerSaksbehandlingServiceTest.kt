@@ -91,12 +91,11 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         "TRYGDEAVTALE, IKKE_YRKESAKTIV",
         "TRYGDEAVTALE, PENSJONIST"
     )
-    fun `hentMuligeBehandlingstyperForNySak_årsavregningPå_returnererÅrsavregningForMedlemskapLovvalg`(
+    fun `årsavregning for medlemskap og lovvalg styres bare av toggle for EØS og trygdeavtale`(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ) {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
 
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
@@ -120,8 +119,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ) {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
 
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForNySak(
@@ -737,7 +735,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
@@ -845,7 +843,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyperForKnyttTilSak_avsluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
         val behandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG) {
             status = Behandlingsstatus.AVSLUTTET
@@ -902,7 +900,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyperForKnyttTilSak_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
         val behandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG) {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
@@ -1103,7 +1101,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
         val behandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG) {
             status = Behandlingsstatus.AVSLUTTET
@@ -1375,8 +1373,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @EnumSource(value = Sakstyper::class, names = ["FTRL", "EU_EOS", "TRYGDEAVTALE"])
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`(sakstype: Sakstyper) {
         if (sakstype != Sakstyper.FTRL) {
-            unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
-            unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+            unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
         }
         val fagsak = Fagsak.forTest {
             type = sakstype
@@ -1534,7 +1531,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING`() {
-        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_OG_TRYGDEAVTALE)
 
         val behandling = Behandling.forTest {
             id = 1L

@@ -14,8 +14,10 @@ class VedtaksmetadataFiksAvvist(melding: String) : RuntimeException(melding)
  * Datafiks for MELOSYS-8174: setter inn manglende rader i `vedtak_metadata` for avsluttede
  * behandlinger uten vedtaksdato.
  *
- * `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning` sorterer behandlinger
- * uten vedtaksdato som eldst. Datafiksen gir dem en vedtaksdato, slik at de sorteres på riktig plass.
+ * `ÅrsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning` hopper over behandlinger
+ * uten vedtaksmetadata. Datafiksen gir dem en vedtaksdato, slik at de tas med og sorteres på riktig plass.
+ * En behandling avsluttet fra behandlingsmenyen skal ikke årsavregnes, så kjør bare datafiksen på
+ * behandlinger fag har bekreftet er vedtak fattet i Melosys.
  *
  * Native SQL, ikke JPA: `registrert_av`/`endret_av` må bli [PATCH_MARKØR] (JPA-auditing ville satt
  * saksbehandler/«MELOSYS»), og `vedtak_dato` skal være `behandlingsresultat.endret_dato` som
