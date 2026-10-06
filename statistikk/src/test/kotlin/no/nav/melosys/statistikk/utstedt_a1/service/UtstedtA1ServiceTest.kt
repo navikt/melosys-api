@@ -12,6 +12,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.service.LandvelgerService
@@ -147,6 +148,31 @@ class UtstedtA1ServiceTest {
             artikkel shouldBe Lovvalgsbestemmelse.ART_12_1
             typeUtstedelse shouldBe A1TypeUtstedelse.FØRSTEGANG
         }
+    }
+
+    @Test
+    fun `sender ikke melding om utstedt A1 for ikke-yrkesaktiv`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak {
+                saksnummer = "MEL-123"
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                medBruker()
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
+            lagBehandlingsresultat(false, behandling, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
+        every { utstedtA1AivenProducer.produserMelding(any()) } answers { firstArg() }
+
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID)
+
+
+        verify(exactly = 0) { utstedtA1AivenProducer.produserMelding(any()) }
     }
 
     private fun lagBehandling(behandlingsstatus: Behandlingsstatus = Behandlingsstatus.AVSLUTTET) =

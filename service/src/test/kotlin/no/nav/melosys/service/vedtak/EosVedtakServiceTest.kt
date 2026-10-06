@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.anmodningsperiodeForTest
 import no.nav.melosys.domain.eessi.BucType
@@ -585,6 +586,46 @@ class EosVedtakServiceKtTest {
                 any()
             )
         }
+    }
+
+    @Test
+    fun `fattVedtak - ikke-yrkesaktiv - lagrer vedtaksmetadata med klagefrist på 6 uker`() {
+        mockBehandlingsresultat()
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns true
+        leggTilLovvalgsperiode()
+
+        vedtakService.fattVedtak(
+            behandling,
+            lagRequest(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, Vedtakstyper.ENDRINGSVEDTAK, BEHANDLINGSRESULTAT_FRITEKST, null, null)
+        )
+
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(6)
+            vedtaksdato.shouldNotBeNull()
+        }
+        behandlingsresultat.fastsattAvLand shouldBe Land_iso2.NO
+        behandlingsresultat.begrunnelseFritekst.shouldBeNull()
+        verifyOrder {
+            behandlingsresultatService.lagre(behandlingsresultat)
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling)
+        }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakEos(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `fattVedtak - ikke-yrkesaktiv - publiserer ikke VedtakMetadataLagretEvent`() {
+        mockBehandlingsresultat()
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns true
+        leggTilLovvalgsperiode()
+
+        vedtakService.fattVedtak(
+            behandling,
+            lagRequest(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, Vedtakstyper.FØRSTEGANGSVEDTAK, null, null, null)
+        )
+
+        verify { prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling) }
+        verify(exactly = 0) { melosysEventMulticaster.multicastEvent(ofType<VedtakMetadataLagretEvent>()) }
     }
 
     private fun mockBehandlingsresultat() {

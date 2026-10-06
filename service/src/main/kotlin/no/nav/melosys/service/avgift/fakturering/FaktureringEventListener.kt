@@ -28,8 +28,10 @@ class FaktureringEventListener(
         if (event.behandlingsstatus != Behandlingsstatus.AVSLUTTET) {
             return
         }
-        if (behandlingsresultatService.hentBehandlingsresultat(event.behandling.id).vedtakMetadata != null) {
-            // Ved vedtak med fakturering opprettes fakturaserie med riktig mottaker allerede
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(event.behandling.id)
+        if (behandlingsresultat.vedtakMetadata != null && !behandlingsresultat.hentBehandling().erIkkeYrkesaktivVedtak()) {
+            // Ved vedtak med fakturering opprettes fakturaserie med riktig mottaker allerede.
+            // Vedtak for ikke-yrkesaktive fakturerer ikke, så mottakeren må oppdateres her.
             return
         }
 

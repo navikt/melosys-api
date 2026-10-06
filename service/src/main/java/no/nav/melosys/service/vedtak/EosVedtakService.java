@@ -112,6 +112,8 @@ public class EosVedtakService implements FattVedtakInterface {
 
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+            behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            behandlingsresultatService.lagre(behandlingsresultat);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
             var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();

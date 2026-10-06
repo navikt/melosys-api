@@ -547,12 +547,17 @@ class ÅrsavregningService(
     }
 
     // En behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke årsavregnes.
+    // Vedtak for ikke-yrkesaktive fastsetter ikke trygdeavgift og skal heller ikke årsavregnes.
     private fun List<Behandlingsresultat>.kunBehandlingerMedVedtak(saksnummer: String): List<Behandlingsresultat> {
         val (medVedtak, utenVedtak) = partition { it.harVedtak() }
         if (utenVedtak.isNotEmpty()) {
             log.info { "Hopper over ${utenVedtak.size} behandling(er) uten vedtak i sak $saksnummer ved oppslag for årsavregning" }
         }
-        return medVedtak
+        val (ikkeYrkesaktive, øvrige) = medVedtak.partition { it.hentBehandling().erIkkeYrkesaktivVedtak() }
+        if (ikkeYrkesaktive.isNotEmpty()) {
+            log.info { "Hopper over ${ikkeYrkesaktive.size} vedtak for ikke-yrkesaktiv i sak $saksnummer ved oppslag for årsavregning" }
+        }
+        return øvrige
     }
 
     // En avsluttet behandling kan mangle vedtak, f.eks. når den er avsluttet fra behandlingsmenyen.

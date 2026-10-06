@@ -1892,6 +1892,121 @@ class OpprettFakturaserieTest {
         verify { faktureringskomponentenClient wasNot Called }
     }
 
+    @Test
+    fun `Nyere vedtak for ikke-yrkesaktiv uten fakturaserie gir referansen fra det eldre vedtaket`() {
+        val fagsak = lagEøsFagsak()
+        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
+        lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), null)
+
+        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe FAKTURASERIE_REFERANSE
+    }
+
+    @Test
+    fun `Nyere avslag for ikke-yrkesaktiv uten fakturaserie gir referansen fra det eldre vedtaket`() {
+        val fagsak = lagEøsFagsak()
+        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
+        lagTidligereVedtak(
+            11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), null,
+            resultattype = Behandlingsresultattyper.AVSLAG_SØKNAD
+        )
+
+        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe FAKTURASERIE_REFERANSE
+    }
+
+    @Test
+    fun `Vedtak for ikke-yrkesaktiv med egen fakturaserie gir sin egen referanse`() {
+        val fagsak = lagEøsFagsak()
+        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
+        lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), NY_FAKTURASERIE_REFERANSE)
+
+        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe NY_FAKTURASERIE_REFERANSE
+    }
+
+    private fun dagerSiden(dager: Long): Instant = Instant.now().minus(dager, ChronoUnit.DAYS)
+
+    private fun lagEøsFagsak() = Fagsak.forTest {
+        type = Sakstyper.EU_EOS
+        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        betalingsvalg = Betalingstype.FAKTURA
+        medBruker()
+    }
+
+    private fun lagTidligereVedtak(
+        behandlingId: Long,
+        fagsak: Fagsak,
+        behandlingstema: Behandlingstema,
+        vedtakstidspunkt: Instant,
+        referanse: String?,
+        resultattype: Behandlingsresultattyper = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+    ) {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = behandlingId
+            type = resultattype
+            fakturaserieReferanse = referanse
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = vedtakstidspunkt
+            }
+            behandling {
+                id = behandlingId
+                tema = behandlingstema
+                status = Behandlingsstatus.AVSLUTTET
+                this.fagsak = fagsak
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+    }
+
+    private fun opprettFakturaserieForNyttVedtak(fagsak: Fagsak): FakturaserieDto {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperiode {
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 12, 31)
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                vedtaksdato = Instant.now()
+            }
+            behandling {
+                id = BEHANDLING_ID
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.IVERKSETTER_VEDTAK
+                this.fagsak = fagsak
+            }
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.hentBehandling())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.hentBehandling()
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        return slotFakturaserieDto.captured
+    }
+
     companion object {
         const val SAKSBEHANDLER_IDENT = "S123456"
         const val BEHANDLING_ID = 1L

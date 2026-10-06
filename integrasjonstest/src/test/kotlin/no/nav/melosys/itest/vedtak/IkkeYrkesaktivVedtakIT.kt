@@ -135,6 +135,10 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -181,7 +185,7 @@ class IkkeYrkesaktivVedtakIT(
                     sakstype = Sakstyper.EU_EOS,
                     sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
                     behandligsresultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-                    vedtakstype = null,
+                    vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
                     medlemskapsperioder = listOf(),
                     lovvalgsperioder = listOf(
                         no.nav.melosys.integrasjon.hendelser.Periode(
@@ -265,6 +269,10 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -372,6 +380,10 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)

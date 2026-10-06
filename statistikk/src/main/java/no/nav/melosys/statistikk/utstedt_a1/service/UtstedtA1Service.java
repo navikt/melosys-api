@@ -40,7 +40,7 @@ public class UtstedtA1Service {
     @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.a1Produseres()) {
+        if (behandlingsresultat.a1Produseres() && !behandlingsresultat.hentBehandling().harIkkeYrkesaktivFlyt()) {
             var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
             var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
 

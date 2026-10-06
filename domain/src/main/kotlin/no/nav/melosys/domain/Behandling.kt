@@ -243,6 +243,11 @@ class Behandling(
 
     fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
+    fun harIkkeYrkesaktivFlyt(): Boolean = Companion.harIkkeYrkesaktivFlyt(fagsak.type, tema)
+
+    // Årsavregninger med tema IKKE_YRKESAKTIV fastsetter trygdeavgift og er ikke vedtak om lovvalg.
+    fun erIkkeYrkesaktivVedtak(): Boolean = harIkkeYrkesaktivFlyt() && !erÅrsavregning()
+
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
         BESLUTNING_LOVVALG_NORGE == tema
@@ -279,7 +284,9 @@ class Behandling(
     }
 
     companion object {
-        // Tom - muliggjør utvidelsefunksjoner i tester
+        // Muliggjør også utvidelsesfunksjoner i tester
+        fun harIkkeYrkesaktivFlyt(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
+            (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     open class Builder {
