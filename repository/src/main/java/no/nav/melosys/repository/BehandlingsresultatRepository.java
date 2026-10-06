@@ -26,12 +26,14 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
     Optional<Behandlingsresultat> findWithHelseutgiftDekkesPerioderById(Long behandlingID);
 
     /**
-     * SELECT ... FOR UPDATE: andre transaksjoner som henter samme behandlingsresultat med lås, venter til denne er ferdig.
-     * flushMode COMMIT hindrer at spørringen flusher først. Etter en slik flush slettet ikke Hibernate perioder som var lagt
-     * til i samme transaksjon, når lovvalgsperioder ble tømt etterpå (LovvalgsperiodeServiceIT).
+     * SELECT ... FOR UPDATE WAIT 10: andre transaksjoner som henter samme behandlingsresultat med lås, venter til denne
+     * er ferdig, men høyst 10 sekunder. flushMode COMMIT: spørringen flusher ikke først, slik findById heller ikke gjør.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints(@QueryHint(name = "org.hibernate.flushMode", value = "COMMIT"))
+    @QueryHints({
+        @QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000"),
+        @QueryHint(name = "org.hibernate.flushMode", value = "COMMIT")
+    })
     Optional<Behandlingsresultat> findForUpdateById(Long behandlingID);
 
     List<Behandlingsresultat> findAllByFakturaserieReferanse(String fakturaserieReferanse);

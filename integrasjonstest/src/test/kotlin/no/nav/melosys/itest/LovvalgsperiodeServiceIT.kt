@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -161,7 +162,7 @@ class LovvalgsperiodeServiceIT(
             }
         }
         val førsteHarSkrevet = CountDownLatch(1)
-        val andreHarStartet = CountDownLatch(1)
+        val førsteKanCommitte = CountDownLatch(1)
         val tråder = Executors.newFixedThreadPool(2)
 
         try {
@@ -170,22 +171,24 @@ class LovvalgsperiodeServiceIT(
                     lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, listOf(nyLovvalgsperiodeUtenTrygdeavgift()))
                     lovvalgsperiodeRepository.flush()
                     førsteHarSkrevet.countDown()
-                    andreHarStartet.await(10, TimeUnit.SECONDS)
-                    // Gir andre kall tid til å komme fram til låsen før første kall committer.
-                    Thread.sleep(500)
+                    førsteKanCommitte.await(10, TimeUnit.SECONDS)
                 }
             }
             førsteHarSkrevet.await(10, TimeUnit.SECONDS) shouldBe true
             val andre = tråder.submit {
-                andreHarStartet.countDown()
                 iEgenTransaksjon {
                     lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, listOf(nyLovvalgsperiodeUtenTrygdeavgift()))
                 }
             }
 
+            Thread.sleep(500)
+            withClue("andre kall skal vente på første kall") { andre.isDone shouldBe false }
+            førsteKanCommitte.countDown()
+
             første.get(30, TimeUnit.SECONDS)
             andre.get(30, TimeUnit.SECONDS)
         } finally {
+            førsteKanCommitte.countDown()
             tråder.shutdownNow()
         }
 
