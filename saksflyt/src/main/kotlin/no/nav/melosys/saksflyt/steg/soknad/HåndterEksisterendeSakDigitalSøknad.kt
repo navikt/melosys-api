@@ -5,8 +5,10 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -47,6 +49,8 @@ private val SØKNADSBEHANDLING_TYPER = setOf(
  *     - OPPRETTET/VURDER_DOKUMENT → kun oppdater mottatte opplysninger
  * 3b. Ingen åpen behandling:
  *     - Opprett ny behandling (NY_VURDERING) + mottatte opplysninger + oppgave
+ *    Behandlingstema utledes fra søknaden bare på EU/EØS-saker. På andre saker beholder åpen behandling
+ *    temaet sitt, og ny vurdering arver temaet fra siste behandling.
  * 4. Lagre mapping (skjemaId, originalData, innsendtDato)
  * 5. Sett behandling på prosessinstansen
  */
@@ -77,7 +81,7 @@ class HåndterEksisterendeSakDigitalSøknad(
         val åpenBehandling = finnÅpenSøknadsbehandling(fagsak)
 
         val (behandling, mottatteOpplysninger) = if (åpenBehandling != null) {
-            håndterÅpenBehandling(åpenBehandling, søknadsdata)
+            håndterÅpenBehandling(fagsak, åpenBehandling, søknadsdata)
         } else {
             opprettNyVurdering(fagsak, søknadsdata)
         }
@@ -118,10 +122,11 @@ class HåndterEksisterendeSakDigitalSøknad(
     }
 
     private fun håndterÅpenBehandling(
+        fagsak: Fagsak,
         behandling: Behandling,
         søknadsdata: UtsendtArbeidstakerSkjemaM2MDto
     ): Pair<Behandling, MottatteOpplysninger> {
-        val utledetBehandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
+        val utledetBehandlingstema = utledBehandlingstema(fagsak, søknadsdata) { behandling.tema }
         if (behandling.tema != utledetBehandlingstema) {
             behandlingService.endreTema(behandling, utledetBehandlingstema)
         }
@@ -153,7 +158,9 @@ class HåndterEksisterendeSakDigitalSøknad(
     ): Pair<Behandling, MottatteOpplysninger> {
         val saksnummer = fagsak.saksnummer
         val referanseId = søknadsdata.referanseId
-        val behandlingstema = BehandlingstemaUtleder.utled(søknadsdata)
+        val behandlingstema = utledBehandlingstema(fagsak, søknadsdata) {
+            fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning().tema
+        }
 
         val nyBehandling = behandlingService.nyBehandling(
             fagsak,
@@ -169,10 +176,16 @@ class HåndterEksisterendeSakDigitalSøknad(
         fagsak.leggTilBehandling(nyBehandling)
         log.info { "Opprettet behandling ${nyBehandling.id} (NY_VURDERING) på sak $saksnummer" }
 
-        val søknad = DigitalSøknadMapper.tilSoeknad(søknadsdata)
-        val mottatteOpplysninger = mottatteOpplysningerService.opprettSøknadDigital(
-            nyBehandling.id, null, søknad, referanseId
-        )
+        // Trygdeavtale- og FTRL-behandlinger bruker SøknadNorgeEllerUtenforEØS; kontroll, brev og medlemskapsperioder caster til den.
+        val mottatteOpplysninger = if (fagsak.type == Sakstyper.EU_EOS) {
+            mottatteOpplysningerService.opprettSøknadDigital(
+                nyBehandling.id, null, DigitalSøknadMapper.tilSoeknad(søknadsdata), referanseId
+            )
+        } else {
+            mottatteOpplysningerService.opprettSøknadDigitalUtenforEøs(
+                nyBehandling.id, null, DigitalSøknadMapper.tilSøknadUtenforEøs(søknadsdata), referanseId
+            )
+        }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             nyBehandling,
@@ -186,5 +199,17 @@ class HåndterEksisterendeSakDigitalSøknad(
         return nyBehandling to mottatteOpplysninger
     }
 
+    private fun utledBehandlingstema(
+        fagsak: Fagsak,
+        søknadsdata: UtsendtArbeidstakerSkjemaM2MDto,
+        temaFraSaken: () -> Behandlingstema
+    ): Behandlingstema {
+        if (fagsak.type == Sakstyper.EU_EOS) return BehandlingstemaUtleder.utled(søknadsdata)
 
+        // Utlederen kjenner bare EØS-temaer. Er saken endret til trygdeavtale/FTRL etter første innsending,
+        // ville et EØS-tema gi en kombinasjon som ikke har noen flyt i saksbehandlingen.
+        val tema = temaFraSaken()
+        log.warn { "Digital søknad mottatt på ${fagsak.type}-sak ${fagsak.saksnummer}, bruker behandlingstema $tema fra saken" }
+        return tema
+    }
 }

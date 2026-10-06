@@ -31,6 +31,7 @@ KodeverkAPI_v1:
   url: https://kodeverk-api.nav.no/api
 Melosys-admin:
   apikey: dummy
+  driftsgruppe: fb706914-eede-490a-b9cd-2458983e24c1 # melosys-innlogging-vakt (dev)
 MelosysEessi:
   url: https://melosys-eessi.dev.intern.nav.no/api
 MelosysSoknadMottak:

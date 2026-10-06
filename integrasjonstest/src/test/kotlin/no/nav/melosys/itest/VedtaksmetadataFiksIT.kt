@@ -213,7 +213,7 @@ class VedtaksmetadataFiksIT(
 
         mockMvc.perform(
             post(angreUrl)
-                .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
+                .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
         )
             .andExpect(status().isOk)
@@ -460,7 +460,7 @@ class VedtaksmetadataFiksIT(
 
     @Test
     fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
-        // AdminControllerApiKeyIT dekker kun GET; disse er POST
+        // AdminControllerTilgangsstyringIT dekker kun GET; disse er POST
         listOf(fiksUrl, angreUrl).forEach { url ->
             mockMvc.perform(
                 post(url)
@@ -471,7 +471,7 @@ class VedtaksmetadataFiksIT(
 
             mockMvc.perform(
                 post(url)
-                    .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
+                    .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isUnauthorized)
@@ -663,7 +663,7 @@ class VedtaksmetadataFiksIT(
 
     private fun kall(url: String, body: String) = mockMvc.perform(
         post(url)
-            .header(AdminControllerApiKeyIT.API_KEY_HEADER, AdminControllerApiKeyIT.GYLDIG_API_NOKKEL)
+            .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(body)
@@ -673,7 +673,12 @@ class VedtaksmetadataFiksIT(
         issuerId = "issuer1",
         subject = "testbruker",
         audience = "dumbdumb",
-        claims = mapOf("oid" to "test-oid", "azp" to "test-azp", "NAVident" to "test123")
+        claims = mapOf(
+            "oid" to "test-oid",
+            "azp" to "test-azp",
+            "NAVident" to "test123",
+            "groups" to listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+        )
     ).serialize()
 
     private fun seedDefektBehandling(

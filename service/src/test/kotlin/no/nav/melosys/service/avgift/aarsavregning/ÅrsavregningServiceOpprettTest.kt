@@ -71,6 +71,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling = fagsak.behandlinger[0]
+            vedtakMetadata { }
 
             medlemskapsperiode("2023-01-01", "2023-12-31")
         }

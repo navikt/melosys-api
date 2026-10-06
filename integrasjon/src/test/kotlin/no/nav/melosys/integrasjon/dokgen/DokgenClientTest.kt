@@ -20,6 +20,8 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg
@@ -30,12 +32,14 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.retry.annotation.EnableRetry
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
@@ -50,6 +54,7 @@ import java.util.UUID
         MetricsTestConfig::class,
     ]
 )
+@EnableRetry(proxyTargetClass = true)
 @AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DokgenClientTest(
@@ -154,6 +159,40 @@ class DokgenClientTest(
                 .withQueryParam("somKopi", equalTo("true"))
                 .withQueryParam("utkast", equalTo("true"))
         )
+    }
+
+    @Test
+    fun `lagPdf retryer ikke på 4xx`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(400)
+                    .withBody("invalid request")
+            )
+        )
+
+        assertThrows<IkkeRetrybarIntegrasjonException> {
+            dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false)
+        }
+
+        mockServer.verify(1, postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf")))
+    }
+
+    @Test
+    fun `lagPdf retryer på 5xx`() {
+        mockServer.stubFor(
+            any(anyUrl()).willReturn(
+                aResponse()
+                    .withStatus(500)
+                    .withBody("server error")
+            )
+        )
+
+        assertThrows<TekniskException> {
+            dokgenClient.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false)
+        }
+
+        mockServer.verify(3, postRequestedFor(urlPathEqualTo("/dokgen/mal/mangelbrev_bruker/lag-pdf")))
     }
 
     @Test

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
@@ -66,7 +67,7 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.shouldHaveSize(67).forEach { sak ->
+            }.shouldHaveSize(71).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), hentSedDokument = behandling::hentSedDokument)
@@ -253,7 +254,7 @@ internal class OppgaveFactoryNyMappingTest {
     fun `gjelderÅr skal brukes som beskrivelse for alle årsavregningskombinasjoner`() {
         rowsMedAlleKombinasjoner
             .filter { it.behandlingstype == Behandlingstyper.ÅRSAVREGNING }
-            .shouldHaveSize(10).forEach { sak ->
+            .shouldHaveSize(14).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), "2024", behandling::hentSedDokument)
@@ -264,6 +265,40 @@ internal class OppgaveFactoryNyMappingTest {
                     verify(exactly = 0) { behandling.hentSedDokument() }
                 }
             }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "EU_EOS, PENSJONIST, ab0480, BEH_ARSAVREG",
+        "EU_EOS, IKKE_YRKESAKTIV, ab0481, BEH_ARSAVREG",
+        "TRYGDEAVTALE, PENSJONIST, ab0476, BEH_ARSAVREG",
+        "TRYGDEAVTALE, IKKE_YRKESAKTIV, ab0475, BEH_ARSAVREG",
+        "EU_EOS, YRKESAKTIV, ab0483, BEH_SAK_MK",
+        "EU_EOS, UTSENDT_ARBEIDSTAKER, ab0483, BEH_SAK_MK",
+        "EU_EOS, UTSENDT_SELVSTENDIG, ab0483, BEH_SAK_MK",
+        "EU_EOS, ARBEID_FLERE_LAND, ab0483, BEH_SAK_MK",
+        "EU_EOS, ARBEID_TJENESTEPERSON_ELLER_FLY, ab0483, BEH_SAK_MK",
+        "EU_EOS, ARBEID_KUN_NORGE, ab0483, BEH_SAK_MK",
+        "TRYGDEAVTALE, YRKESAKTIV, ab0477, BEH_SAK_MK"
+    )
+    fun `årsavregning for medlemskap og lovvalg gir riktig oppgave og beholder eksisterende oppgavetyper`(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema,
+        forventetKode: String,
+        forventetOppgavetype: Oppgavetyper
+    ) {
+        val behandling = lagBehandling(sakstype, Sakstemaer.MEDLEMSKAP_LOVVALG, behandlingstema, Behandlingstyper.ÅRSAVREGNING)
+
+
+        val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), "2025") {
+            error("Årsavregning skal ikke hente SED")
+        }.build()
+
+
+        oppgave.behandlingstema.shouldBe(forventetKode)
+        oppgave.tema.shouldBe(Tema.TRY)
+        oppgave.oppgavetype.shouldBe(forventetOppgavetype)
+        oppgave.beskrivelse.shouldBe("2025")
     }
 
     @Test

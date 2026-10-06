@@ -84,9 +84,8 @@ public class EosVedtakService implements FattVedtakInterface {
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
-        if (behandlingsresultat.erInnvilgelse()) {
+        if (behandlingsresultat.erInnvilgelseMed(request.getBehandlingsresultatTypeKode())) {
             var kontrollerSomSkalIgnoreres = request.isKopiTilArbeidsgiver()
                 ? null
                 : Collections.singleton(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
@@ -103,6 +102,8 @@ public class EosVedtakService implements FattVedtakInterface {
                     kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
             }
         }
+        // Etter kontrollen: VedtaksfattingFasade ruller ikke tilbake ved ValideringException
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
