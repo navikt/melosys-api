@@ -140,7 +140,7 @@ class IkkeYrkesaktivVedtakIT(
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
                 vedtaksdato.shouldNotBeNull()
-                // Midnatt kan passere mellom fattVedtak og sjekken.
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
                 vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }
@@ -277,7 +277,7 @@ class IkkeYrkesaktivVedtakIT(
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
                 vedtaksdato.shouldNotBeNull()
-                // Midnatt kan passere mellom fattVedtak og sjekken.
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
                 vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }
@@ -391,7 +391,7 @@ class IkkeYrkesaktivVedtakIT(
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
                 vedtaksdato.shouldNotBeNull()
-                // Midnatt kan passere mellom fattVedtak og sjekken.
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
                 vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }

@@ -473,7 +473,7 @@ class ÅrsavregningService(
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
      * Behandlinger uten vedtak i Melosys (uten vedtaksmetadata) tas ikke med.
-     * Vedtak for ikke-yrkesaktive tas heller ikke med, men årsavregninger med tema IKKE_YRKESAKTIV gjør det.
+     * Vedtak i EØS og trygdeavtale med tema IKKE_YRKESAKTIV tas heller ikke med, men årsavregninger med det temaet gjør det.
      *
      * For å finne gjeldende avgiftspliktig periode brukes den nyeste behandlingen med avgiftspliktige perioder,
      * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
@@ -548,7 +548,7 @@ class ÅrsavregningService(
     }
 
     // En behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke årsavregnes.
-    // Vedtak for ikke-yrkesaktive fastsetter ikke trygdeavgift og skal heller ikke årsavregnes.
+    // Ikke-yrkesaktive vedtak i EØS og trygdeavtale fastsetter ikke trygdeavgift og skal heller ikke årsavregnes.
     private fun List<Behandlingsresultat>.kunVedtakSomKanÅrsavregnes(saksnummer: String): List<Behandlingsresultat> {
         val (medVedtak, utenVedtak) = partition { it.harVedtak() }
         if (utenVedtak.isNotEmpty()) {
