@@ -162,6 +162,7 @@ class LovvalgsperiodeServiceIT(
             }
         }
         val førsteHarSkrevet = CountDownLatch(1)
+        val andreHarStartet = CountDownLatch(1)
         val førsteKanCommitte = CountDownLatch(1)
         val tråder = Executors.newFixedThreadPool(2)
 
@@ -176,11 +177,13 @@ class LovvalgsperiodeServiceIT(
             }
             førsteHarSkrevet.await(10, TimeUnit.SECONDS) shouldBe true
             val andre = tråder.submit {
+                andreHarStartet.countDown()
                 iEgenTransaksjon {
                     lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, listOf(nyLovvalgsperiodeUtenTrygdeavgift()))
                 }
             }
 
+            andreHarStartet.await(10, TimeUnit.SECONDS) shouldBe true
             Thread.sleep(500)
             withClue("andre kall skal vente på første kall") { andre.isDone shouldBe false }
             førsteKanCommitte.countDown()
@@ -190,6 +193,7 @@ class LovvalgsperiodeServiceIT(
         } finally {
             førsteKanCommitte.countDown()
             tråder.shutdownNow()
+            tråder.awaitTermination(15, TimeUnit.SECONDS)
         }
 
         lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingID).single().apply {
