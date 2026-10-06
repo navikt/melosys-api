@@ -56,16 +56,18 @@ class ÅrsavregningVedtakMapper(
         val minstebelop = minstebeløpService.finnMinstebeløp(årsavregningModel.endeligAvgift + årsavregningModel.tidligereAvgift)
         val endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift)
         val forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift)
+        val endeligTotalbeløp = årsavregningModel.beregnetAvgiftBelop
+            ?: throw FunksjonellException("BeregnetAvgiftBelop finnes ikke for behandling $behandlingsId")
+        val differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.hentÅrsavregning().aar,
             endeligTrygdeavgift = endeligTrygdeavgift,
             forskuddsvisFakturertTrygdeavgift = forskuddsvisFakturertTrygdeavgift,
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
-                ?: throw FunksjonellException("BeregnetAvgiftBelop finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
-            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
+            endeligTrygdeavgiftTotalbeløp = endeligTotalbeløp,
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = tidligereBetaltTotalt(endeligTotalbeløp, differansebeløp),
+            differansebeløp = differansebeløp,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             innledningFritekst = brevbestilling.innledningFritekstAarsavregning,
@@ -99,15 +101,17 @@ class ÅrsavregningVedtakMapper(
         val minstebelop = minstebeløpService.finnMinstebeløp(årsavregningModel.tidligereAvgift)
         val erPensjonist = behandling.erPensjonist()
         val sakstype = behandling.fagsak.type
+        val endeligTotalbeløp = årsavregningModel.manueltAvgiftBeloep
+            ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke for behandling ${behandling.id}")
+        val differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = årsavregningModel.år,
             endeligTrygdeavgift = emptyList(),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.manueltAvgiftBeloep
-                ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke for behandling ${behandling.id}"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
-            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
+            endeligTrygdeavgiftTotalbeløp = endeligTotalbeløp,
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = tidligereBetaltTotalt(endeligTotalbeløp, differansebeløp),
+            differansebeløp = differansebeløp,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             innledningFritekst = brevbestilling.innledningFritekstAarsavregning,
@@ -159,9 +163,12 @@ class ÅrsavregningVedtakMapper(
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
         (årsavregning.harInnbetaltTrygdeavgift == null || årsavregning.harInnbetaltTrygdeavgift != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
-    private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
-        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.innbetaltTrygdeavgift ?: BigDecimal.ZERO)
-    }
+    /**
+     * Tidligere betalt for året, utledet fra de to andre beløpene i brevet slik at regnestykket alltid går opp.
+     * Samme definisjon som [no.nav.melosys.domain.avgift.Årsavregning.hentTidligereBetaltTotalt].
+     */
+    private fun tidligereBetaltTotalt(endeligTotalbeløp: BigDecimal, differansebeløp: BigDecimal): BigDecimal =
+        endeligTotalbeløp - differansebeløp
 
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? =
         behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
