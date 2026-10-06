@@ -16,6 +16,6 @@ data class AvgiftsperiodeDto(
     val inntektskildetype: Inntektskildetype,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val beregningsregel: Avgiftsberegningsregel,
-    val trygdedekning: String?,
+    val trygdedekning: String,
     val avgiftsdel: Avgiftsdel?
 )

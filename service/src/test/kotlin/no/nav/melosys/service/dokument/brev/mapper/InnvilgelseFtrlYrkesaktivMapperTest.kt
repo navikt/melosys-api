@@ -397,6 +397,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     this.behandlingsresultat = behandlingsresultat
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
                     this.trygdeavgiftsperioder = trygdeavgiftsperioder
+                    trygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiode = this }
                 }
             )
         }
