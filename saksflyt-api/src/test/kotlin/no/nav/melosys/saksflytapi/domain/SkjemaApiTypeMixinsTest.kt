@@ -1,13 +1,22 @@
 package no.nav.melosys.saksflytapi.domain
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
+import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.Skjemadel
 import org.junit.jupiter.api.Test
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
@@ -71,6 +80,39 @@ class SkjemaApiTypeMixinsTest {
 
         hentet.skjema.skjemaDefinisjonVersjon shouldBe "1"
         hentet.skjema.metadata.erOffentligArbeidsgiver shouldBe null
+    }
+
+    @Test
+    fun `antallAnsatte fra EREG overlever round-trip av søknadsdata via Prosessinstans`() {
+        val dto = lagUtsendtArbeidstakerSkjemaM2MDto { antallAnsatte = 7 }
+
+        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNADSDATA, dto)
+        val hentet = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
+
+        hentet.skjema.metadata.antallAnsatte shouldBe 7
+    }
+
+    @Test
+    fun `metadata-mixins har samme konstruktørparametre som typene fra melosys-skjema-api-types`() {
+        // Uten lik signatur ignoreres @JsonCreator-mixinen, og nye felter i typene blir ikke fanget opp her
+        mapOf(
+            DegSelvMetadata::class to DegSelvMetadataMixin::class,
+            ArbeidsgiverMetadata::class to ArbeidsgiverMetadataMixin::class,
+            AnnenPersonMetadata::class to AnnenPersonMetadataMixin::class,
+            ArbeidsgiverMedFullmaktMetadata::class to ArbeidsgiverMedFullmaktMetadataMixin::class,
+            RadgiverMetadata::class to RadgiverMetadataMixin::class,
+            RadgiverMedFullmaktMetadata::class to RadgiverMedFullmaktMetadataMixin::class,
+        ).forEach { (type, mixin) ->
+            val mixinParametre = mixin.java.declaredConstructors.single().parameters.map {
+                it.getAnnotation(JsonProperty::class.java).value to it.type
+            }
+            val typeParametre = requireNotNull(type.primaryConstructor).parameters.map {
+                it.name to it.type.jvmErasure.javaObjectType
+            }
+            withClue(mixin.simpleName) {
+                mixinParametre.map { (navn, klasse) -> navn to klasse.kotlin.javaObjectType } shouldBe typeParametre
+            }
+        }
     }
 
     private fun fjernFelterRekursivt(node: JsonNode, vararg feltnavn: String) {
