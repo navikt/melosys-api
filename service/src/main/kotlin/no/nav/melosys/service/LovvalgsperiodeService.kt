@@ -89,7 +89,9 @@ class LovvalgsperiodeService(
         behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
     ): Collection<Lovvalgsperiode> {
-        val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
+        // Låsen gjør at to samtidige lagringer for samme behandling kjører etter hverandre. Uten den sletter
+        // begge de samme periodene og setter inn de samme nye (MELOSYS-8338).
+        val behandlingsresultat = behandlingsresultatRepo.findForUpdateById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
         val eksisterendeTrygdeavgiftsperioder = hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat)

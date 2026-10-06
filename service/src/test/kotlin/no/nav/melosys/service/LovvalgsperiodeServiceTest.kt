@@ -118,7 +118,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun lagreLovvalgsperioderReturnererLovvalgsperiodeMedBehandlingsresultat() {
         val lagretBehandlingsresultat = Behandlingsresultat.forTest { id = BEH_ID }
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
+        every { behandlingsresultatRepository.findForUpdateById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
 
 
         val lovvalgsPerioder = listOf(lovvalgsperiodeForTest())
@@ -153,7 +153,7 @@ internal class LovvalgsperiodeServiceTest {
             )
         )
 
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepository.findForUpdateById(BEH_ID) } returns Optional.of(behandlingsresultat)
 
 
         val resultat = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(lovvalgsperiodeForTest()))
@@ -201,7 +201,7 @@ internal class LovvalgsperiodeServiceTest {
             )
         )
 
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepository.findForUpdateById(BEH_ID) } returns Optional.of(behandlingsresultat)
 
         // Act
         val kopiertAvgiftsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, listOf(lovvalgsperiodeForTest()))
@@ -219,7 +219,7 @@ internal class LovvalgsperiodeServiceTest {
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
         val lovvalgsperioder = mutableSetOf(lovvalgsperiodeForTest())
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
+        every { behandlingsresultatRepository.findForUpdateById(BEH_ID) } returns Optional.empty()
 
 
         shouldThrow<IllegalStateException> {

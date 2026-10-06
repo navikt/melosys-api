@@ -16,11 +16,20 @@ import no.nav.melosys.repository.*
 import no.nav.melosys.service.LovvalgsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class LovvalgsperiodeServiceIT(
     @Autowired
@@ -35,6 +44,8 @@ class LovvalgsperiodeServiceIT(
     private val fagsakRepository: FagsakRepository,
     @Autowired
     private val entityManager: EntityManager,
+    @Autowired
+    private val transactionManager: PlatformTransactionManager,
 ) : DataJpaTestBase() {
 
     private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
@@ -132,6 +143,67 @@ class LovvalgsperiodeServiceIT(
             grunnlagSkatteforholdTilNorge shouldNotBe null
         }
     }
+
+    /**
+     * melosys-web sender to like lagringer samtidig (MELOSYS-8338). Første kall holder transaksjonen
+     * åpen etter at det har skrevet, og andre kall starter i mellomtiden.
+     * Uten lås får andre kall ORA-00001 (ingen perioder fra før) eller «delete … row count 0» (perioder fra før).
+     */
+    @ParameterizedTest(name = "perioder fra før = {0}")
+    @ValueSource(booleans = [false, true])
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    fun `to samtidige lagringer for samme behandling lykkes begge`(harPerioderFraFør: Boolean) {
+        val behandlingID = iEgenTransaksjon {
+            if (harPerioderFraFør) {
+                lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift().behandlingsresultat.hentId()
+            } else {
+                lagreBehandlingsresultatUtenLovvalgsperioder().hentId()
+            }
+        }
+        val førsteHarSkrevet = CountDownLatch(1)
+        val andreHarStartet = CountDownLatch(1)
+        val tråder = Executors.newFixedThreadPool(2)
+
+        try {
+            val første = tråder.submit {
+                iEgenTransaksjon {
+                    lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, listOf(nyLovvalgsperiodeUtenTrygdeavgift()))
+                    lovvalgsperiodeRepository.flush()
+                    førsteHarSkrevet.countDown()
+                    andreHarStartet.await(10, TimeUnit.SECONDS)
+                    // Gir andre kall tid til å komme fram til låsen før første kall committer.
+                    Thread.sleep(500)
+                }
+            }
+            førsteHarSkrevet.await(10, TimeUnit.SECONDS) shouldBe true
+            val andre = tråder.submit {
+                andreHarStartet.countDown()
+                iEgenTransaksjon {
+                    lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, listOf(nyLovvalgsperiodeUtenTrygdeavgift()))
+                }
+            }
+
+            første.get(30, TimeUnit.SECONDS)
+            andre.get(30, TimeUnit.SECONDS)
+        } finally {
+            tråder.shutdownNow()
+        }
+
+        lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingID).single().apply {
+            fom shouldBe NY_LOVVALGSPERIODE_FOM
+            tom shouldBe NY_LOVVALGSPERIODE_TOM
+        }
+    }
+
+    private fun <T> iEgenTransaksjon(blokk: () -> T): T = TransactionTemplate(transactionManager).execute { blokk() }!!
+
+    private fun lagreBehandlingsresultatUtenLovvalgsperioder(): Behandlingsresultat =
+        behandlingsresultatRepository.saveAndFlush(
+            Behandlingsresultat.forTest {
+                behandling = lagreBehandling()
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            }.also { it.leggTilRegisteringInfo() }
+        )
 
     private fun lagreBehandlingsresultatMedLovvalgsperiodeSomHarTrygdeavgift(
         behandlingstema: Behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
