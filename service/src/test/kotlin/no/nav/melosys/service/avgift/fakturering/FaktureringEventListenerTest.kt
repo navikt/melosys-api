@@ -215,7 +215,7 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Oppdater fakturamottaker når vedtak for ikke-yrkesaktiv avsluttes, siden det ikke fakturerer`() {
-        val avsluttetBehandling = mockEndretFullmektig(Behandlingstyper.FØRSTEGANG)
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.FØRSTEGANG)
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
 
@@ -224,14 +224,14 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Ikke oppdater fakturamottaker når vedtatt årsavregning med tema ikke-yrkesaktiv avsluttes`() {
-        val avsluttetBehandling = mockEndretFullmektig(Behandlingstyper.ÅRSAVREGNING)
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.ÅRSAVREGNING)
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
 
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansOppdaterFaktura(any()) }
     }
 
-    private fun mockEndretFullmektig(behandlingstype: Behandlingstyper): Behandling {
+    private fun lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(behandlingstype: Behandlingstyper): Behandling {
         val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
         val desember2 = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
 

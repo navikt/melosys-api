@@ -2,6 +2,7 @@ package no.nav.melosys.itest.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -118,6 +119,7 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -137,7 +139,9 @@ class IkkeYrkesaktivVedtakIT(
             fastsattAvLand.shouldBe(Land_iso2.NO)
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
-                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+                vedtaksdato.shouldNotBeNull()
+                // Midnatt kan passere mellom fattVedtak og sjekken.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
@@ -252,6 +256,7 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -271,7 +276,9 @@ class IkkeYrkesaktivVedtakIT(
             fastsattAvLand.shouldBe(Land_iso2.NO)
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
-                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+                vedtaksdato.shouldNotBeNull()
+                // Midnatt kan passere mellom fattVedtak og sjekken.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
@@ -363,6 +370,7 @@ class IkkeYrkesaktivVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -382,7 +390,9 @@ class IkkeYrkesaktivVedtakIT(
             fastsattAvLand.shouldBe(Land_iso2.NO)
             vedtakMetadata.shouldNotBeNull().apply {
                 vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
-                vedtakKlagefrist.shouldBe(LocalDate.now().plusWeeks(6))
+                vedtaksdato.shouldNotBeNull()
+                // Midnatt kan passere mellom fattVedtak og sjekken.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
             }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {

@@ -217,7 +217,7 @@ internal class BehandlingTest {
         "EU_EOS, UTSENDT_ARBEIDSTAKER, false",
         "TRYGDEAVTALE, YRKESAKTIV, false",
     )
-    fun `harIkkeYrkesaktivFlyt gjelder kun EØS og trygdeavtale med tema IKKE_YRKESAKTIV`(
+    fun `harIkkeYrkesaktivFlyt og erIkkeYrkesaktivVedtak gjelder kun EØS og trygdeavtale med tema IKKE_YRKESAKTIV`(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
         forventet: Boolean

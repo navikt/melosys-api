@@ -152,17 +152,7 @@ class UtstedtA1ServiceTest {
 
     @Test
     fun `sender ikke melding om utstedt A1 for ikke-yrkesaktiv`() {
-        val behandling = Behandling.forTest {
-            id = BEHANDLING_ID
-            tema = Behandlingstema.IKKE_YRKESAKTIV
-            status = Behandlingsstatus.AVSLUTTET
-            fagsak {
-                saksnummer = "MEL-123"
-                type = Sakstyper.EU_EOS
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                medBruker()
-            }
-        }
+        val behandling = lagBehandling(behandlingstema = Behandlingstema.IKKE_YRKESAKTIV)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns
             lagBehandlingsresultat(false, behandling, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
@@ -175,9 +165,13 @@ class UtstedtA1ServiceTest {
         verify(exactly = 0) { utstedtA1AivenProducer.produserMelding(any()) }
     }
 
-    private fun lagBehandling(behandlingsstatus: Behandlingsstatus = Behandlingsstatus.AVSLUTTET) =
+    private fun lagBehandling(
+        behandlingsstatus: Behandlingsstatus = Behandlingsstatus.AVSLUTTET,
+        behandlingstema: Behandlingstema? = null
+    ) =
         Behandling.forTest {
             id = BEHANDLING_ID
+            behandlingstema?.let { tema = it }
             fagsak {
                 saksnummer = "MEL-123"
                 type = Sakstyper.EU_EOS

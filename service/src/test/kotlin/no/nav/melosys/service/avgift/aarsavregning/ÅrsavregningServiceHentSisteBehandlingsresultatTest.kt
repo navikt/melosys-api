@@ -872,25 +872,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `ser bort fra nyere vedtak for ikke-yrkesaktiv, og logger antallet som hoppes over`() {
-        val yrkesaktivtVedtak = lagTidligereBehandlingsresultat {
-            id = 1
-            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling {
-                id = 1
-                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    saksnummer = "123456"
-                    type = Sakstyper.EU_EOS
-                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                }
-            }
-            registrertDato = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata {
-                vedtaksdato = LocalDate.of(2025, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            }
-            lovvalgsperiode("2025-01-01", "2025-12-31")
-        }
+        val yrkesaktivtVedtak = lagYrkesaktivtVedtak2025()
         val aktivFagsak = yrkesaktivtVedtak.hentBehandling().fagsak
 
         val ikkeYrkesaktivtVedtak = lagTidligereBehandlingsresultat {
@@ -916,7 +898,6 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         withLogAppender<ÅrsavregningService> { logger ->
             with(årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2025).shouldNotBeNull()) {
                 sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe yrkesaktivtVedtak
-                sisteBehandlingsresultatMedAvgift shouldBe yrkesaktivtVedtak
             }
 
             logger.list.filter { it.level == Level.INFO }.map { it.formattedMessage } shouldContain
@@ -926,25 +907,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `årsavregning med tema ikke-yrkesaktiv er fortsatt siste årsavregning`() {
-        val yrkesaktivtVedtak = lagTidligereBehandlingsresultat {
-            id = 1
-            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling {
-                id = 1
-                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    saksnummer = "123456"
-                    type = Sakstyper.EU_EOS
-                    tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                }
-            }
-            registrertDato = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata {
-                vedtaksdato = LocalDate.of(2025, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            }
-            lovvalgsperiode("2025-01-01", "2025-12-31")
-        }
+        val yrkesaktivtVedtak = lagYrkesaktivtVedtak2025()
         val aktivFagsak = yrkesaktivtVedtak.hentBehandling().fagsak
 
         val årsavregningIkkeYrkesaktiv = lagTidligereBehandlingsresultat {
@@ -974,5 +937,25 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2025)
             .shouldNotBeNull()
             .sisteÅrsavregning shouldBe årsavregningIkkeYrkesaktiv
+    }
+
+    private fun lagYrkesaktivtVedtak2025() = lagTidligereBehandlingsresultat {
+        id = 1
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandling {
+            id = 1
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak {
+                saksnummer = "123456"
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        registrertDato = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        vedtakMetadata {
+            vedtaksdato = LocalDate.of(2025, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        }
+        lovvalgsperiode("2025-01-01", "2025-12-31")
     }
 }

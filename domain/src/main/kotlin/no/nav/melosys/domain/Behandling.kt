@@ -245,7 +245,10 @@ class Behandling(
 
     fun harIkkeYrkesaktivFlyt(): Boolean = Companion.harIkkeYrkesaktivFlyt(fagsak.type, tema)
 
-    // Årsavregninger med tema IKKE_YRKESAKTIV fastsetter trygdeavgift og er ikke vedtak om lovvalg.
+    /**
+     * Beskriver behandlingen (sakstype og tema, ikke årsavregning); sjekker ikke at et vedtak finnes.
+     * Årsavregninger med tema IKKE_YRKESAKTIV fastsetter trygdeavgift og er ikke vedtak om lovvalg.
+     */
     fun erIkkeYrkesaktivVedtak(): Boolean = harIkkeYrkesaktivFlyt() && !erÅrsavregning()
 
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
@@ -285,6 +288,7 @@ class Behandling(
 
     companion object {
         // Muliggjør også utvidelsesfunksjoner i tester
+        @JvmStatic
         fun harIkkeYrkesaktivFlyt(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
             (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
