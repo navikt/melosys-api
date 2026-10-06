@@ -397,6 +397,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     this.behandlingsresultat = behandlingsresultat
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
                     this.trygdeavgiftsperioder = trygdeavgiftsperioder
+                    trygdeavgiftsperioder.forEach { it.grunnlagMedlemskapsperiode = this }
                 }
             )
         }
@@ -905,7 +906,26 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             }
         }
 
-    private fun lagBehandlingsresultatMedBeregningsregel(regel: Avgiftsberegningsregel): Behandlingsresultat =
+    @Test
+    fun `mapYrkesaktivFrivillig sender trygdedekning og avgiftsdel når 25 prosent-regelen splitter helse- og pensjonsdel`() {
+        val behandlingsresultat = lagBehandlingsresultatMedBeregningsregel(
+            Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL,
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+            avgiftsdeler = listOf(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
+        )
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.map { it.avgiftsdel }.shouldContainExactlyInAnyOrder(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
+            avgiftsperioder.map { it.trygdedekning }.shouldContainOnly(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name)
+        }
+    }
+
+    private fun lagBehandlingsresultatMedBeregningsregel(
+        regel: Avgiftsberegningsregel,
+        trygdedekning: Trygdedekninger = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+        avgiftsdeler: List<Avgiftsdel?> = listOf(null)
+    ): Behandlingsresultat =
         Behandlingsresultat.forTest {
             id = 1L
             nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
@@ -918,18 +938,21 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                 tom = LocalDate.EPOCH.plusMonths(4)
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
-                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                this.trygdedekning = trygdedekning
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-                trygdeavgiftsperiode {
-                    periodeFra = LocalDate.EPOCH.plusMonths(1)
-                    periodeTil = LocalDate.EPOCH.plusMonths(4)
-                    trygdesats = null
-                    trygdeavgiftsbeløpMd = BigDecimal.ZERO
-                    beregningsregel = regel
-                    grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
-                    grunnlagInntekstperiode {
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        arbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftsdeler.forEach { del ->
+                    trygdeavgiftsperiode {
+                        periodeFra = LocalDate.EPOCH.plusMonths(1)
+                        periodeTil = LocalDate.EPOCH.plusMonths(4)
+                        trygdesats = null
+                        trygdeavgiftsbeløpMd = if (del == Avgiftsdel.PENSJON) BigDecimal.ONE else BigDecimal.ZERO
+                        beregningsregel = regel
+                        avgiftsdel = del
+                        grunnlagSkatteforholdTilNorge { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG }
+                        grunnlagInntekstperiode {
+                            type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                            arbeidsgiversavgiftBetalesTilSkatt = true
+                        }
                     }
                 }
             }
