@@ -64,7 +64,7 @@ melosys:
       enabled: false  # Deaktiver scheduler i integrasjonstester
 
 Melosys-admin:
-  apikey: dummy
+  console-klient-id: test-azp
   driftsgruppe: 00000000-0000-0000-0000-000000000001
 MelosysSoknadMottak:
   url: dummy
