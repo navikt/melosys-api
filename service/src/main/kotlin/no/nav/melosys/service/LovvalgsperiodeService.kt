@@ -88,11 +88,27 @@ class LovvalgsperiodeService(
     fun lagreLovvalgsperioder(
         behandlingID: Long,
         lovvalgsperioder: Collection<Lovvalgsperiode>
+    ): Collection<Lovvalgsperiode> = lagreLovvalgsperioder(behandlingID, lovvalgsperioder, tømTrygdeavgiftVedEndring = false)
+
+    // Som for medlemskapsperioder i FTRL: endret periode eller resultat tømmer trygdeavgiften.
+    @Transactional
+    fun lagreLovvalgsperioderOgTømTrygdeavgiftVedEndring(
+        behandlingID: Long,
+        lovvalgsperioder: Collection<Lovvalgsperiode>
+    ): Collection<Lovvalgsperiode> = lagreLovvalgsperioder(behandlingID, lovvalgsperioder, tømTrygdeavgiftVedEndring = true)
+
+    private fun lagreLovvalgsperioder(
+        behandlingID: Long,
+        lovvalgsperioder: Collection<Lovvalgsperiode>,
+        tømTrygdeavgiftVedEndring: Boolean
     ): Collection<Lovvalgsperiode> {
         val behandlingsresultat = behandlingsresultatRepo.findById(behandlingID).getOrNull()
             ?: throw IllegalStateException("Behandlingsresultat med id $behandlingID fins ikke.")
 
-        val eksisterendeTrygdeavgiftsperioder = hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat)
+        val beholdTrygdeavgift = !tømTrygdeavgiftVedEndring ||
+            avgiftsgrunnlag(behandlingsresultat.lovvalgsperioder) == avgiftsgrunnlag(lovvalgsperioder)
+        val eksisterendeTrygdeavgiftsperioder =
+            if (beholdTrygdeavgift) hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat) else emptyList()
 
         slettEksisterendeLovvalgsperioder(behandlingsresultat)
 
@@ -103,6 +119,9 @@ class LovvalgsperiodeService(
         behandlingsresultat.lovvalgsperioder.addAll(nyePerioder)
         return nyePerioder
     }
+
+    private fun avgiftsgrunnlag(lovvalgsperioder: Collection<Lovvalgsperiode>) =
+        lovvalgsperioder.map { listOf(it.fom, it.tom, it.innvilgelsesresultat) }.toSet()
 
     private fun hentOgInitialiserEksisterendeTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
         // Må hente trygdeavgiftsperioder FØR sletting siden de hentes fra eksisterende lovvalgsperioder.
