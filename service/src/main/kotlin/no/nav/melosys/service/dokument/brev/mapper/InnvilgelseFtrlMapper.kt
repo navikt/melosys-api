@@ -178,6 +178,9 @@ class InnvilgelseFtrlMapper(
         )
     }
 
+    /**
+     * Sann når noe av medlemskapet ligger i et tidligere kalenderår (tidligste fom er før inneværende år).
+     */
     private fun utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat: Behandlingsresultat): Boolean {
         return if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
@@ -188,6 +191,9 @@ class InnvilgelseFtrlMapper(
         }
     }
 
+    /**
+     * Sann når hele medlemskapet ligger i tidligere kalenderår (seneste tom er før inneværende år).
+     */
     private fun utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat: Behandlingsresultat): Boolean {
         return if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             behandlingsresultat.utledAvgiftspliktigperioderTom()?.year?.let { tomÅr ->
