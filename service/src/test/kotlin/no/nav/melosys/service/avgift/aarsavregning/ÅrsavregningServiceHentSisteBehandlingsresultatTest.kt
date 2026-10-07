@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -732,12 +731,11 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
     }
 
     /**
-     * En sak avsluttet fra behandlingsmenyen med «Søknaden er innvilget» får resultattype uten at det
-     * fattes vedtak i Melosys. Raden i vedtak_metadata finnes da ikke, og [Behandlingsresultat.harVedtak]
-     * finnes nettopp fordi tilstanden er lovlig. Oppslaget skal sortere en slik behandling som eldst, ikke feile.
+     * En behandling avsluttet fra behandlingsmenyen får resultattype uten at det fattes vedtak i Melosys,
+     * så raden i vedtak_metadata finnes ikke. Slike behandlinger skal aldri tas hensyn til ved årsavregning.
      */
     @Test
-    fun `velger behandlingen med vedtak når en annen avsluttet behandling mangler vedtaksmetadata`() {
+    fun `bruker vedtaket når en nyere behandling mangler vedtak, og logger antallet som hoppes over`() {
         val behandlingMedVedtak = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -757,22 +755,21 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         }
         val aktivFagsak = behandlingMedVedtak.hentBehandling().fagsak
 
-        // Avsluttet uten vedtak i Melosys, og for et annet år enn det som avregnes
-        val behandlingUtenVedtak = Behandlingsresultat.forTest {
+        val nyereBehandlingUtenVedtak = Behandlingsresultat.forTest {
             id = 2
-            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             registrertDato = LocalDate.of(2024, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling {
                 id = 2
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak = aktivFagsak
             }
-            medlemskapsperiode("2024-01-01", "2024-12-31", medTrygdeavgift = false)
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns behandlingMedVedtak
-        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns behandlingUtenVedtak
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyereBehandlingUtenVedtak
 
         withLogAppender<ÅrsavregningService> { logger ->
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
@@ -785,18 +782,12 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
             }
 
             logger.list.filter { it.level == Level.INFO }.map { it.formattedMessage } shouldContain
-                "1 behandling(er) uten vedtaksdato i sak 123456 ved oppslag for årsavregning"
+                "Hopper over 1 behandling(er) uten vedtak i sak 123456 ved oppslag for årsavregning"
         }
-
-        årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
-            "123456", 2023, førVedtaksdato = Instant.parse("2025-01-01T00:00:00Z")
-        ).shouldNotBeNull().sisteBehandlingsresultatMedAvgift shouldBe behandlingMedVedtak
-
-        verify(exactly = 4) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
 
     @Test
-    fun `behandling uten vedtaksdato brukes når den er eneste, men ikke når grunnlaget skal være fra før en vedtaksdato`() {
+    fun `gir ikke grunnlag når alle relevante behandlinger mangler vedtak`() {
         val behandlingUtenVedtak = Behandlingsresultat.forTest {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -811,23 +802,35 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
             }
             medlemskapsperiode("2023-01-01", "2023-12-31")
         }
+        val aktivFagsak = behandlingUtenVedtak.hentBehandling().fagsak
 
-        every { fagsakService.hentFagsak("123456") } returns behandlingUtenVedtak.hentBehandling().fagsak
+        // Et avslag er et vedtak, men ikke en relevant behandlingsresultattype
+        val avslag = lagTidligereBehandlingsresultat {
+            id = 2
+            type = Behandlingsresultattyper.AVSLAG_SØKNAD
+            behandling {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            registrertDato = LocalDate.of(2022, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2022, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+        }
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
         every { behandlingsresultatService.hentBehandlingsresultat(1) } returns behandlingUtenVedtak
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns avslag
 
-        årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
-            .shouldNotBeNull().sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe behandlingUtenVedtak
-        årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
-            "123456", 2023, førVedtaksdato = Instant.parse("2025-01-01T00:00:00Z")
-        ) shouldBe null
+        årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023) shouldBe null
     }
 
     @Test
-    fun `flere behandlinger uten vedtaksdato sorteres på registrert dato`() {
-        val nyest = Behandlingsresultat.forTest {
+    fun `henter ikke avgift fra behandling uten vedtak når vedtaket mangler avgift for året`() {
+        val vedtakUtenAvgift = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            registrertDato = LocalDate.of(2024, 5, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
@@ -836,14 +839,18 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                     type = Sakstyper.FTRL
                 }
             }
-            medlemskapsperiode("2023-01-01", "2023-12-31")
+            registrertDato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2024, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
         }
-        val aktivFagsak = nyest.hentBehandling().fagsak
+        val aktivFagsak = vedtakUtenAvgift.hentBehandling().fagsak
 
-        val eldst = Behandlingsresultat.forTest {
+        val behandlingUtenVedtakMedAvgift = Behandlingsresultat.forTest {
             id = 2
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling {
                 id = 2
                 status = Behandlingsstatus.AVSLUTTET
@@ -853,12 +860,12 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
-        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns nyest
-        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns eldst
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns vedtakUtenAvgift
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns behandlingUtenVedtakMedAvgift
 
         with(årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023).shouldNotBeNull()) {
-            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyest
-            sisteBehandlingsresultatMedAvgift shouldBe nyest
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe vedtakUtenAvgift
+            sisteBehandlingsresultatMedAvgift shouldBe null
         }
     }
 }

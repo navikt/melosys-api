@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.soknad
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Innretningstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
@@ -28,6 +27,17 @@ internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
 
 internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
     Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
+
+internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean {
+    val skjemaer = listOfNotNull(skjema, kobletSkjema)
+    val registerverdier = skjemaer
+        .mapNotNull { it.metadata.erOffentligArbeidsgiver }
+        .distinct()
+    check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende klassifisering i EREG" }
+    return checkNotNull(registerverdier.singleOrNull()) {
+        "Mangler registerklassifisering fra EREG. Foreldede V1-skjemaer mangler registermetadata."
+    }
+}
 
 /**
  * Mapper digital søknadsdata til [Soeknad] for pre-utfylling av sidemeny i Melosys.
@@ -62,7 +72,8 @@ object DigitalSøknadMapper {
         mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
 
         // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
-        søknad.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
+        søknad.juridiskArbeidsgiverNorge =
+            mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
         // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra både arbeidsgivers
         // lønnsliste og arbeidstakers virksomhetsliste. Identiske oppføringer dedupliseres.
@@ -139,8 +150,16 @@ object DigitalSøknadMapper {
         dto: UtsendtArbeidstakerSkjemaM2MDto,
         virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
     ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = virksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
+        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
+        // Antall ansatte er hentet fra EREG (juridisk enhet), resten er oppgitt av arbeidsgiver
+        antallAnsatte = listOfNotNull(dto.skjema, dto.kobletSkjema).firstNotNullOfOrNull { it.metadata.antallAnsatte }
+        antallAdmAnsatte = virksomhetINorge?.antallAdministrativtAnsatte
+        antallUtsendte = virksomhetINorge?.antallUtsendteArbeidstakere
+        andelRekruttertINorge = virksomhetINorge?.andelAnsatteRekruttertINorge?.toBigDecimal()
+        andelOmsetningINorge = virksomhetINorge?.andelOmsetningINorge?.toBigDecimal()
+        andelOppdragINorge = virksomhetINorge?.andelOppdragUtfortINorge?.toBigDecimal()
+        andelKontrakterINorge = virksomhetINorge?.andelOppdragskontrakterInngattINorge?.toBigDecimal()
     }
 
     private fun hentHovedarbeidsgiversOrgnr(dto: UtsendtArbeidstakerSkjemaM2MDto): String? {
@@ -282,15 +301,4 @@ object DigitalSøknadMapper {
         )
     }
 
-    fun utledBehandlingstema(dto: UtsendtArbeidstakerSkjemaM2MDto): Behandlingstema {
-        val erOffentligVirksomhet = when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidsgiversSkjemaDataDto ->
-                data.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto ->
-                data.arbeidsgiversData.arbeidsgiverensVirksomhetINorge?.erArbeidsgiverenOffentligVirksomhet
-            else -> false
-        }
-        return if (erOffentligVirksomhet == true) Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-        else Behandlingstema.UTSENDT_ARBEIDSTAKER
-    }
 }

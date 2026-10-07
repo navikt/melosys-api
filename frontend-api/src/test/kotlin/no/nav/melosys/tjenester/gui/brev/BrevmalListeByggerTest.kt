@@ -288,7 +288,7 @@ internal class BrevmalListeByggerTest {
     }
 
     @Test
-    fun byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererMalMedFeilmeldingMenArbeidsgiverHarFastFeilmelding() {
+    fun byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererTryggFeilmeldingMenArbeidsgiverHarFastFeilmelding() {
         val FEILMELDING = "En annen feil"
         every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns lagBehandling()
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
@@ -305,7 +305,7 @@ internal class BrevmalListeByggerTest {
         tilgjengeligeMaler.shouldHaveSize(5).run {
             first().mottaker.run {
                 type.shouldBe(MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse)
-                feilmelding.tittel.shouldBe(FEILMELDING)
+                feilmelding.tittel.shouldBe("Kunne ikke hente opplysninger om mottakeren. Prøv igjen senere.")
             }
             elementAt(1).mottaker.run {
                 type.shouldBe(MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse)

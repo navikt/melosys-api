@@ -587,6 +587,74 @@ class ÅrsavregningIkkeSkattepliktigeIT(
         }
     }
 
+    @Nested
+    @DisplayName("Behandlinger uten vedtak")
+    inner class BehandlingerUtenVedtak {
+        @Test
+        fun `skal ikke finne sak der eneste behandling mangler vedtak`() {
+            val sakUtenVedtak = "MEL-UTEN-VEDTAK"
+
+            lagBehandlingsresultat {
+                behandling {
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak {
+                        saksnummer = sakUtenVedtak
+                        type = Sakstyper.FTRL
+                        status = Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+                vedtakMetadata = null
+            }
+
+            årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+                .filter { it.sak.saksnummer == sakUtenVedtak }
+                .shouldBeEmpty()
+        }
+
+        @Test
+        fun `skal ikke finne sak der avgiften for året bare finnes i behandling uten vedtak`() {
+            val sakMedAvgiftUtenVedtak = "MEL-AVGIFT-UTEN-VEDTAK"
+
+            // Vedtak med medlemskap for året, men uten trygdeavgift
+            lagBehandlingsresultat {
+                behandling {
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak {
+                        saksnummer = sakMedAvgiftUtenVedtak
+                        type = Sakstyper.FTRL
+                        status = Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+                medlemskapsperioder.clear()
+                medlemskapsperiode {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = FOM
+                    tom = TOM
+                    medlemskapstype = Medlemskapstyper.PLIKTIG
+                    trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                }
+            }
+
+            // Avsluttet fra behandlingsmenyen, med ikke-skattepliktig avgift for året
+            lagBehandlingsresultat {
+                behandling {
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak {
+                        saksnummer = sakMedAvgiftUtenVedtak
+                        type = Sakstyper.FTRL
+                        status = Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+                vedtakMetadata = null
+            }
+
+            årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+                .filter { it.sak.saksnummer == sakMedAvgiftUtenVedtak }
+                .shouldBeEmpty()
+        }
+    }
+
     private fun lagBehandlingsresultat(block: BehandlingsresultatTestFactory.Builder.() -> Unit = {}) =
         Behandlingsresultat.forTest {
             behandlingsmåte = Behandlingsmaate.MANUELT

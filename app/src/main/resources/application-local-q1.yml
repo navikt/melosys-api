@@ -30,7 +30,8 @@ JournalpostApi_v1:
 KodeverkAPI_v1:
   url: https://kodeverk-api.nav.no/api
 Melosys-admin:
-  apikey: dummy
+  console-klient-id: 7e5dc28f-00a6-4d3f-b8e6-c42a78b60ffc # melosys-console-q2 (dev)
+  driftsgruppe: fb706914-eede-490a-b9cd-2458983e24c1 # melosys-innlogging-vakt (dev)
 MelosysEessi:
   url: https://melosys-eessi.dev.intern.nav.no/api
 MelosysSoknadMottak:

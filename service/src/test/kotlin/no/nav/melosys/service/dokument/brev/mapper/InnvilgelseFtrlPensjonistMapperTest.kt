@@ -4,6 +4,7 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -16,6 +17,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.domain.avgift.Avgiftsdel
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
@@ -529,6 +531,20 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     }
 
     @Test
+    fun `mapPensjonistFrivillig sender avgiftsdel når 25 prosent-regelen splitter helse- og pensjonsdel`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL, listOf(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
+        )
+        mockHappyCase(behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.map { it.avgiftsdel }.shouldContainExactlyInAnyOrder(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
+            avgiftsperioder.map { it.trygdedekning }
+                .shouldContainOnly(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER.name)
+        }
+    }
+
+    @Test
     fun `mapPensjonistFrivillig med ORDINÆR beregningsregel mapper ORDINÆR som beregningsregel`() {
         val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
             Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.ORDINÆR
@@ -604,7 +620,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
 
     private fun lagPensjonistBehandlingsresultatMedBeregningsregel(
         medlemskapsType: Medlemskapstyper,
-        regel: Avgiftsberegningsregel
+        regel: Avgiftsberegningsregel,
+        avgiftsdeler: List<Avgiftsdel?> = listOf(null)
     ): Behandlingsresultat = Behandlingsresultat.forTest {
         id = 1L
         behandling {
@@ -631,18 +648,21 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 else Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             bestemmelse = if (medlemskapsType == Medlemskapstyper.PLIKTIG) Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 else Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
-            trygdeavgiftsperiode {
-                periodeFra = nå.minusYears(1).withMonth(1)
-                periodeTil = nå.withMonth(4)
-                trygdesats = BigDecimal(0.05)
-                trygdeavgiftsbeløpMd = BigDecimal(500.0)
-                beregningsregel = regel
-                grunnlagInntekstperiode {
-                    fomDato = nå.minusYears(1).withMonth(1)
-                    tomDato = nå.withMonth(4)
-                }
-                grunnlagSkatteforholdTilNorge {
-                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            avgiftsdeler.forEach { del ->
+                trygdeavgiftsperiode {
+                    periodeFra = nå.minusYears(1).withMonth(1)
+                    periodeTil = nå.withMonth(4)
+                    trygdesats = BigDecimal(0.05)
+                    trygdeavgiftsbeløpMd = if (del == Avgiftsdel.PENSJON) BigDecimal(200.0) else BigDecimal(500.0)
+                    beregningsregel = regel
+                    avgiftsdel = del
+                    grunnlagInntekstperiode {
+                        fomDato = nå.minusYears(1).withMonth(1)
+                        tomDato = nå.withMonth(4)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
                 }
             }
         }

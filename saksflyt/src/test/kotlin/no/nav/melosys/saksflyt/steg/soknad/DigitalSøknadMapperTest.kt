@@ -42,6 +42,7 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeid
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeidstakersSkjemaDataDto
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class DigitalSøknadMapperTest {
@@ -203,14 +204,11 @@ internal class DigitalSøknadMapperTest {
         }
 
         @Test
-        fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens virksomhet i Norge`() {
+        fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens registermetadata`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                data = arbeidsgiverData(
-                    virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                        erArbeidsgiverenOffentligVirksomhet = true
-                    )
-                )
+                erOffentligArbeidsgiver = true
+                data = arbeidsgiverData()
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
@@ -219,15 +217,77 @@ internal class DigitalSøknadMapperTest {
         }
 
         @Test
-        fun `erOffentligVirksomhet er null når arbeidsgiver-del mangler`() {
+        fun `erOffentligVirksomhet hentes fra arbeidstakers metadata når arbeidsgiver-del mangler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                erOffentligArbeidsgiver = true
                 data = arbeidstakerData()
             }
 
             val søknad = DigitalSøknadMapper.tilSoeknad(dto)
 
-            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet.shouldBeNull()
+            søknad.juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
+        }
+
+        @Test
+        fun `mapper opplysninger om foretakets samlede virksomhet fra arbeidsgiver-delen`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                antallAnsatte = 5
+                data = arbeidsgiverData(virksomhetINorge = virksomhetINorgeMedSamletVirksomhet())
+            }
+
+            val juridiskArbeidsgiver = DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge
+
+            juridiskArbeidsgiver.antallAnsatte shouldBe 5
+            juridiskArbeidsgiver.antallAdmAnsatte shouldBe 3
+            juridiskArbeidsgiver.antallUtsendte shouldBe 2
+            juridiskArbeidsgiver.andelRekruttertINorge shouldBe BigDecimal(80)
+            juridiskArbeidsgiver.andelOmsetningINorge shouldBe BigDecimal(60)
+            juridiskArbeidsgiver.andelOppdragINorge shouldBe BigDecimal(0)
+            juridiskArbeidsgiver.andelKontrakterINorge shouldBe BigDecimal(100)
+        }
+
+        @Test
+        fun `mapper samlet virksomhet og antall ansatte fra koblet arbeidsgiver-del`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData()
+                medKobletArbeidsgiverSkjema {
+                    antallAnsatte = 7
+                    data = arbeidsgiverData(virksomhetINorge = virksomhetINorgeMedSamletVirksomhet())
+                }
+            }
+
+            val juridiskArbeidsgiver = DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge
+
+            juridiskArbeidsgiver.antallAnsatte shouldBe 7
+            juridiskArbeidsgiver.antallAdmAnsatte shouldBe 3
+            juridiskArbeidsgiver.andelKontrakterINorge shouldBe BigDecimal(100)
+        }
+
+        @Test
+        fun `mapper kun antall ansatte når samlet virksomhet ikke er oppgitt`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
+                antallAnsatte = 50
+                data = arbeidsgiverData(
+                    virksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
+                        erArbeidsgiverenBemanningsEllerVikarbyraa = false,
+                        opprettholderArbeidsgiverenVanligDrift = true
+                    )
+                )
+            }
+
+            val juridiskArbeidsgiver = DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge
+
+            juridiskArbeidsgiver.antallAnsatte shouldBe 50
+            juridiskArbeidsgiver.antallAdmAnsatte.shouldBeNull()
+            juridiskArbeidsgiver.antallUtsendte.shouldBeNull()
+            juridiskArbeidsgiver.andelRekruttertINorge.shouldBeNull()
+            juridiskArbeidsgiver.andelOmsetningINorge.shouldBeNull()
+            juridiskArbeidsgiver.andelOppdragINorge.shouldBeNull()
+            juridiskArbeidsgiver.andelKontrakterINorge.shouldBeNull()
         }
     }
 
@@ -682,12 +742,10 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
                 orgnr = "KOMBI-123"
+                erOffentligArbeidsgiver = false
                 data = kombinertData(
                     utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom),
                     arbeidsgiversData = UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto.ArbeidsgiversData(
-                        arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                            erArbeidsgiverenOffentligVirksomhet = false
-                        ),
                         arbeidsstedIUtlandet = ArbeidsstedIUtlandetDto(
                             arbeidsstedType = ArbeidsstedType.PA_LAND,
                             paLand = PaLandDto(
@@ -880,6 +938,17 @@ internal class DigitalSøknadMapperTest {
         arbeidsgiverensVirksomhetINorge = virksomhetINorge,
         arbeidstakerensLonn = lonn,
         arbeidsstedIUtlandet = arbeidssted
+    )
+
+    private fun virksomhetINorgeMedSamletVirksomhet() = ArbeidsgiverensVirksomhetINorgeDto(
+        erArbeidsgiverenBemanningsEllerVikarbyraa = true,
+        opprettholderArbeidsgiverenVanligDrift = true,
+        antallAdministrativtAnsatte = 3,
+        antallUtsendteArbeidstakere = 2,
+        andelAnsatteRekruttertINorge = 80,
+        andelOmsetningINorge = 60,
+        andelOppdragUtfortINorge = 0,
+        andelOppdragskontrakterInngattINorge = 100
     )
 
     private fun arbeidsgiverSøknadMed(arbeidssted: ArbeidsstedIUtlandetDto) =

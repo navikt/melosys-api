@@ -98,6 +98,11 @@ class EndreAktoerIdIT(
         val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(subjectHandler)
         every { subjectHandler.userID } returns "Z123456"
+        // AdminTilgangInterceptor leser SubjectHandler: personkall fra Console med driftsgruppe
+        every { subjectHandler.oidcTokenString } returns "mock-token"
+        every { subjectHandler.tokenIdType } returns null
+        every { subjectHandler.azp } returns AdminControllerTilgangsstyringIT.CONSOLE_KLIENT_ID
+        every { subjectHandler.groups } returns listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
 
         val saksnummer = "MEL-123"
         val gammelAktoerid = "1111111111111"
@@ -123,7 +128,6 @@ class EndreAktoerIdIT(
 
         mockMvc.perform(
             MockMvcRequestBuilders.put("/admin/fagsaker/$saksnummer/endreAktoerId/$nyAktoerid")
-                .header("X-MELOSYS-ADMIN-APIKEY", "dummy")
                 .header("Authorization", "Bearer ${hentBearerToken()}")
         ).andExpect(MockMvcResultMatchers.status().isOk)
 

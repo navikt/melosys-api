@@ -42,6 +42,8 @@ abstract class DegSelvMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -51,6 +53,8 @@ abstract class ArbeidsgiverMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -61,6 +65,8 @@ abstract class AnnenPersonMetadataMixin @JsonCreator constructor(
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -71,6 +77,8 @@ abstract class ArbeidsgiverMedFullmaktMetadataMixin @JsonCreator constructor(
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
 )
@@ -80,6 +88,8 @@ abstract class RadgiverMetadataMixin @JsonCreator constructor(
     @JsonProperty("arbeidsgiverNavn") arbeidsgiverNavn: String?,
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
     @JsonProperty("radgiverfirma") radgiverfirma: RadgiverfirmaInfo?,
@@ -91,6 +101,8 @@ abstract class RadgiverMedFullmaktMetadataMixin @JsonCreator constructor(
     @JsonProperty("juridiskEnhetOrgnr") juridiskEnhetOrgnr: String?,
     @JsonProperty("fullmektigFnr") fullmektigFnr: String?,
     @JsonProperty("arbeidstakerNavn") arbeidstakerNavn: String?,
+    @JsonProperty("erOffentligArbeidsgiver") erOffentligArbeidsgiver: Boolean?,
+    @JsonProperty("antallAnsatte") antallAnsatte: Int?,
     @JsonProperty("kobletSkjemaId") kobletSkjemaId: UUID?,
     @JsonProperty("erstatterSkjemaId") erstatterSkjemaId: UUID?,
     @JsonProperty("radgiverfirma") radgiverfirma: RadgiverfirmaInfo?,
@@ -112,6 +124,7 @@ abstract class UtsendtArbeidstakerSkjemaDtoMixin @JsonCreator constructor(
     @JsonProperty("orgnr") orgnr: String?,
     @JsonProperty("metadata") metadata: UtsendtArbeidstakerMetadata?,
     @JsonProperty("data") data: UtsendtArbeidstakerSkjemaData?,
+    @JsonProperty("skjemaDefinisjonVersjon") skjemaDefinisjonVersjon: String?,
 )
 
 abstract class UtsendtArbeidstakerSkjemaM2MDtoMixin @JsonCreator constructor(

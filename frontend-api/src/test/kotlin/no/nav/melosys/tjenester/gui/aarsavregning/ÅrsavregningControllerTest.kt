@@ -288,7 +288,8 @@ internal class ÅrsavregningControllerTest {
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110,
     "innbetaltTrygdeavgift": null,
-    "manueltAvgiftBeloep": null
+    "manueltAvgiftBeloep": null,
+    "tilbakelagtInnbetaltTrygdeavgift": null
   },
   "harInnbetaltTrygdeavgift": false,
   "endeligAvgiftValg": null,
@@ -591,7 +592,8 @@ internal class ÅrsavregningControllerTest {
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872,
         "innbetaltTrygdeavgift": null,
-        "manueltAvgiftBeloep": null
+        "manueltAvgiftBeloep": null,
+        "tilbakelagtInnbetaltTrygdeavgift": null
     },
     "harInnbetaltTrygdeavgift": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",

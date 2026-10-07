@@ -26,7 +26,6 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.SkjemaSakMappingService
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverensVirksomhetINorgeDto
 import no.nav.melosys.skjema.types.felles.LandKode
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedIUtlandetDto
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsstedType
@@ -526,11 +525,8 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     private fun lagProsessinstansMedOffentligSøknad(): Pair<UtsendtArbeidstakerSkjemaM2MDto, Prosessinstans> {
         val offentligSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
-                arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
-                    erArbeidsgiverenOffentligVirksomhet = true
-                )
-            )
+            erOffentligArbeidsgiver = true
+            data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
         }
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.DIGITAL_SØKNADSDATA, offentligSøknadsdata)

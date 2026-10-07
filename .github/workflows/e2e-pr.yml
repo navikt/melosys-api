@@ -1,0 +1,210 @@
+name: E2E på PR
+
+# Sett labelen `e2e` på en PR for å kjøre hele e2e-suiten mot PR-en flettet inn i
+# master. Er nøyaktig samme kode testet grønt før (markøren e2e-ok-<tree> i GAR),
+# kjører ingenting. For en ny kjøring fjerner du labelen og setter den på nytt.
+# Resultatet kommer som en kommentar i PR-en (jobben rapport), også når PR-en har
+# fått nye commits.
+# Ikke bruk «Re-run jobs»: den gjenbruker den gamle merge-commiten, og en gammel
+# kjøring i samme concurrency-gruppe avbryter den som går.
+# Gaten: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+    branches: [master]
+
+# Bare hendelser for labelen e2e deler gruppe: fjernes e2e, avbrytes kjøringen som
+# går. Andre labeler får hver sin gruppe og avbryter ingenting.
+concurrency:
+  group: e2e-pr-${{ github.event.pull_request.number }}-${{ github.event.label.name == 'e2e' && 'e2e' || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+
+jobs:
+  e2e-marker:
+    name: Slå opp markør
+    # Fork-PR-er har verken secrets eller OIDC.
+    if: >-
+      github.event.action == 'labeled'
+      && github.event.label.name == 'e2e'
+      && github.event.pull_request.state == 'open'
+      && github.event.pull_request.user.login != 'dependabot[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    # Ved timeout blir jobben rød og ingenting kjører; sett labelen på nytt.
+    timeout-minutes: 5
+    outputs:
+      hit: ${{ steps.marker.outputs.hit }}
+      tree: ${{ steps.marker.outputs.tree }}
+    steps:
+      # Feiler innloggingen, feiler også oppslaget, og det regnes som bom.
+      - name: Login to NAIS registry
+        uses: nais/login@v0
+        continue-on-error: true
+        with:
+          team: teammelosys
+
+      # github.sha er merge-commiten (refs/pull/<n>/merge). Payloaden har ikke treet.
+      - name: Finnes e2e-ok-<tree>?
+        id: marker
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          TREE=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA" --jq .commit.tree.sha 2>/dev/null || true)
+          if [[ "$TREE" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "tree=$TREE" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$TREE" =~ ^[0-9a-f]{40}$ ]] && docker manifest inspect "$IMAGE:e2e-ok-$TREE" > /dev/null 2>&1; then
+            hit=true
+          else
+            hit=false
+          fi
+          echo "hit=$hit" >> "$GITHUB_OUTPUT"
+          echo "e2e-marker: hit=$hit (sha $SHA, tree ${TREE:-ukjent})" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Bygg image
+    needs: e2e-marker
+    if: needs.e2e-marker.outputs.hit != 'true'
+    runs-on: ubuntu-latest-8-cores
+    # packages: read fordi Maven henter fra github-package-registry-navikt med
+    # GITHUB_TOKEN (.github/settings.xml), som pull-request.yml.
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PASSWORD: ${{ secrets.READER_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Maven
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.0.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.READER_TOKEN }}
+      # Bare bygg; testene kjører i pull-request.yml («Maven Test»).
+      - name: Build
+        run: mvn clean package --threads=8 -DskipTests -B -e -U --settings .github/settings.xml
+      # Bare <merge-sha>, aldri latest: da ville PR-koden gått til alle andre
+      # repoers e2e-kjøringer. nais/docker-build-push legger i tillegg på en dato-tag.
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        with:
+          team: teammelosys
+          tag: |
+            type=raw,value=${{ github.sha }},priority=9000
+          platforms: linux/amd64
+          salsa: false
+
+  gate:
+    name: E2E
+    needs: [e2e-marker, build]
+    if: needs.e2e-marker.outputs.hit != 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: navikt/melosys-e2e-tests/.github/workflows/e2e-gate.yml@main
+    with:
+      service: melosys-api
+      image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+      tag: ${{ github.sha }}
+    secrets:
+      E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
+
+  # Checken fra denne kjøringen henger på PR-headen da labelen ble satt. Kommer det
+  # en ny commit underveis, viser ikke PR-en checken lenger, så resultatet skrives
+  # også som en kommentar. Avbrutte kjøringer (labelen fjernet) kommenterer ikke.
+  rapport:
+    name: Resultat i PR
+    needs: [e2e-marker, build, gate]
+    if: ${{ !cancelled() && needs.e2e-marker.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Kommenter resultatet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          TESTET_HEAD: ${{ github.event.pull_request.head.sha }}
+          MARKER: ${{ needs.e2e-marker.result }}
+          HIT: ${{ needs.e2e-marker.outputs.hit }}
+          TREE: ${{ needs.gate.outputs.tree || needs.e2e-marker.outputs.tree }}
+          BUILD: ${{ needs.build.result }}
+          GATE: ${{ needs.gate.result }}
+          GATE_HIT: ${{ needs.gate.outputs.hit }}
+          E2E_RUN_ID: ${{ needs.gate.outputs.run_id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          E2E_URL=""
+          if [[ "$E2E_RUN_ID" =~ ^[0-9]+$ ]]; then
+            E2E_URL="https://github.com/navikt/melosys-e2e-tests/actions/runs/$E2E_RUN_ID"
+          fi
+          LENKER="[E2E på PR]($RUN_URL)${E2E_URL:+ · [E2E Tests]($E2E_URL)}"
+          if [ "$HIT" = "true" ]; then
+            TITTEL="✅ E2E: allerede testet grønt"
+            TEKST="Nøyaktig denne koden har bestått e2e før. Ingen ny kjøring."
+          elif [ "$MARKER" != "success" ]; then
+            TITTEL="⚠️ E2E kjørte ikke"
+            TEKST="Oppslaget av markøren endte med \`$MARKER\`. Fjern og sett labelen \`e2e\` på nytt."
+          elif [ "$BUILD" != "success" ]; then
+            TITTEL="❌ E2E kjørte ikke"
+            TEKST="Bygget av imaget endte med \`$BUILD\`."
+          elif [ "$GATE" = "success" ] && [ "$GATE_HIT" = "true" ]; then
+            TITTEL="✅ E2E: allerede testet grønt"
+            TEKST="Nøyaktig denne koden har bestått e2e før. Ingen ny kjøring."
+          elif [ "$GATE" = "success" ]; then
+            TITTEL="✅ E2E grønn"
+            TEKST="Hele e2e-suiten er grønn."
+          else
+            # Gaten kan også feile før E2E Tests startet, så ikke «rød».
+            TITTEL="❌ E2E ikke grønn"
+            TEKST="Gaten endte med \`$GATE\`. Se kjøringen for detaljer."
+          fi
+
+          # Har PR-en fått nye commits siden labelen ble satt, gjelder resultatet
+          # ikke dem. Feiler oppslaget, utelates advarselen.
+          NY_HEAD=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha 2>/dev/null || true)
+          {
+            echo "### $TITTEL"
+            echo ""
+            echo "$TEKST"
+            echo ""
+            echo "Gjelder: \`${TESTET_HEAD:0:7}\` flettet inn i master${TREE:+, tree \`${TREE:0:7}\`}. $LENKER"
+            if [[ "$NY_HEAD" =~ ^[0-9a-f]{40}$ ]] && [ "$NY_HEAD" != "$TESTET_HEAD" ]; then
+              echo ""
+              echo "> [!WARNING]"
+              echo "> PR-en har fått nye commits etter at kjøringen startet (siste: \`${NY_HEAD:0:7}\`). Resultatet gjelder \`${TESTET_HEAD:0:7}\`. Fjern og sett labelen \`e2e\` på nytt for å teste siste commit."
+            fi
+          } > "$RUNNER_TEMP/kommentar.md"
+          cat "$RUNNER_TEMP/kommentar.md" >> "$GITHUB_STEP_SUMMARY"
+
+          # En feil her skal ikke gjøre en grønn e2e-kjøring rød.
+          if ! gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              -F body=@"$RUNNER_TEMP/kommentar.md" --silent 2> "$RUNNER_TEMP/kommentar.err"; then
+            echo "::warning::Klarte ikke kommentere i PR-en: $(tr '\n\r' '  ' < "$RUNNER_TEMP/kommentar.err")"
+          fi

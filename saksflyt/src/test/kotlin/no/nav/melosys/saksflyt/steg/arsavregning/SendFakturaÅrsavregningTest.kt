@@ -239,6 +239,7 @@ class SendFakturaÅrsavregningTest {
             }
             årsavregning {
                 aar = 2023
+                beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat {
                     fakturaserieReferanse = tidligereFakturaserieRef

@@ -1,9 +1,10 @@
 name: Build and Push Image
+run-name: Build and Push Image · ${{ inputs.image_tag }}
 on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Custom image tag (e.g., e2e-test-123, feature-x)'
+        description: 'Custom image tag (e.g., e2e-test-123, feature-x; latest, mq-* and e2e-ok-* are reserved)'
         required: true
         type: string
       skip_tests:
@@ -26,10 +27,33 @@ jobs:
   build:
     name: Build and Push Image
     runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 30
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
       custom_tag: ${{ github.event.inputs.image_tag }}
     steps:
+      - name: Validate image tag
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "::error::Use a valid Docker tag: 1-128 letters, digits, underscores, periods or hyphens, starting with a letter, digit or underscore."
+            exit 1
+          fi
+          # Reserved: latest (the shared default image), mq-* (merge queue images)
+          # and e2e-ok-* (the e2e marker; a manual e2e-ok-<tree> would make e2e skip that code).
+          case "$IMAGE_TAG" in
+            latest | mq-* | e2e-ok-*)
+              echo "::error::The tag $IMAGE_TAG is reserved (latest, mq-* and e2e-ok-*). Use another tag."
+              exit 1
+              ;;
+          esac
+          # A 40-character commit sha is the image of that commit, so only this run's own sha.
+          if [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ && "$IMAGE_TAG" != "$GITHUB_SHA" ]]; then
+            echo "::error::The tag $IMAGE_TAG is the sha of another commit and reserved for its image. Use another tag."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
