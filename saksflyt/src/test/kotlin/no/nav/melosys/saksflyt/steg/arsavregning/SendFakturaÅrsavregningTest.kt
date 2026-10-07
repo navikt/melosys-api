@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -340,6 +341,23 @@ class SendFakturaÅrsavregningTest {
 
         sendOgHentFaktura(behandlingsresultat).run {
             startDato shouldBe LocalDate.of(2025, 7, 1)
+            sluttDato shouldBe LocalDate.of(2025, 12, 31)
+        }
+    }
+
+    @Test
+    fun `sender faktura - bare avslåtte perioder og ingen tidligere perioder for året gir hele året`() {
+        // Ingen periode å hente datoer fra. Faktureringskomponenten krever datoer, og årsavregningen gjelder hele året.
+        val behandlingsresultat = lagÅrsavregning(2025) {
+            medlemskapsperiode {
+                fom = LocalDate.of(2025, 7, 1)
+                tom = LocalDate.of(2025, 12, 31)
+                innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+            }
+        }
+
+        sendOgHentFaktura(behandlingsresultat).run {
+            startDato shouldBe LocalDate.of(2025, 1, 1)
             sluttDato shouldBe LocalDate.of(2025, 12, 31)
         }
     }
