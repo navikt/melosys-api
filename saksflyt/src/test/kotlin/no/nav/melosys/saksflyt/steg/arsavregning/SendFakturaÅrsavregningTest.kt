@@ -363,6 +363,22 @@ class SendFakturaÅrsavregningTest {
     }
 
     @Test
+    fun `sender faktura - medlemskapsperiode over årsskiftet avkortes til årsavregningsåret`() {
+        // Uten trygdeavgiftsperioder (manuelt beløp) brukes medlemskapsperioden, som ikke er delt per år.
+        val behandlingsresultat = lagÅrsavregning(2025) {
+            medlemskapsperiode {
+                fom = LocalDate.of(2024, 7, 1)
+                tom = LocalDate.of(2026, 6, 30)
+            }
+        }
+
+        sendOgHentFaktura(behandlingsresultat).run {
+            startDato shouldBe LocalDate.of(2025, 1, 1)
+            sluttDato shouldBe LocalDate.of(2025, 12, 31)
+        }
+    }
+
+    @Test
     fun `sender faktura - flere trygdeavgiftsperioder i året gir første fra-dato og siste til-dato`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = 100

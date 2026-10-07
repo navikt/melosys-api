@@ -18,6 +18,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
+import org.threeten.extra.LocalDateRange
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -100,10 +101,8 @@ class SendFakturaÅrsavregning(
      */
     private fun finnFakturaperiode(behandlingsresultat: Behandlingsresultat): Pair<LocalDate, LocalDate> {
         val år = behandlingsresultat.hentÅrsavregning().aar
-        val førsteDagIÅret = LocalDate.of(år, 1, 1)
-        val sisteDagIÅret = LocalDate.of(år, 12, 31)
 
-        val perioder = perioderForÅr(behandlingsresultat, år).ifEmpty {
+        val perioder = perioderIÅret(behandlingsresultat, år).ifEmpty {
             // Dersom årsavregningen mangler avgiftspliktige perioder for året.
             // For eksempel hvis en NY_VURDERING har fjernet medlemskapsperioder for hele året.
             val gjeldende = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
@@ -112,20 +111,31 @@ class SendFakturaÅrsavregning(
                 behandlingsresultat.vedtakMetadata?.vedtaksdato
             )
             listOfNotNull(gjeldende?.sisteÅrsavregning, gjeldende?.sisteBehandlingsresultatMedAvgift)
-                .map { perioderForÅr(it, år) }
+                .map { perioderIÅret(it, år) }
                 .firstOrNull { it.isNotEmpty() }
                 .orEmpty()
         }
 
-        return (perioder.minOfOrNull { it.getFom() } ?: førsteDagIÅret) to
-            (perioder.maxOfOrNull { it.getTom() ?: sisteDagIÅret } ?: sisteDagIÅret)
+        val heleÅret = heleÅret(år)
+        return (perioder.minOfOrNull { it.start } ?: heleÅret.start) to
+            (perioder.maxOfOrNull { it.endInclusive } ?: heleÅret.endInclusive)
     }
 
-    /** Trygdeavgiftsperiodene som overlapper året, ellers de innvilgede avgiftspliktige periodene som overlapper året. */
-    private fun perioderForÅr(behandlingsresultat: Behandlingsresultat, år: Int): List<ErPeriode> =
-        behandlingsresultat.trygdeavgiftsperioder
+    /**
+     * Delen av hver periode som ligger i året. Trygdeavgiftsperiodene brukes, ellers de innvilgede avgiftspliktige
+     * periodene. Trygdeavgiftsperiodene er alltid delt per år, men de avgiftspliktige periodene kan gå over
+     * årsskiftet. Derfor avkortes hver periode til året, så fakturaperioden ikke havner utenfor året.
+     */
+    private fun perioderIÅret(behandlingsresultat: Behandlingsresultat, år: Int): List<LocalDateRange> {
+        val perioder: List<ErPeriode> = behandlingsresultat.trygdeavgiftsperioder
             .filter { it.overlapperMedÅr(år) }
             .ifEmpty { behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() && it.overlapperMedÅr(år) } }
+        val heleÅret = heleÅret(år)
+        // overlapperMedÅr over sikrer at snittet ikke er tomt
+        return perioder.map { LocalDateRange.ofClosed(it.fom, it.tom ?: heleÅret.endInclusive).intersection(heleÅret) }
+    }
+
+    private fun heleÅret(år: Int): LocalDateRange = LocalDateRange.ofClosed(LocalDate.of(år, 1, 1), LocalDate.of(år, 12, 31))
 
     companion object {
         private val FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
