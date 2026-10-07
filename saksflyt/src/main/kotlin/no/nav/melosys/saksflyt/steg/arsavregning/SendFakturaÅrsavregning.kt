@@ -18,8 +18,8 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import org.threeten.extra.LocalDateRange
 import org.springframework.stereotype.Component
+import org.threeten.extra.LocalDateRange
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
@@ -69,7 +69,9 @@ class SendFakturaÅrsavregning(
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato = FORMATTER.format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
-        val (startDato, sluttDato) = finnFakturaperiode(behandlingsresultat)
+        val fakturaperiode = finnFakturaperiode(behandlingsresultat)
+        val startDato = fakturaperiode.start
+        val sluttDato = fakturaperiode.endInclusive
         val startDatoFormatert = FORMATTER.format(startDato)
         val sluttDatoFormatert = FORMATTER.format(sluttDato)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
@@ -99,26 +101,31 @@ class SendFakturaÅrsavregning(
      * ingen, fordi året er fjernet av en senere vurdering, brukes perioden som sist ble gjort opp for året: siste
      * årsavregning, ellers siste behandling med trygdeavgift. Uten perioder i saken gjelder fakturaen hele året.
      */
-    private fun finnFakturaperiode(behandlingsresultat: Behandlingsresultat): Pair<LocalDate, LocalDate> {
+    private fun finnFakturaperiode(behandlingsresultat: Behandlingsresultat): LocalDateRange {
         val år = behandlingsresultat.hentÅrsavregning().aar
+        val perioder = perioderIÅret(behandlingsresultat, år)
+            .ifEmpty { perioderFraSisteOppgjørForÅret(behandlingsresultat, år) }
 
-        val perioder = perioderIÅret(behandlingsresultat, år).ifEmpty {
-            // Dersom årsavregningen mangler avgiftspliktige perioder for året.
-            // For eksempel hvis en NY_VURDERING har fjernet medlemskapsperioder for hele året.
-            val gjeldende = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
-                behandlingsresultat.hentBehandling().fagsak.saksnummer,
-                år,
-                behandlingsresultat.vedtakMetadata?.vedtaksdato
-            )
-            listOfNotNull(gjeldende?.sisteÅrsavregning, gjeldende?.sisteBehandlingsresultatMedAvgift)
-                .map { perioderIÅret(it, år) }
-                .firstOrNull { it.isNotEmpty() }
-                .orEmpty()
-        }
+        if (perioder.isEmpty()) return heleÅret(år)
+        return LocalDateRange.ofClosed(perioder.minOf { it.start }, perioder.maxOf { it.endInclusive })
+    }
 
-        val heleÅret = heleÅret(år)
-        return (perioder.minOfOrNull { it.start } ?: heleÅret.start) to
-            (perioder.maxOfOrNull { it.endInclusive } ?: heleÅret.endInclusive)
+    /**
+     * Brukes når årsavregningen mangler perioder for året, f.eks. fordi en NY_VURDERING har fjernet dem.
+     * sisteBehandlingsresultatMedAvgiftspliktigPeriode brukes ikke med vilje: den kan være behandlingen som fjernet
+     * året, og har da bare perioder for andre år.
+     */
+    private fun perioderFraSisteOppgjørForÅret(behandlingsresultat: Behandlingsresultat, år: Int): List<LocalDateRange> {
+        val gjeldende = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
+            år,
+            behandlingsresultat.vedtakMetadata?.vedtaksdato,
+        ) ?: return emptyList()
+
+        return listOfNotNull(gjeldende.sisteÅrsavregning, gjeldende.sisteBehandlingsresultatMedAvgift)
+            .map { perioderIÅret(it, år) }
+            .firstOrNull { it.isNotEmpty() }
+            .orEmpty()
     }
 
     /**
@@ -127,11 +134,12 @@ class SendFakturaÅrsavregning(
      * årsskiftet. Derfor avkortes hver periode til året, så fakturaperioden ikke havner utenfor året.
      */
     private fun perioderIÅret(behandlingsresultat: Behandlingsresultat, år: Int): List<LocalDateRange> {
-        val perioder: List<ErPeriode> = behandlingsresultat.trygdeavgiftsperioder
-            .filter { it.overlapperMedÅr(år) }
-            .ifEmpty { behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() && it.overlapperMedÅr(år) } }
         val heleÅret = heleÅret(år)
-        // overlapperMedÅr over sikrer at snittet ikke er tomt
+        val trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
+        val perioder: List<ErPeriode> = trygdeavgiftsperioder.ifEmpty {
+            behandlingsresultat.finnAvgiftspliktigPerioder().filter { it.erInnvilget() && it.overlapperMedÅr(år) }
+        }
+        // Filteret over sikrer overlapp med året, så intersection kaster ikke
         return perioder.map { LocalDateRange.ofClosed(it.fom, it.tom ?: heleÅret.endInclusive).intersection(heleÅret) }
     }
 
