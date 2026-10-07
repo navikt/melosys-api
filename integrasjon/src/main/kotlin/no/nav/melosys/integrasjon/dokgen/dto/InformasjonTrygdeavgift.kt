@@ -26,7 +26,6 @@ class InformasjonTrygdeavgift(
     val betalingsvalg: Betalingstype,
     val fullmektigTrygdeavgift: String?,
     val avgiftsperioder: List<AvgiftsperiodeEøsPensjonist>,
-    val harAvgiftspliktigePerioderIForegåendeÅr: Boolean,
     val erSkattemessigEmigrert: Boolean,
     val minstebelopVerdi: BigDecimal? = null,
     val minstebelopAar: Int? = null,
