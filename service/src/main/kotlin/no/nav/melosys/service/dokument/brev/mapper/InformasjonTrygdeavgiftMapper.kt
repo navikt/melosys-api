@@ -69,13 +69,6 @@ class InformasjonTrygdeavgiftMapper(
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
-            harAvgiftspliktigePerioderIForegåendeÅr = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-                behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
-                    fom.year < LocalDate.now().year
-                } ?: false
-            } else {
-                false
-            },
             erSkattemessigEmigrert = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any {
                 it.grunnlagSkatteforholdTilNorge?.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG
             },

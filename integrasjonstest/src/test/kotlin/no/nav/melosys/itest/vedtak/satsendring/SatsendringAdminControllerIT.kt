@@ -31,7 +31,6 @@ import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,12 +65,13 @@ class SatsendringAdminControllerIT @Autowired constructor(
     private val satsendringÅr = TrygdeavgiftsberegningMedSatsendring.satsendringÅr
 
     // SatsendringTestBase setter en streng mock av SubjectHandler. AdminTilgangInterceptor leser den,
-    // så testen må svare som et personkall med driftsgruppe. Kjøres etter setupBase() i basen.
+    // så testen må svare som et personkall fra Console med driftsgruppe. Kjøres etter setupBase() i basen.
     @BeforeEach
     fun mockDriftsgruppe() {
         val subjectHandler = SubjectHandler.getInstance()
         every { subjectHandler.oidcTokenString } returns "mock-token"
         every { subjectHandler.tokenIdType } returns null
+        every { subjectHandler.azp } returns AdminControllerTilgangsstyringIT.CONSOLE_KLIENT_ID
         every { subjectHandler.groups } returns listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
     }
 
@@ -110,7 +110,6 @@ class SatsendringAdminControllerIT @Autowired constructor(
 
             mockMvc.perform(
                 MockMvcRequestBuilders.post("/admin/satsendringer/${satsendringÅr}?dryRun=false")
-                    .header(ApiKeyInterceptor.API_KEY_HEADER, "dummy")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
 
