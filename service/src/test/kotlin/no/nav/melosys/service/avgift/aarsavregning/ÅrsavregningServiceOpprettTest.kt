@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift.aarsavregning
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -10,7 +11,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.Årsavregning
@@ -71,6 +71,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling = fagsak.behandlinger[0]
+            vedtakMetadata { }
 
             medlemskapsperiode("2023-01-01", "2023-12-31")
         }
@@ -579,18 +580,237 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         nyÅrsavregningBehandlingsresultat.helseutgiftDekkesPerioder.size shouldBe 0
         nyÅrsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().run {
             tidligereBehandlingsresultat shouldBe nyVurderingKun2026
-            tidligereFakturertBeloep shouldNotBe null
             beregnetAvgiftBelop shouldBe BigDecimal.ZERO
-            // Full kreditering: 0 - tidligereFakturert - innbetalt
-            tilFaktureringBeloep shouldBe BigDecimal.ZERO
-                .subtract(tidligereFakturertBeloep)
-                .subtract(BigDecimal("5000"))
+            // Full kreditering: 0 - 60000 (12 måneder à 5000) - 5000 innbetalt + 5000 lagt tilbake fra forrige årsavregning
+            tidligereFakturertBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("60000")
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("-60000")
             manueltAvgiftBeloep shouldBe null
         }
     }
 
     @Test
-    fun `opprettÅrsavregning - år fjernet av ny vurdering overstyrer manuelt beløp og valg arvet fra tidligere årsavregning`() {
+    fun `opprettÅrsavregning - år fjernet av ny vurdering overstyrer manuelt beløp og valg, og krediterer det sist fastsatte`() {
+        val (nyÅrsavregning, nyVurdering) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = false)
+
+        nyÅrsavregning.medlemskapsperioder.shouldHaveSize(0)
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            tidligereBehandlingsresultat shouldBe nyVurdering
+            tidligereFakturertBeloep shouldBe BigDecimal("7000")
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+            manueltAvgiftBeloep shouldBe null
+            endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            beregnetAvgiftBelop shouldBe BigDecimal.ZERO
+            // 0 - 7000 - 300 + 300: innbetalingen inngår i de 7000 og trekkes ikke fra en gang til
+            tilFaktureringBeloep shouldBe BigDecimal("-7000")
+
+            årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+                .tilbakelagtInnbetaltTrygdeavgift shouldBe BigDecimal("300")
+
+            // Saksbehandler finner at det er betalt 500 totalt i Avgiftssystemet: bare de 200 nye krediteres i tillegg
+            innbetaltTrygdeavgift = BigDecimal("500")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+            tilFaktureringBeloep shouldBe BigDecimal("-7200")
+        }
+    }
+
+    @Test
+    fun `opprettÅrsavregning - ny årsavregning som arver manuelt beløp har beløp til fakturering med en gang`() {
+        // Forrige årsavregning: manuelt 7000, 300 innbetalt i Avgiftssystemet (allerede trukket fra i de 7000).
+        // Ny årsavregning arver manuelt beløp 7000 og innbetalt 300:
+        // 7000 − 7000 − 300 + 300 (lagt tilbake, ellers trukket fra to ganger) = 0
+        val arvetManueltBeløp = BigDecimal("7000")
+        val innbetaltIAvgiftssystemet = BigDecimal("300")
+
+        val (nyÅrsavregning, _) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = true)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            manueltAvgiftBeloep shouldBe arvetManueltBeløp
+            tidligereFakturertBeloep shouldBe arvetManueltBeløp
+            innbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal.ZERO
+        }
+        årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+            .tilbakelagtInnbetaltTrygdeavgift shouldBe innbetaltIAvgiftssystemet
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep - ny vurdering mellom årsavregningene trekker ikke arvet innbetalt fra to ganger`() {
+        val (nyÅrsavregning, nyVurdering) = opprettÅrsavregningEtterNyVurdering(nyVurderingDekkerÅret = true)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            tidligereBehandlingsresultat shouldBe nyVurdering
+            tidligereFakturertBeloep shouldBe BigDecimal("7000")
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+
+            // Året er ikke fjernet, så manuelt beløp arves. Saksbehandler bytter til beregning.
+            manueltAvgiftBeloep shouldBe BigDecimal("7000")
+            manueltAvgiftBeloep = null
+            beregnetAvgiftBelop = BigDecimal("6000")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            // 6000 - 7000 - 300 + 300. Før ble ingenting lagt tilbake, fordi tidligere behandling var vurderingen: -1300
+            tilFaktureringBeloep shouldBe BigDecimal("-1000")
+        }
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep - EØS pensjonist legger tilbake innbetalt fra forrige årsavregning`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.TRYGDEAVGIFT
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                tema = Behandlingstema.PENSJONIST
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                tema = Behandlingstema.PENSJONIST
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+        // Forrige årsavregning har helseutgiftsperiode, ikke medlemskapsperiode
+        val forrigeÅrsavregning = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2024, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+            helseutgiftDekkesPeriode("2023-01-01", "2023-12-31")
+            årsavregning {
+                id = 10
+                aar = 2023
+                harInnbetaltTrygdeavgift = true
+                innbetaltTrygdeavgift = BigDecimal("300")
+            }
+        }
+        val nyÅrsavregning = Behandlingsresultat.forTest {
+            id = 2L
+            behandling = fagsak.behandlinger[1]
+            årsavregning {
+                id = 20
+                aar = 2023
+                harInnbetaltTrygdeavgift = true
+                innbetaltTrygdeavgift = BigDecimal("300")
+                tidligereFakturertBeloep = BigDecimal("1000")
+                beregnetAvgiftBelop = BigDecimal("800")
+            }
+        }
+        val etterId = mapOf(1L to forrigeÅrsavregning, 2L to nyÅrsavregning)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers { etterId.getValue(firstArg()) }
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            // 800 - 1000 - 300 + 300
+            tilFaktureringBeloep shouldBe BigDecimal("-200")
+        }
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep - tidligere fakturert fra ny vurdering med avgift legger ikke tilbake innbetalt`() {
+        val (nyÅrsavregning, nyVurdering) = opprettÅrsavregningEtterNyVurdering(
+            nyVurderingDekkerÅret = true,
+            tidligereManuelt = null,
+            nyVurderingMedTrygdeavgift = true,
+        )
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            tidligereBehandlingsresultat shouldBe nyVurdering
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+            // Tidligere fakturert er det vurderingen fakturerte, som ikke inneholder innbetalingen i Avgiftssystemet
+            val tidligereFakturert = tidligereFakturertBeloep.shouldNotBeNull()
+
+            beregnetAvgiftBelop = BigDecimal("6000")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            årsavregningService.finnÅrsavregningForBehandling(3).shouldNotBeNull()
+                .tilbakelagtInnbetaltTrygdeavgift shouldBe null
+
+            // 6000 - tidligere fakturert - 300, uten tilbakelegging
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo
+                BigDecimal("6000") - tidligereFakturert - BigDecimal("300")
+        }
+    }
+
+    @Test
+    fun `opprettÅrsavregning - tidligere fakturert fra forrige årsavregnings perioder legger tilbake innbetalt`() {
+        val fagsak = Fagsak.forTest {
+            saksnummer = "123456"
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandling {
+                id = 1L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            behandling {
+                id = 2L
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+            }
+        }
+        // Forrige årsavregning er siste behandling med avgift for året, så tidligere fakturert hentes derfra
+        val forrigeÅrsavregning = Behandlingsresultat.forTest {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            behandling = fagsak.behandlinger[0]
+            medlemskapsperiode("2024-01-01", "2024-12-31")
+            årsavregning {
+                id = 10
+                aar = 2024
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET_MED_PERIODE_FRA_AVGIFTSSYSTEMET
+                harInnbetaltTrygdeavgift = true
+                innbetaltTrygdeavgift = BigDecimal("300")
+            }
+        }
+        val nyÅrsavregning = Behandlingsresultat.forTest {
+            id = 2L
+            behandling = fagsak.behandlinger[1]
+        }
+        val etterId = mapOf(1L to forrigeÅrsavregning, 2L to nyÅrsavregning)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers { etterId.getValue(firstArg()) }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers { etterId.getValue(firstArg()) }
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2024) } returns 0
+        every { behandlingsresultatService.lagre(any()) } answers { firstArg() }
+
+        årsavregningService.opprettÅrsavregning(2, 2024)
+
+        nyÅrsavregning.årsavregning.shouldNotBeNull().run {
+            innbetaltTrygdeavgift shouldBe BigDecimal("300")
+            // 12 måneder à 5000 fra forrige årsavregnings trygdeavgiftsperiode
+            tidligereFakturertBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("60000")
+
+            beregnetAvgiftBelop = BigDecimal("6000")
+            årsavregningService.beregnTilFaktureringsBeloep(this)
+
+            // Innbetalingen inngår i tidligere fakturert, så den legges tilbake: 6000 - 60000 - 300 + 300
+            tilFaktureringBeloep.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("-54000")
+        }
+        årsavregningService.finnÅrsavregningForBehandling(2).shouldNotBeNull()
+            .tilbakelagtInnbetaltTrygdeavgift.shouldNotBeNull() shouldBeEqualComparingTo BigDecimal("300")
+    }
+
+    /**
+     * Årsavregning for 2025 med 300 innbetalt i Avgiftssystemet, fastsatt manuelt til [tidligereManuelt] (eller beregnet
+     * når null), deretter en ny vurdering, deretter ny årsavregning for 2025. Den nye vurderingen blir «tidligere
+     * behandling». Med [nyVurderingMedTrygdeavgift] har vurderingen egne avgiftsperioder for året, og tidligere
+     * fakturert hentes da fra den i stedet for fra årsavregningen.
+     */
+    private fun opprettÅrsavregningEtterNyVurdering(
+        nyVurderingDekkerÅret: Boolean,
+        tidligereManuelt: BigDecimal? = BigDecimal("7000"),
+        nyVurderingMedTrygdeavgift: Boolean = false,
+    ): Pair<Behandlingsresultat, Behandlingsresultat> {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
             behandling {
@@ -614,15 +834,16 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tema = Sakstemaer.UNNTAK
         }
 
-        // Tidligere årsavregning for 2025 ble fastsatt manuelt til 7000
         val tidligereÅrsavregningsresultat = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             årsavregning {
                 id = 112
                 aar = 2025
-                manueltAvgiftBeloep = BigDecimal("7000")
-                endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
+                harInnbetaltTrygdeavgift = true
+                innbetaltTrygdeavgift = BigDecimal("300")
+                manueltAvgiftBeloep = tidligereManuelt
+                endeligAvgiftValg = if (tidligereManuelt != null) EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT else EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             }
             registrertDato = LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             vedtakMetadata {
@@ -633,7 +854,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             medlemskapsperiode("2025-01-01", "2025-12-31")
         }
 
-        val nyVurderingKun2026 = Behandlingsresultat.forTest {
+        val nyVurdering = Behandlingsresultat.forTest {
             id = 2L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             registrertDato = LocalDate.of(2025, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -642,31 +863,22 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             }
             behandling = fagsak.behandlinger[1]
 
-            medlemskapsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
+            if (nyVurderingDekkerÅret) {
+                medlemskapsperiode("2025-01-01", "2026-12-31", medTrygdeavgift = nyVurderingMedTrygdeavgift)
+            } else {
+                medlemskapsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
+            }
         }
 
-        val nyÅrsavregningBehandlingsresultat = Behandlingsresultat.forTest {
+        val nyÅrsavregning = Behandlingsresultat.forTest {
             id = 3L
             registrertDato = LocalDate.of(2025, 7, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling = fagsak.behandlinger[2]
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
-            when (firstArg<Long>()) {
-                1L -> tidligereÅrsavregningsresultat
-                2L -> nyVurderingKun2026
-                3L -> nyÅrsavregningBehandlingsresultat
-                else -> null
-            }.shouldNotBeNull()
-        }
-        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers {
-            when (firstArg<Long>()) {
-                1L -> tidligereÅrsavregningsresultat
-                2L -> nyVurderingKun2026
-                3L -> nyÅrsavregningBehandlingsresultat
-                else -> null
-            }.shouldNotBeNull()
-        }
+        val etterId = mapOf(1L to tidligereÅrsavregningsresultat, 2L to nyVurdering, 3L to nyÅrsavregning)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers { etterId.getValue(firstArg()) }
+        every { behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(any()) } answers { etterId.getValue(firstArg()) }
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(3, 2025) } returns 0
         every { behandlingsresultatService.lagre(any()) } answers {
@@ -675,16 +887,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
         årsavregningService.opprettÅrsavregning(3, 2025)
 
-        nyÅrsavregningBehandlingsresultat.medlemskapsperioder.shouldHaveSize(0)
-        nyÅrsavregningBehandlingsresultat.årsavregning.shouldNotBeNull().run {
-            tidligereBehandlingsresultat shouldBe nyVurderingKun2026
-            // Det som ble fastsatt manuelt sist er det som skal krediteres
-            tidligereFakturertBeloep shouldBe BigDecimal("7000")
-            manueltAvgiftBeloep shouldBe null
-            endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-            beregnetAvgiftBelop shouldBe BigDecimal.ZERO
-            tilFaktureringBeloep shouldBe BigDecimal("-7000")
-        }
+        return nyÅrsavregning to nyVurdering
     }
 
     @Test
