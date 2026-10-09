@@ -46,7 +46,8 @@ class InnvilgelseYrkesaktivPliktigFtrl(
     val minstebelopVerdi: BigDecimal? = null,
     val minstebelopAar: Int? = null,
     val harMinstebelopPeriode: Boolean = false,
-    val har25ProsentRegelPeriode: Boolean = false
+    val har25ProsentRegelPeriode: Boolean = false,
+    val harKunMedlemskapsperioderIForegåendeÅr: Boolean = false
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -76,7 +77,8 @@ class InnvilgelseYrkesaktivPliktigFtrl(
         minstebelopVerdi: BigDecimal? = null,
         minstebelopAar: Int? = null,
         harMinstebelopPeriode: Boolean = false,
-        har25ProsentRegelPeriode: Boolean = false
+        har25ProsentRegelPeriode: Boolean = false,
+        harKunMedlemskapsperioderIForegåendeÅr: Boolean = false
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -105,6 +107,7 @@ class InnvilgelseYrkesaktivPliktigFtrl(
         minstebelopVerdi,
         minstebelopAar,
         harMinstebelopPeriode,
-        har25ProsentRegelPeriode
+        har25ProsentRegelPeriode,
+        harKunMedlemskapsperioderIForegåendeÅr
     )
 }

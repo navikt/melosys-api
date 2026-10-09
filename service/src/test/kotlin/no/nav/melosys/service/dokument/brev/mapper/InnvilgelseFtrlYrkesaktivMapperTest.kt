@@ -217,6 +217,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             betalerArbeidsgiveravgift.shouldBeTrue()
             ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
             harMedlemskapsperioderIForegåendeÅr.shouldBeTrue()
+            harKunMedlemskapsperioderIForegåendeÅr.shouldBeFalse()
         }
     }
 

@@ -119,6 +119,7 @@ class InnvilgelseFtrlMapper(
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
             betalingsvalg = hentBetalingsvalg(behandling),
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
+            harKunMedlemskapsperioderIForegåendeÅr = utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
@@ -169,6 +170,7 @@ class InnvilgelseFtrlMapper(
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
+            harKunMedlemskapsperioderIForegåendeÅr = utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
@@ -176,10 +178,26 @@ class InnvilgelseFtrlMapper(
         )
     }
 
+    /**
+     * Sann når noe av medlemskapet ligger i et tidligere kalenderår (tidligste fom er før inneværende år).
+     */
     private fun utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat: Behandlingsresultat): Boolean {
         return if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             behandlingsresultat.utledAvgiftspliktigperioderFom()?.let { fom ->
                 fom.year < LocalDate.now().year
+            } ?: false
+        } else {
+            false
+        }
+    }
+
+    /**
+     * Sann når hele medlemskapet ligger i tidligere kalenderår (seneste tom er før inneværende år).
+     */
+    private fun utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat: Behandlingsresultat): Boolean {
+        return if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            behandlingsresultat.utledAvgiftspliktigperioderTom()?.year?.let { tomÅr ->
+                tomÅr < LocalDate.now().year
             } ?: false
         } else {
             false
@@ -271,6 +289,7 @@ class InnvilgelseFtrlMapper(
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             harMedlemskapsperioderIForegåendeÅr = utledHarMedlemskaperioderIForegåendeÅr(behandlingsresultat),
+            harKunMedlemskapsperioderIForegåendeÅr = utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
@@ -458,4 +477,3 @@ class InnvilgelseFtrlMapper(
     private fun Collection<Trygdeavgiftsperiode>.harPeriodeMedBeregningsregel(regel: Avgiftsberegningsregel): Boolean =
         any { it.beregningsregel == regel }
 }
-
