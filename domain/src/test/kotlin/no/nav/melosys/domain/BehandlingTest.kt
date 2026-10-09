@@ -3,10 +3,13 @@ package no.nav.melosys.domain
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 
 internal class BehandlingTest {
@@ -204,5 +207,40 @@ internal class BehandlingTest {
                 SaksopplysningType.PERSHIST
             )
         ).shouldBe(true)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "EU_EOS, IKKE_YRKESAKTIV, true",
+        "TRYGDEAVTALE, IKKE_YRKESAKTIV, true",
+        "FTRL, IKKE_YRKESAKTIV, false",
+        "EU_EOS, UTSENDT_ARBEIDSTAKER, false",
+        "TRYGDEAVTALE, YRKESAKTIV, false",
+    )
+    fun `harIkkeYrkesaktivFlyt og erIkkeYrkesaktivVedtak gjelder kun EØS og trygdeavtale med tema IKKE_YRKESAKTIV`(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema,
+        forventet: Boolean
+    ) {
+        val behandling = Behandling.forTest {
+            tema = behandlingstema
+            fagsak { type = sakstype }
+        }
+
+        Behandling.harIkkeYrkesaktivFlyt(sakstype, behandlingstema) shouldBe forventet
+        behandling.harIkkeYrkesaktivFlyt() shouldBe forventet
+        behandling.erIkkeYrkesaktivVedtak() shouldBe forventet
+    }
+
+    @Test
+    fun `erIkkeYrkesaktivVedtak er false for årsavregning med tema IKKE_YRKESAKTIV`() {
+        val årsavregning = Behandling.forTest {
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            fagsak { type = Sakstyper.EU_EOS }
+        }
+
+        årsavregning.harIkkeYrkesaktivFlyt() shouldBe true
+        årsavregning.erIkkeYrkesaktivVedtak() shouldBe false
     }
 }

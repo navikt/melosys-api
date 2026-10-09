@@ -128,12 +128,12 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
     fun harIkkeYrkesaktivFlyt(
         behandling: Behandling
-    ) = harIkkeYrkesaktivFlyt(behandling.fagsak.type, behandling.tema)
+    ) = behandling.harIkkeYrkesaktivFlyt()
 
     fun harIkkeYrkesaktivFlyt(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
-    ) = (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
+    ) = Behandling.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
 
     fun harPensjonistUføretrygdetFlyt(
         behandling: Behandling

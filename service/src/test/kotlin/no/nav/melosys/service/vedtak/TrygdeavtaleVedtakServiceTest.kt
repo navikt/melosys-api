@@ -4,12 +4,14 @@ import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -48,6 +50,7 @@ import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavtaleVedtakServiceTest {
@@ -404,6 +407,33 @@ class TrygdeavtaleVedtakServiceTest {
             standardvedleggType shouldBe null
         }
         brevbestillingDto.kopiMottakere shouldHaveSize 0
+    }
+
+    @Test
+    fun `fattVedtak - ikke-yrkesaktiv - lagrer vedtaksmetadata med klagefrist på 6 uker`() {
+        val behandling = lagBehandling()
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns true
+
+        trygdeavtaleVedtakService.fattVedtak(behandling, lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode))
+
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe ENDRINGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(6)
+            vedtaksdato.shouldNotBeNull()
+        }
+        behandlingsresultat.run {
+            fastsattAvLand shouldBe Land_iso2.NO
+            begrunnelseFritekst.shouldBeNull()
+            nyVurderingBakgrunn.shouldBeNull()
+        }
+        verifyOrder {
+            behandlingsresultatService.lagre(behandlingsresultat)
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling)
+        }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any()) }
+        verify(exactly = 0) { dokgenService.produserOgDistribuerBrev(any<Long>(), any()) }
     }
 
     private fun lagFattVedtakRequest(vedtakstype: Vedtakstyper, nyVurderingBakgrunn: String?) =

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.LoggingTestUtils.withLogAppender
 import org.junit.jupiter.api.Test
@@ -867,5 +868,94 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
             sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe vedtakUtenAvgift
             sisteBehandlingsresultatMedAvgift shouldBe null
         }
+    }
+
+    @Test
+    fun `ser bort fra nyere vedtak for ikke-yrkesaktiv, og logger antallet som hoppes over`() {
+        val yrkesaktivtVedtak = lagYrkesaktivtVedtak2025()
+        val aktivFagsak = yrkesaktivtVedtak.hentBehandling().fagsak
+
+        val ikkeYrkesaktivtVedtak = lagTidligereBehandlingsresultat {
+            id = 2
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandling {
+                id = 2
+                tema = Behandlingstema.IKKE_YRKESAKTIV
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            registrertDato = LocalDate.of(2026, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2026, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            lovvalgsperiode("2026-01-01", "2026-12-31", medTrygdeavgift = false)
+        }
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns yrkesaktivtVedtak
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns ikkeYrkesaktivtVedtak
+
+        withLogAppender<ÅrsavregningService> { logger ->
+            with(årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2025).shouldNotBeNull()) {
+                sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe yrkesaktivtVedtak
+            }
+
+            logger.list.filter { it.level == Level.INFO }.map { it.formattedMessage } shouldContain
+                "Hopper over 1 vedtak for ikke-yrkesaktiv i sak 123456 ved oppslag for årsavregning"
+        }
+    }
+
+    @Test
+    fun `årsavregning med tema ikke-yrkesaktiv er fortsatt siste årsavregning`() {
+        val yrkesaktivtVedtak = lagYrkesaktivtVedtak2025()
+        val aktivFagsak = yrkesaktivtVedtak.hentBehandling().fagsak
+
+        val årsavregningIkkeYrkesaktiv = lagTidligereBehandlingsresultat {
+            id = 2
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            behandling {
+                id = 2
+                type = Behandlingstyper.ÅRSAVREGNING
+                tema = Behandlingstema.IKKE_YRKESAKTIV
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            registrertDato = LocalDate.of(2026, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2026, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            årsavregning {
+                aar = 2025
+            }
+            lovvalgsperiode("2025-01-01", "2025-12-31")
+        }
+
+        every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1) } returns yrkesaktivtVedtak
+        every { behandlingsresultatService.hentBehandlingsresultat(2) } returns årsavregningIkkeYrkesaktiv
+
+        årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2025)
+            .shouldNotBeNull()
+            .sisteÅrsavregning shouldBe årsavregningIkkeYrkesaktiv
+    }
+
+    private fun lagYrkesaktivtVedtak2025() = lagTidligereBehandlingsresultat {
+        id = 1
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandling {
+            id = 1
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak {
+                saksnummer = "123456"
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+        registrertDato = LocalDate.of(2025, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        vedtakMetadata {
+            vedtaksdato = LocalDate.of(2025, 2, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+        }
+        lovvalgsperiode("2025-01-01", "2025-12-31")
     }
 }

@@ -6,9 +6,13 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.VURDER_DOKUMENT
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -207,5 +211,63 @@ internal class FaktureringEventListenerTest {
         )
 
         verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
+    }
+
+    @Test
+    fun `Oppdater fakturamottaker når vedtak for ikke-yrkesaktiv avsluttes, siden det ikke fakturerer`() {
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.FØRSTEGANG)
+
+        faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
+
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) }
+    }
+
+    @Test
+    fun `Ikke oppdater fakturamottaker når vedtatt årsavregning med tema ikke-yrkesaktiv avsluttes`() {
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.ÅRSAVREGNING)
+
+        faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
+
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansOppdaterFaktura(any()) }
+    }
+
+    private fun lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(behandlingstype: Behandlingstyper): Behandling {
+        val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+        val desember2 = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
+
+        val nåværendeFullmektigAvgift = lagFullmektigMedTrygdeavgiftFullmakt(orgnr = "888888888", registrertDato = desember1)
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.EU_EOS
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            aktører(nåværendeFullmektigAvgift)
+        }
+        val avsluttetBehandling = Behandling.forTest {
+            id = 1
+            type = behandlingstype
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            status = AVSLUTTET
+            registrertDato = Instant.EPOCH
+            this.fagsak = fagsak
+        }
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling = avsluttetBehandling
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+            }
+        }
+        val historiskFullmektig = lagFullmektigMedTrygdeavgiftFullmakt(
+            orgnr = "999999999",
+            registrertDato = desember1,
+            endretDato = desember2
+        )
+
+        every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
+        every {
+            aktoerHistorikkService.hentHistoriskeAktørerPåTidspunkt(fagsak, Aktoersroller.FULLMEKTIG, avsluttetBehandling.registrertDato)
+        } returns listOf(historiskFullmektig)
+        every { trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(fagsak.saksnummer, true) } returns true
+        every { prosessinstansService.opprettProsessinstansOppdaterFaktura(avsluttetBehandling) } just runs
+        return avsluttetBehandling
     }
 }

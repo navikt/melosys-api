@@ -473,6 +473,7 @@ class ÅrsavregningService(
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
      * Behandlinger uten vedtak i Melosys (uten vedtaksmetadata) tas ikke med.
+     * Vedtak i EØS og trygdeavtale med tema IKKE_YRKESAKTIV tas heller ikke med, men årsavregninger med det temaet gjør det.
      *
      * For å finne gjeldende avgiftspliktig periode brukes den nyeste behandlingen med avgiftspliktige perioder,
      * uavhengig av om periodene overlapper med det aktuelle året. Dette sikrer at en ny vurdering som fjerner
@@ -506,7 +507,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .kunBehandlingerMedVedtak(saksnummer)
+            .kunVedtakSomKanÅrsavregnes(saksnummer)
             .filter { førVedtaksdato == null || vedtaksdato(it)?.isBefore(førVedtaksdato) == true }
             .sortedWith(eldsteVedtakFørst)
 
@@ -547,12 +548,17 @@ class ÅrsavregningService(
     }
 
     // En behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke årsavregnes.
-    private fun List<Behandlingsresultat>.kunBehandlingerMedVedtak(saksnummer: String): List<Behandlingsresultat> {
+    // Ikke-yrkesaktive vedtak i EØS og trygdeavtale fastsetter ikke trygdeavgift og skal heller ikke årsavregnes.
+    private fun List<Behandlingsresultat>.kunVedtakSomKanÅrsavregnes(saksnummer: String): List<Behandlingsresultat> {
         val (medVedtak, utenVedtak) = partition { it.harVedtak() }
         if (utenVedtak.isNotEmpty()) {
             log.info { "Hopper over ${utenVedtak.size} behandling(er) uten vedtak i sak $saksnummer ved oppslag for årsavregning" }
         }
-        return medVedtak
+        val (ikkeYrkesaktive, øvrige) = medVedtak.partition { it.hentBehandling().erIkkeYrkesaktivVedtak() }
+        if (ikkeYrkesaktive.isNotEmpty()) {
+            log.info { "Hopper over ${ikkeYrkesaktive.size} vedtak for ikke-yrkesaktiv i sak $saksnummer ved oppslag for årsavregning" }
+        }
+        return øvrige
     }
 
     // En avsluttet behandling kan mangle vedtak, f.eks. når den er avsluttet fra behandlingsmenyen.
