@@ -237,7 +237,7 @@ internal class LovvalgsperiodeServiceTest {
         eksisterendeLovvalgsperiode.behandlingsresultat = behandlingsresultat
         behandlingsresultat.lovvalgsperioder.add(eksisterendeLovvalgsperiode)
 
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepository.findForUpdateById(BEH_ID) } returns Optional.of(behandlingsresultat)
     }
 
     @Test
