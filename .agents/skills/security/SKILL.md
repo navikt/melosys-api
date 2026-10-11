@@ -238,35 +238,27 @@ class MyIT {
 
 ## Admin Endpoints Security
 
-Admin endpoints are `@Protected` (token-support) controllers, additionally gated by
-`ApiKeyInterceptor` (`frontend-api/.../tjenester/gui/config/ApiKeyInterceptor.kt`).
+Admin endpoints under `/admin/**` are `@Protected` (token-support) controllers, additionally gated by
+`AdminTilgangInterceptor` (`frontend-api/.../tjenester/gui/config/AdminTilgangInterceptor.kt`).
+There is no shared admin API key anymore (MELOSYS-8271); the `X-MELOSYS-ADMIN-APIKEY` header is ignored.
 
-### API Key Validation
+### Access rules
 
-`ApiKeyInterceptor` compares the request header `X-MELOSYS-ADMIN-APIKEY` (constant `API_KEY_HEADER`)
-against the configured `Melosys-admin.apikey` value and returns HTTP 403 on mismatch.
-In nais the key comes from the `MELOSYS_ADMIN_API_KEY` env var (`application-nais.yml`:
-`apikey: ${MELOSYS_ADMIN_API_KEY}`).
+- No valid `aad` token: the interceptor lets the request through and `@Protected` returns 401.
+- The token's `azp` must be one of `Melosys-admin.console-klient-id` (melosys-console's client ID).
+  Otherwise 403. In nais the value comes from `MELOSYS_CONSOLE_CLIENT_ID` (`nais/vars-*.json`).
+- User calls (OBO) also require the ops group `Melosys-admin.driftsgruppe` in the `groups` claim.
+  Otherwise 403.
+- Machine calls (`idtyp = app`) from melosys-console may call all admin endpoints.
 
-```kotlin
-@Component
-class ApiKeyInterceptor(
-    @Value("\${Melosys-admin.apikey}") private val apiKey: String
-) : HandlerInterceptor {
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        if (request.getHeader(API_KEY_HEADER) != apiKey) {
-            response.status = 403
-            response.writer.write("Invalid API key")
-            return false
-        }
-        return true
-    }
+`RestControllerInterceptor` marks requests under `/admin/` as admin requests, so downstream calls
+use the system token (`ThreadLocalAccessInfo.shouldUseSystemToken()`).
 
-    companion object {
-        const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
-    }
-}
-```
+`/api/admin/**` endpoints in `no.nav.melosys.tjenester.gui` (e.g. `TekstblokkAdminController`) are not
+covered by the interceptor; they only have `@Protected`.
+
+In `local-mock` the client IDs are the `azp` values of the local mock tokens
+(`melosys-api` for melosys-console, `melosys-localhost` for the e2e token).
 
 ## Error Handling
 

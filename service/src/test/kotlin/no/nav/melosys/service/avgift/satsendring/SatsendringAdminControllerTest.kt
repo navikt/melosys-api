@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.*
 
-@WebMvcTest(controllers = [SatsendringAdminController::class], properties = ["Melosys-admin.apikey=Dummy"])
+@WebMvcTest(controllers = [SatsendringAdminController::class])
 class SatsendringAdminControllerTest {
 
     @Autowired

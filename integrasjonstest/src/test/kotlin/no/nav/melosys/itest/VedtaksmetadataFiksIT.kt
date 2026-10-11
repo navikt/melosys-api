@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.melosys.Application
 import no.nav.melosys.service.avgift.aarsavregning.skattepliktig.VedtaksmetadataFiksService.Companion.PATCH_MARKØR
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -213,7 +214,6 @@ class VedtaksmetadataFiksIT(
 
         mockMvc.perform(
             post(angreUrl)
-                .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
         )
             .andExpect(status().isOk)
@@ -459,19 +459,18 @@ class VedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `endepunktene krever både admin-API-nøkkel og bearer token`() {
+    fun `endepunktene krever bearer token med driftsgruppe`() {
         // AdminControllerTilgangsstyringIT dekker kun GET; disse er POST
         listOf(fiksUrl, angreUrl).forEach { url ->
             mockMvc.perform(
                 post(url)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = emptyList())}")
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isForbidden)
 
             mockMvc.perform(
                 post(url)
-                    .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content("""{"saksnummer":["MEL-950"]}""")
             ).andExpect(status().isUnauthorized)
@@ -663,21 +662,26 @@ class VedtaksmetadataFiksIT(
 
     private fun kall(url: String, body: String) = mockMvc.perform(
         post(url)
-            .header(AdminControllerTilgangsstyringIT.API_KEY_HEADER, AdminControllerTilgangsstyringIT.GYLDIG_API_NOKKEL)
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(body)
     )
 
-    private fun hentBearerToken(): String = mockOAuth2Server.issueToken(
-        issuerId = "issuer1",
-        subject = "testbruker",
-        audience = "dumbdumb",
-        claims = mapOf(
-            "oid" to "test-oid",
-            "azp" to "test-azp",
-            "NAVident" to "test123",
-            "groups" to listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+    // mock-oauth2-server setter azp fra clientId, ikke fra claims
+    private fun hentBearerToken(
+        grupper: List<String> = listOf(AdminControllerTilgangsstyringIT.DRIFTSGRUPPE_ID)
+    ): String = mockOAuth2Server.issueToken(
+        "issuer1",
+        AdminControllerTilgangsstyringIT.CONSOLE_KLIENT_ID,
+        DefaultOAuth2TokenCallback(
+            issuerId = "issuer1",
+            subject = "testbruker",
+            audience = listOf("dumbdumb"),
+            claims = mapOf(
+                "oid" to "test-oid",
+                "NAVident" to "test123",
+                "groups" to grupper
+            )
         )
     ).serialize()
 

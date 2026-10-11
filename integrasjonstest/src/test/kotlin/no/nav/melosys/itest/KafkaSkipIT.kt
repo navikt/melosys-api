@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
 import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler.Failed
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer
-import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -123,7 +122,6 @@ class KafkaSkipIT(
                 MockMvcRequestBuilders.delete("/admin/kafka/errors/$errorKey")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(ApiKeyInterceptor.API_KEY_HEADER, "Dummy")
             ).andExpect(status().isOk)
 
             // Wait until the failed message list is cleared
@@ -152,7 +150,6 @@ class KafkaSkipIT(
             MockMvcRequestBuilders.get("/admin/kafka/errors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .header(ApiKeyInterceptor.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
             .andReturn()
 
@@ -165,7 +162,6 @@ class KafkaSkipIT(
                 MockMvcRequestBuilders.delete("/admin/kafka/errors/$errorKey")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(ApiKeyInterceptor.API_KEY_HEADER, "Dummy")
             ).andExpect(status().isOk)
                 .andReturn()
             await.atMost(5, TimeUnit.SECONDS).until {

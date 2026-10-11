@@ -3,10 +3,14 @@ package no.nav.melosys.repository;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import no.nav.melosys.domain.Behandlingsresultat;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 
 public interface BehandlingsresultatRepository extends JpaRepository<Behandlingsresultat, Long> {
     @EntityGraph(attributePaths = {"avklartefakta"}, type = EntityGraph.EntityGraphType.LOAD)
@@ -20,6 +24,17 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
 
     @EntityGraph(attributePaths = {"helseutgiftDekkesPerioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithHelseutgiftDekkesPerioderById(Long behandlingID);
+
+    /**
+     * SELECT ... FOR UPDATE WAIT 10: andre transaksjoner som henter samme behandlingsresultat med lås, venter til denne
+     * er ferdig, men høyst 10 sekunder. flushMode COMMIT: spørringen flusher ikke først, slik findById heller ikke gjør.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+        @QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000"),
+        @QueryHint(name = "org.hibernate.flushMode", value = "COMMIT")
+    })
+    Optional<Behandlingsresultat> findForUpdateById(Long behandlingID);
 
     List<Behandlingsresultat> findAllByFakturaserieReferanse(String fakturaserieReferanse);
 

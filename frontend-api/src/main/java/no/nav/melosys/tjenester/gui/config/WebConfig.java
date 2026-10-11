@@ -21,11 +21,9 @@ import org.springframework.web.filter.UrlHandlerFilter;
 public class WebConfig implements WebMvcConfigurer {
     private static final String API_PREFIX = "/api";
     private static final String FRONTEND_API_TJENESTER = "no.nav.melosys.tjenester.gui";
-    private final ApiKeyInterceptor apiKeyInterceptor;
     private final AdminTilgangInterceptor adminTilgangInterceptor;
 
-    public WebConfig(ApiKeyInterceptor apiKeyInterceptor, AdminTilgangInterceptor adminTilgangInterceptor) {
-        this.apiKeyInterceptor = apiKeyInterceptor;
+    public WebConfig(AdminTilgangInterceptor adminTilgangInterceptor) {
         this.adminTilgangInterceptor = adminTilgangInterceptor;
     }
 
@@ -61,7 +59,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CorrelationIdInterceptor());
 
-        registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**");
         registry.addInterceptor(adminTilgangInterceptor).addPathPatterns("/admin/**");
     }
 

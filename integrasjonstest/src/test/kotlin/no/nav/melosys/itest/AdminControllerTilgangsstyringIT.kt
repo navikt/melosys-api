@@ -1,29 +1,48 @@
 package no.nav.melosys.itest
 
+import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.oauth2.sdk.TokenRequest
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.Application
 import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.MANGLER_DRIFTSGRUPPE
+import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor.Companion.UKJENT_KLIENT
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
+import no.nav.security.mock.oauth2.token.OAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 
 /**
- * Tester for admin-kontroller autentisering som krever både API-nøkkel og bearer token.
+ * Tilgangsstyring for admin-endepunktene (MELOSYS-8271).
  *
- * MELOSYS-8271: Personkall krever i tillegg driftsgruppen i tokenets `groups`-claim.
- * Maskinkall (`idtyp = app`) krever fortsatt bare API-nøkkel og gyldig token.
+ * - Alle kall må komme fra Console: tokenets `azp` må være Consoles klient-ID.
+ * - Personkall krever i tillegg driftsgruppen i tokenets `groups`-claim.
+ * - Maskinkall (`idtyp = app`) fra Console får tilgang til alle admin-endepunkter.
+ * - Kall uten gyldig token avvises med 401 av AdminTilgangInterceptor, uavhengig av `@Protected`.
+ * - Adminnøkkelen er fjernet. Nøkkelheaderen påvirker ikke svaret.
  */
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -37,153 +56,170 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 class AdminControllerTilgangsstyringIT(
     @Autowired var mockMvc: MockMvc,
-    @Autowired var mockOAuth2Server: MockOAuth2Server
+    @Autowired var mockOAuth2Server: MockOAuth2Server,
+    @Autowired @Qualifier("requestMappingHandlerMapping") var handlerMapping: RequestMappingHandlerMapping
 ) : OracleTestContainerBase() {
 
     companion object {
-        const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
-        const val GYLDIG_API_NOKKEL = "dummy"
-        const val UGYLDIG_API_NOKKEL = "incorrect"
-
-        // Samme verdi som Melosys-admin.driftsgruppe i application-test.yml
+        // Samme verdier som Melosys-admin i application-test.yml
+        const val CONSOLE_KLIENT_ID = "test-azp"
         const val DRIFTSGRUPPE_ID = "00000000-0000-0000-0000-000000000001"
+
+        const val ANNEN_KLIENT_ID = "annen-klient-id"
         const val ANNEN_GRUPPE_ID = "00000000-0000-0000-0000-000000000002"
+
+        // Den fjernede adminnøkkelen. Brukes bare for å vise at headeren ikke lenger har effekt.
+        private const val API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY"
     }
 
-    private fun hentBearerToken(grupper: List<String> = listOf(DRIFTSGRUPPE_ID)): String {
-        return mockOAuth2Server.issueToken(
+    // mock-oauth2-server overskriver azp i claims med klient-ID-en tokenet utstedes til,
+    // så azp settes via clientId. Med azp = null fjernes claimet helt.
+    private fun utstedToken(subject: String, azp: String?, claims: Map<String, Any>): SignedJWT {
+        val callback = DefaultOAuth2TokenCallback(
             issuerId = "issuer1",
+            subject = subject,
+            audience = listOf("dumbdumb"),
+            claims = claims
+        )
+        val callbackUtenAzp = object : OAuth2TokenCallback by callback {
+            override fun addClaims(tokenRequest: TokenRequest): Map<String, Any> =
+                callback.addClaims(tokenRequest) - "azp"
+        }
+        return mockOAuth2Server.issueToken(
+            "issuer1",
+            azp ?: "ubrukt",
+            if (azp == null) callbackUtenAzp else callback
+        )
+    }
+
+    private fun hentPersonToken(
+        grupper: List<String> = listOf(DRIFTSGRUPPE_ID),
+        azp: String? = CONSOLE_KLIENT_ID
+    ): String = utstedToken(
+        subject = "testbruker",
+        azp = azp,
+        claims = mapOf(
+            "oid" to "test-oid",
+            "NAVident" to "test123",
+            "groups" to grupper
+        )
+    ).serialize()
+
+    private fun hentMaskinToken(azp: String = CONSOLE_KLIENT_ID): String = utstedToken(
+        subject = "test-app-oid",
+        azp = azp,
+        claims = mapOf(
+            "oid" to "test-app-oid",
+            "azp_name" to "test-cluster:teammelosys:melosys-console",
+            "idtyp" to "app",
+            "roles" to listOf("access_as_application")
+        )
+    ).serialize()
+
+    private fun hent(endepunkt: String, token: String? = null, nøkkel: String? = null): ResultActions =
+        mockMvc.perform(
+            get(endepunkt).apply {
+                token?.let { header(HttpHeaders.AUTHORIZATION, "Bearer $it") }
+                nøkkel?.let { header(API_KEY_HEADER, it) }
+            }.accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+
+    private fun ResultActions.skalAvvisesMed(melding: String) {
+        andExpect(status().isForbidden)
+            .andReturn().response.contentAsString shouldBe melding
+    }
+
+    // --- Uten gyldig token ---
+
+    @Test
+    fun `skal returnere 401 når bearer token mangler`() {
+        hent("/admin/kafka/errors").andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `skal returnere 401 når bearer token er ugyldig`() {
+        hent("/admin/kafka/errors", token = "ugyldig-token").andExpect(status().isUnauthorized)
+    }
+
+    // --- Personkall ---
+
+    @Test
+    fun `skal returnere 200 for personkall fra Console med driftsgruppe uten API-nøkkel`() {
+        hent("/admin/kafka/errors", token = hentPersonToken()).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `skal returnere 403 for personkall med driftsgruppe fra en annen klient enn Console`() {
+        hent("/admin/kafka/errors", token = hentPersonToken(azp = ANNEN_KLIENT_ID))
+            .skalAvvisesMed(UKJENT_KLIENT)
+    }
+
+    @Test
+    fun `skal returnere 403 når tokenet mangler azp`() {
+        val token = utstedToken(
             subject = "testbruker",
-            audience = "dumbdumb",
+            azp = null,
             claims = mapOf(
                 "oid" to "test-oid",
-                "azp" to "test-azp",
                 "NAVident" to "test123",
-                "groups" to grupper
+                "groups" to listOf(DRIFTSGRUPPE_ID)
             )
-        ).serialize()
-    }
-
-    private fun hentMaskinToken(): String {
-        return mockOAuth2Server.issueToken(
-            issuerId = "issuer1",
-            subject = "test-app-oid",
-            audience = "dumbdumb",
-            claims = mapOf(
-                "oid" to "test-app-oid",
-                "azp" to "test-azp",
-                "azp_name" to "test-cluster:teammelosys:melosys-console",
-                "idtyp" to "app",
-                "roles" to listOf("access_as_application")
-            )
-        ).serialize()
-    }
-
-    @Test
-    fun `skal returnere 403 når både API-nøkkel og bearer token mangler`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
+        // Forutsetning: tokenet har faktisk ikke azp
+        token.jwtClaimsSet.getClaim("azp").shouldBeNull()
+
+        hent("/admin/kafka/errors", token = token.serialize()).skalAvvisesMed(UKJENT_KLIENT)
     }
 
     @Test
-    fun `skal returnere 403 når API-nøkkel er feil og bearer token mangler`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, UGYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
+    fun `skal returnere 403 når personkall fra Console mangler driftsgruppe`() {
+        hent("/admin/kafka/errors", token = hentPersonToken(grupper = emptyList()))
+            .skalAvvisesMed(MANGLER_DRIFTSGRUPPE)
     }
 
     @Test
-    fun `skal returnere 403 når API-nøkkel mangler men bearer token er oppgitt`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
+    fun `skal returnere 403 når personkall fra Console bare har en annen gruppe enn driftsgruppen`() {
+        hent("/admin/kafka/errors", token = hentPersonToken(grupper = listOf(ANNEN_GRUPPE_ID)))
+            .skalAvvisesMed(MANGLER_DRIFTSGRUPPE)
+    }
+
+    // --- Maskinkall ---
+
+    @Test
+    fun `skal returnere 200 for maskinkall fra Console mot automatisk rute`() {
+        // Consoles automatiske synk bruker denne ruten med M2M-token
+        hent("/admin/prosessinstanser/feilede", token = hentMaskinToken()).andExpect(status().isOk)
     }
 
     @Test
-    fun `skal returnere 401 når API-nøkkel er korrekt men bearer token mangler`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isUnauthorized)
+    fun `skal returnere 200 for maskinkall fra Console mot andre admin-endepunkter`() {
+        hent("/admin/kafka/errors", token = hentMaskinToken()).andExpect(status().isOk)
     }
 
     @Test
-    fun `skal returnere 401 når API-nøkkel er korrekt men bearer token er ugyldig`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ugyldig-token")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isUnauthorized)
+    fun `skal returnere 403 for maskinkall fra en annen klient enn Console`() {
+        hent("/admin/prosessinstanser/feilede", token = hentMaskinToken(azp = ANNEN_KLIENT_ID))
+            .skalAvvisesMed(UKJENT_KLIENT)
+    }
+
+    // --- Den fjernede API-nøkkelen ---
+
+    @Test
+    fun `skal ignorere nøkkelheaderen når kallet ellers er gyldig`() {
+        hent("/admin/kafka/errors", token = hentPersonToken(), nøkkel = "feil-nøkkel")
+            .andExpect(status().isOk)
     }
 
     @Test
-    fun `skal returnere 200 når både API-nøkkel og bearer token er korrekte`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        ).andExpect(status().isOk)
+    fun `skal ikke gi tilgang uten driftsgruppe selv om nøkkelheaderen sendes`() {
+        hent("/admin/kafka/errors", token = hentPersonToken(grupper = emptyList()), nøkkel = "dummy")
+            .skalAvvisesMed(MANGLER_DRIFTSGRUPPE)
     }
 
-    @Test
-    fun `skal returnere 403 når API-nøkkel er feil selv om bearer token er korrekt`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, UGYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
-    }
+    // --- På tvers av admin-kontrollere ---
 
     @Test
-    fun `skal kreve både API-nøkkel og bearer token for ProsessinstansAdminController`() {
-        // Test med manglende API-nøkkel
-        mockMvc.perform(
-            get("/admin/prosessinstanser/feilede")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
-
-        // Test med manglende bearer token
-        mockMvc.perform(
-            get("/admin/prosessinstanser/feilede")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isUnauthorized)
-
-        // Test med begge korrekte
-        mockMvc.perform(
-            get("/admin/prosessinstanser/feilede")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        ).andExpect(status().isOk)
-    }
-
-    @Test
-    fun `skal kreve konsistent autentisering på tvers av admin-kontrollere`() {
+    fun `skal ha samme tilgangsstyring på tvers av admin-kontrollere`() {
         val endepunkter = listOf(
             "/admin/kafka/errors",
             "/admin/prosessinstanser/feilede",
@@ -192,109 +228,77 @@ class AdminControllerTilgangsstyringIT(
         )
 
         endepunkter.forEach { endepunkt ->
-            // Test manglende API-nøkkel
-            mockMvc.perform(
-                get(endepunkt)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
-            )
-                .andExpect(status().isForbidden)
-                .andReturn().response.contentAsString shouldBe "Invalid API key"
-
-            // Test manglende bearer token
-            mockMvc.perform(
-                get(endepunkt)
-                    .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
-            )
-                .andExpect(status().isUnauthorized)
-
-            // Test begge korrekte
-            mockMvc.perform(
-                get(endepunkt)
-                    .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
-            ).andExpect(status().isOk)
+            hent(endepunkt).andExpect(status().isUnauthorized)
+            hent(endepunkt, token = hentPersonToken()).andExpect(status().isOk)
+            hent(endepunkt, token = hentPersonToken(grupper = emptyList())).skalAvvisesMed(MANGLER_DRIFTSGRUPPE)
+            hent(endepunkt, token = hentPersonToken(azp = ANNEN_KLIENT_ID)).skalAvvisesMed(UKJENT_KLIENT)
         }
     }
 
-    // --- MELOSYS-8271: driftsgruppe for personkall ---
+    // --- Alle registrerte admin-endepunkter ---
+    //
+    // RestControllerInterceptor gir systemtoken til alle kall under /admin/ og stoler på at
+    // AdminTilgangInterceptor allerede har avvist uautoriserte kall. Endepunktene hentes fra Spring,
+    // så nye admin-kontrollere dekkes uten at testene må oppdateres. assertSoftly viser alle
+    // endepunkter som feiler, ikke bare det første.
 
     @Test
-    fun `skal returnere 403 når personkall har korrekt API-nøkkel men mangler driftsgruppe`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = emptyList())}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
-    }
+    fun `skal avvise kall uten token på alle registrerte admin-endepunkter`() {
+        val endepunkter = registrerteAdminEndepunkter()
 
-    @Test
-    fun `skal returnere 403 når personkall bare har en annen gruppe enn driftsgruppen`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = listOf(ANNEN_GRUPPE_ID))}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
-    }
-
-    @Test
-    fun `skal fortsatt kreve API-nøkkel når personkall har driftsgruppe`() {
-        mockMvc.perform(
-            get("/admin/kafka/errors")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = listOf(DRIFTSGRUPPE_ID))}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
-    }
-
-    @Test
-    fun `skal returnere 200 for maskinkall med korrekt API-nøkkel uten driftsgruppe`() {
-        // Consoles automatiske synk bruker denne ruten med M2M-token
-        mockMvc.perform(
-            get("/admin/prosessinstanser/feilede")
-                .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentMaskinToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        ).andExpect(status().isOk)
-    }
-
-    @Test
-    fun `skal returnere 403 for maskinkall uten API-nøkkel`() {
-        mockMvc.perform(
-            get("/admin/prosessinstanser/feilede")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentMaskinToken()}")
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-        )
-            .andExpect(status().isForbidden)
-            .andReturn().response.contentAsString shouldBe "Invalid API key"
-    }
-
-    @Test
-    fun `skal kreve driftsgruppe for personkall på tvers av admin-kontrollere`() {
-        val endepunkter = listOf(
-            "/admin/kafka/errors",
-            "/admin/prosessinstanser/feilede",
-            "/admin/statistikk/rammeavtale-fjernarbeid",
-        )
-
-        endepunkter.forEach { endepunkt ->
-            mockMvc.perform(
-                get(endepunkt)
-                    .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken(grupper = emptyList())}")
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
-            )
-                .andExpect(status().isForbidden)
-                .andReturn().response.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
+        assertSoftly {
+            endepunkter.forEach { endepunkt ->
+                // Bare status: både AdminTilgangInterceptor og @Protected kan svare 401, og begge er riktige
+                withClue(endepunkt) {
+                    kall(endepunkt, token = null).status shouldBe 401
+                }
+            }
         }
     }
+
+    @Test
+    fun `skal avvise kall uten driftsgruppe på alle registrerte admin-endepunkter`() {
+        val endepunkter = registrerteAdminEndepunkter()
+        val token = hentPersonToken(grupper = emptyList())
+
+        assertSoftly {
+            endepunkter.forEach { endepunkt ->
+                withClue(endepunkt) {
+                    val respons = kall(endepunkt, token)
+                    respons.status shouldBe 403
+                    respons.contentAsString shouldBe MANGLER_DRIFTSGRUPPE
+                }
+            }
+        }
+    }
+
+    private data class Endepunkt(val metode: HttpMethod, val mønster: String) {
+        // Interceptoren avviser før argumentene leses, så stivariablene trenger bare å matche mønsteret
+        val url = mønster.replace(Regex("\\{[^}]+}"), "1")
+
+        override fun toString() = "$metode $mønster"
+    }
+
+    private fun registrerteAdminEndepunkter(): List<Endepunkt> {
+        val endepunkter = handlerMapping.handlerMethods.keys.flatMap { info ->
+            val metoder = info.methodsCondition.methods.ifEmpty { setOf(RequestMethod.GET) }
+            info.patternValues
+                .filter { it.startsWith("/admin/") }
+                .flatMap { mønster -> metoder.map { Endepunkt(it.asHttpMethod(), mønster) } }
+        }
+
+        // Vakt mot falsk grønn: finner oppslaget ingen endepunkter, kjører forEach i testene ingen
+        // assertions, og testene passerer uten å ha sjekket noe. De to endepunktene er hentet fra hver
+        // sin modul (integrasjon og saksflyt), så vakten viser også at oppslaget når kontrollere utenfor
+        // frontend-api.
+        endepunkter.map { it.mønster }.shouldContainAll("/admin/kafka/errors", "/admin/prosessinstanser/feilede")
+        return endepunkter
+    }
+
+    private fun kall(endepunkt: Endepunkt, token: String?): MockHttpServletResponse =
+        mockMvc.perform(
+            request(endepunkt.metode, endepunkt.url).apply {
+                token?.let { header(HttpHeaders.AUTHORIZATION, "Bearer $it") }
+            }.contentType(MediaType.APPLICATION_JSON)
+        ).andReturn().response
 }

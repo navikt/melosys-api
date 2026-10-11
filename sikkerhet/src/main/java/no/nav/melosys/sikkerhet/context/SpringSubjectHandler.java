@@ -15,6 +15,7 @@ public class SpringSubjectHandler extends SubjectHandler {
     private static final String JWT_TOKEN_CLAIM_GROUPS = "groups";
     private static final String JWT_TOKEN_ID_TYPE = "idtyp";
     private static final String JWT_TOKEN_CLAIM_AZP_NAME = "azp_name"; //  (authorized party name)
+    private static final String JWT_TOKEN_CLAIM_AZP = "azp"; //  (authorized party) Klient-ID-en til applikasjonen som ba om tokenet.
 
     private final SpringTokenValidationContextHolder contextHolder;
 
@@ -61,6 +62,11 @@ public class SpringSubjectHandler extends SubjectHandler {
     @Override
     public String getTokenIdType() {
         return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_ID_TYPE) : null;
+    }
+
+    @Override
+    public String getAzp() {
+        return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().getStringClaim(JWT_TOKEN_CLAIM_AZP) : null;
     }
 
     private String findSystemNameIfM2MToken() {

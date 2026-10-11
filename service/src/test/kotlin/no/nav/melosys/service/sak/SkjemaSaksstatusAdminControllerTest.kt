@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
-@WebMvcTest(controllers = [SkjemaSaksstatusAdminController::class], properties = ["Melosys-admin.apikey=Dummy"])
+@WebMvcTest(controllers = [SkjemaSaksstatusAdminController::class])
 class SkjemaSaksstatusAdminControllerTest {
 
     @Autowired

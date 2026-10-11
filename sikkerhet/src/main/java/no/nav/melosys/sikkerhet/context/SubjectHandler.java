@@ -32,6 +32,10 @@ public abstract class SubjectHandler {
         return null;
     }
 
+    public String getAzp() {
+        return null;
+    }
+
     public static String getSaksbehandlerIdent() {
         return getInstance().getUserID();
     }

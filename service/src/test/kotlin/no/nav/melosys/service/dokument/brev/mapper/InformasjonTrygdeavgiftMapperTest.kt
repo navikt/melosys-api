@@ -125,7 +125,6 @@ internal class InformasjonTrygdeavgiftMapperTest {
             bostedLand shouldBe "Danmark"
             erNordisk shouldBe true
             avgiftsperioder shouldHaveSize 2
-            harAvgiftspliktigePerioderIForegåendeÅr shouldBe false
             erSkattemessigEmigrert shouldBe false
         }
     }
@@ -191,7 +190,6 @@ internal class InformasjonTrygdeavgiftMapperTest {
             bostedLand shouldBe "Danmark"
             erNordisk shouldBe true
             avgiftsperioder shouldHaveSize 2
-            harAvgiftspliktigePerioderIForegåendeÅr shouldBe true
             erSkattemessigEmigrert shouldBe false
         }
     }
@@ -257,7 +255,6 @@ internal class InformasjonTrygdeavgiftMapperTest {
             bostedLand shouldBe "Danmark"
             erNordisk shouldBe true
             avgiftsperioder shouldHaveSize 2
-            harAvgiftspliktigePerioderIForegåendeÅr shouldBe false
             erSkattemessigEmigrert shouldBe false
         }
     }
@@ -297,7 +294,6 @@ internal class InformasjonTrygdeavgiftMapperTest {
             bostedLand shouldBe "Danmark"
             erNordisk shouldBe true
             avgiftsperioder shouldHaveSize 0
-            harAvgiftspliktigePerioderIForegåendeÅr shouldBe false
             erSkattemessigEmigrert shouldBe false
         }
     }

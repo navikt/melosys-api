@@ -10,7 +10,7 @@ JournalpostApi_v1:
 KodeverkAPI_v1:
   url: ${KODEVERK_REST_API_URL}
 Melosys-admin:
-  apikey: ${MELOSYS_ADMIN_API_KEY}
+  console-klient-id: ${MELOSYS_CONSOLE_CLIENT_ID}
   driftsgruppe: ${GROUP_MELOSYS_INNLOGGING_VAKT}
 MelosysEessi:
   url: ${MELOSYS_EESSI_URL}

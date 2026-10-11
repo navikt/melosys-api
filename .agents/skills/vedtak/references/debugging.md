@@ -323,8 +323,8 @@ WHERE b.id = :behandlingId;
 
 Exposed by `ProsessinstansAdminController` (`saksflyt/.../kontroll/ProsessinstansAdminController.java`),
 base path `/admin/prosessinstanser` (no `/api` prefix — that prefix only applies to
-`no.nav.melosys.tjenester.gui` controllers). All `/admin/**` endpoints are guarded by the
-`ApiKeyInterceptor`. Logic lives in `ProsessinstansAdminService`.
+`no.nav.melosys.tjenester.gui` controllers). All `/admin/**` endpoints are guarded by
+`AdminTilgangInterceptor` (see the security skill). Logic lives in `ProsessinstansAdminService`.
 
 ### List Failed Prosessinstanser
 ```
