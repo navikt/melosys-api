@@ -52,7 +52,7 @@ public class HentRegisteropplysninger implements StegBehandler {
 
         boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
         boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling);
-        boolean erEøsPensjonistÅrsavregning = behandling.erEøsPensjonist() && behandling.erÅrsavregning();
+        boolean erEøsPensjonistÅrsavregning = behandling.erÅrsavregning();
 
         if (harRegistreringUnntakFraMedlemskapFlyt
             || harIkkeYrkesaktivFlyt
