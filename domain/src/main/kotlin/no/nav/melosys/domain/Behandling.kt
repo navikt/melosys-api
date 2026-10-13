@@ -243,13 +243,14 @@ class Behandling(
 
     fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
-    fun harIkkeYrkesaktivFlyt(): Boolean = Companion.harIkkeYrkesaktivFlyt(fagsak.type, tema)
+    /** Se [Companion.erIkkeYrkesaktivLovvalg]. Gjelder også årsavregninger med tema IKKE_YRKESAKTIV. */
+    fun erIkkeYrkesaktivLovvalg(): Boolean = Companion.erIkkeYrkesaktivLovvalg(fagsak.type, tema)
 
     /**
      * Beskriver behandlingen (sakstype og tema, ikke årsavregning); sjekker ikke at et vedtak finnes.
      * Årsavregninger med tema IKKE_YRKESAKTIV fastsetter trygdeavgift og er ikke vedtak om lovvalg.
      */
-    fun erIkkeYrkesaktivVedtak(): Boolean = harIkkeYrkesaktivFlyt() && !erÅrsavregning()
+    fun erIkkeYrkesaktivVedtak(): Boolean = erIkkeYrkesaktivLovvalg() && !erÅrsavregning()
 
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
@@ -288,8 +289,12 @@ class Behandling(
 
     companion object {
         // Muliggjør også utvidelsesfunksjoner i tester
-        @JvmStatic
-        fun harIkkeYrkesaktivFlyt(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
+        /**
+         * Lovvalg for ikke-yrkesaktiv i EØS og trygdeavtale: egen iverksettingsflyt, uten fakturering og uten A1.
+         * FTRL med tema IKKE_YRKESAKTIV er ikke med: der fastsettes medlemskap med trygdeavgift i vanlig
+         * vedtaksflyt, og vedtaket skal årsavregnes og faktureres.
+         */
+        fun erIkkeYrkesaktivLovvalg(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
             (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 

@@ -40,7 +40,7 @@ public class UtstedtA1Service {
     @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.a1Produseres() && behandlingsresultat.hentBehandling().harIkkeYrkesaktivFlyt()) {
+        if (behandlingsresultat.a1Produseres() && behandlingsresultat.hentBehandling().erIkkeYrkesaktivLovvalg()) {
             log.info("Melding om utstedt A1 blir ikke sendt for behandling {}: ikke-yrkesaktiv flyt", behandlingID);
         } else if (behandlingsresultat.a1Produseres()) {
             var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);

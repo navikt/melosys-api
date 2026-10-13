@@ -217,7 +217,7 @@ internal class BehandlingTest {
         "EU_EOS, UTSENDT_ARBEIDSTAKER, false",
         "TRYGDEAVTALE, YRKESAKTIV, false",
     )
-    fun `harIkkeYrkesaktivFlyt og erIkkeYrkesaktivVedtak gjelder kun EØS og trygdeavtale med tema IKKE_YRKESAKTIV`(
+    fun `erIkkeYrkesaktivLovvalg og erIkkeYrkesaktivVedtak gjelder kun EØS og trygdeavtale med tema IKKE_YRKESAKTIV`(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
         forventet: Boolean
@@ -227,8 +227,8 @@ internal class BehandlingTest {
             fagsak { type = sakstype }
         }
 
-        Behandling.harIkkeYrkesaktivFlyt(sakstype, behandlingstema) shouldBe forventet
-        behandling.harIkkeYrkesaktivFlyt() shouldBe forventet
+        Behandling.erIkkeYrkesaktivLovvalg(sakstype, behandlingstema) shouldBe forventet
+        behandling.erIkkeYrkesaktivLovvalg() shouldBe forventet
         behandling.erIkkeYrkesaktivVedtak() shouldBe forventet
     }
 
@@ -240,7 +240,7 @@ internal class BehandlingTest {
             fagsak { type = Sakstyper.EU_EOS }
         }
 
-        årsavregning.harIkkeYrkesaktivFlyt() shouldBe true
+        årsavregning.erIkkeYrkesaktivLovvalg() shouldBe true
         årsavregning.erIkkeYrkesaktivVedtak() shouldBe false
     }
 }
