@@ -13,12 +13,16 @@ private val log = KotlinLogging.logger { }
  * vedtaksflyten for ikke-yrkesaktive i EØS og trygdeavtale (`IVERKSETT_VEDTAK_IKKE_YRKESAKTIV`).
  * Flyten lagret ikke raden før MELOSYS-8337.
  *
- * Vedtaksdatoen er `behandlingsresultat.endret_dato`. Vedtak der prosessinstansen ligger mer enn 3 timer
- * fra den datoen, eller der prosessinstansen mangler, holdes utenfor og listes i svaret.
+ * Vedtaksdatoen er `behandlingsresultat.endret_dato`. Vedtak der prosessinstansen mangler eller ligger mer
+ * enn 3 timer fra den datoen, og vedtak med annen behandlingstype enn førstegang og ny vurdering, holdes
+ * utenfor og listes i svaret.
+ *
+ * Kjør ikke skarpt før MELOSYS-8337 er i prod. Først da ser årsavregningen, faktureringen og
+ * A1-statistikken bort fra ikke-yrkesaktive vedtak som har vedtaksmetadata.
  *
  * Native SQL fordi `registrert_av` og `endret_av` skal være [PATCH_MARKØR]; JPA-auditing ville satt
- * innlogget bruker. Native SQL publiserer heller ingen `VedtakMetadataLagretEvent`, og det er meningen:
- * eneste lytter er A1-statistikken, og ikke-yrkesaktive får ikke A1.
+ * innlogget bruker. Native SQL publiserer heller ingen `VedtakMetadataLagretEvent`. Eneste lytter er
+ * A1-statistikken, og ikke-yrkesaktive skal ikke ha A1.
  */
 @Component
 class IkkeYrkesaktivVedtaksmetadataFiksService {
@@ -145,7 +149,7 @@ class IkkeYrkesaktivVedtaksmetadataFiksService {
     companion object {
         const val PATCH_MARKØR = "MELOSYS-8351-PATCH"
         const val STANDARD_MAKS_ANTALL_RADER = 500
-        const val MAKS_ANTALL_RADER = 1000
+        const val MAKS_ANTALL_RADER = 500
 
         /**
          * Én rad per avsluttet ikke-yrkesaktivt vedtak i EØS eller trygdeavtale uten vedtaksmetadata.

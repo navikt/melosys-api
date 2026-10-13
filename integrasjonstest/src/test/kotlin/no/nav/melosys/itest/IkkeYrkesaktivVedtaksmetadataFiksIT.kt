@@ -136,6 +136,19 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
     }
 
     @Test
+    fun `medlem i folketrygden fikses, lovvalg fastsatt av et annet land røres ikke`() {
+        val medlem = seedFlytvedtak("MEL-31", "EU_EOS", "FØRSTEGANG", "2024-10-23 09:54:00", resultatType = "MEDLEM_I_FOLKETRYGDEN")
+        seedFlytvedtak("MEL-32", "EU_EOS", "FØRSTEGANG", "2024-10-23 09:54:00", fastsattAvLand = "SE")
+
+        kall(fiksUrl, """{"skarp":true}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallInnsatt").value(1))
+            .andExpect(jsonPath("$.grupper").isEmpty)
+
+        patchedeIder() shouldContainExactly listOf(medlem)
+    }
+
+    @Test
     fun `avvik på inntil 3 timer mot eldste prosessinstans fikses, over 3 timer holdes utenfor`() {
         // Prosessinstansen lå 1–2 timer feil april 2024 – august 2025, derfor tåles 3 timer
         val toTimerFør = seedFlytvedtak("MEL-40", "EU_EOS", "FØRSTEGANG", "2024-10-23 11:54:00", prosessinstans = "2024-10-23 09:54:00")
@@ -177,13 +190,16 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
     }
 
     @Test
-    fun `maksAntallRader utenfor 1 til 1000 avvises før noe skrives`() {
+    fun `maksAntallRader utenfor 1 til 500 avvises før noe skrives`() {
         seedFlytvedtak("MEL-60", "EU_EOS", "FØRSTEGANG", "2024-10-23 09:54:00")
 
         kall(fiksUrl, """{"skarp":true,"maksAntallRader":0}""").andExpect(status().isBadRequest)
-        kall(fiksUrl, """{"skarp":true,"maksAntallRader":1001}""").andExpect(status().isBadRequest)
-
+        kall(fiksUrl, """{"skarp":true,"maksAntallRader":501}""").andExpect(status().isBadRequest)
         antallMetadata() shouldBe 0
+
+        kall(fiksUrl, """{"skarp":true,"maksAntallRader":500}""")
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.antallInnsatt").value(1))
     }
 
     @Test
@@ -341,7 +357,7 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
            FROM vedtak_metadata WHERE behandlingsresultat_id = ?""",
         { rs, _ -> Rad(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)) },
         behandlingsresultatId
-    )!!
+    )
 
     private fun harRad(behandlingsresultatId: Long): Boolean = jdbcTemplate.queryForObject(
         "SELECT COUNT(*) FROM vedtak_metadata WHERE behandlingsresultat_id = ?", Int::class.java, behandlingsresultatId
