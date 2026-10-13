@@ -17,7 +17,7 @@ private val log = KotlinLogging.logger { }
  * enn 3 timer fra den datoen, og vedtak med annen behandlingstype enn førstegang og ny vurdering, holdes
  * utenfor og listes i svaret.
  *
- * Kjør ikke skarpt før MELOSYS-8337 er i prod. Først da ser årsavregningen, faktureringen og
+ * Kjør ikke skarpt før melosys-api#3551 (MELOSYS-8337) er i prod. Først da ser årsavregningen, faktureringen og
  * A1-statistikken bort fra ikke-yrkesaktive vedtak som har vedtaksmetadata.
  *
  * Native SQL fordi `registrert_av` og `endret_av` skal være [PATCH_MARKØR]; JPA-auditing ville satt
