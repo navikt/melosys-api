@@ -52,13 +52,13 @@ public class HentRegisteropplysninger implements StegBehandler {
 
         boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
         boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling);
-        boolean erEøsPensjonistÅrsavregning = behandling.erEøsPensjonist() && behandling.erÅrsavregning();
+        boolean erÅrsavregning = behandling.erÅrsavregning();
 
         if (harRegistreringUnntakFraMedlemskapFlyt
             || harIkkeYrkesaktivFlyt
             || !behandling.getFagsak().erSakstypeEøs()
             || erForVirksomhet
-            || erEøsPensjonistÅrsavregning
+            || erÅrsavregning
         ) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;

@@ -874,6 +874,65 @@ internal class KontrollTest {
     }
 
     @Test
+    fun `helseutgift dekkes-perioder fra opprinnelig behandling skal ikke gi overlappende periode kontrollfeil når ny vurdering er vedtatt`() {
+        mockEøsPensjonistBehandlingMedHelseutgiftDekkesPeriode(fom = LocalDate.of(2012, 7, 1), tom = LocalDate.of(2012, 12, 31))
+        val førstegangsbehandling = lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
+            id = 11L,
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            resultattype = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            harVedtak = true,
+            fom = LocalDate.of(2012, 1, 1),
+            tom = LocalDate.of(2012, 12, 31)
+        )
+        val vedtattNyVurdering = lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
+            id = 12L,
+            behandlingstype = Behandlingstyper.NY_VURDERING,
+            resultattype = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            harVedtak = true,
+            fom = LocalDate.of(2012, 1, 1),
+            tom = LocalDate.of(2012, 6, 30),
+            opprinneligBehandling = førstegangsbehandling.hentBehandling()
+        )
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(førstegangsbehandling, vedtattNyVurdering)
+
+        val resultat = mockedKontroll.kontroller(behandlingID, null, emptySet())
+
+        resultat.shouldBeEmpty()
+    }
+
+    @Test
+    fun `helseutgift dekkes-perioder fra opprinnelig behandling skal gi overlappende periode kontrollfeil når ny vurdering er henlagt`() {
+        mockEøsPensjonistBehandlingMedHelseutgiftDekkesPeriode(fom = LocalDate.of(2012, 7, 1), tom = LocalDate.of(2012, 12, 31))
+        val førstegangsbehandling = lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
+            id = 11L,
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            resultattype = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            harVedtak = true,
+            fom = LocalDate.of(2012, 1, 1),
+            tom = LocalDate.of(2012, 12, 31)
+        )
+        val henlagtNyVurdering = lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
+            id = 12L,
+            behandlingstype = Behandlingstyper.NY_VURDERING,
+            resultattype = Behandlingsresultattyper.HENLEGGELSE,
+            harVedtak = false,
+            fom = LocalDate.of(2012, 1, 1),
+            tom = LocalDate.of(2012, 6, 30),
+            opprinneligBehandling = førstegangsbehandling.hentBehandling()
+        )
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(førstegangsbehandling, henlagtNyVurdering)
+
+        val resultat = mockedKontroll.kontroller(behandlingID, null, emptySet())
+
+        resultat.shouldNotBeEmpty()
+            .single().kode shouldBe Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE
+    }
+
+    @Test
     fun kontroller_periodeOver3År_returnererKode() {
         val behandling = lagBehandling {
             fagsak {
@@ -1073,5 +1132,54 @@ internal class KontrollTest {
     private fun mockLovvalgsperiodeService(lovvalgsperiode: Lovvalgsperiode) {
         every { lovvalgsperiodeService.hentLovvalgsperiode(behandlingID) } returns lovvalgsperiode
         every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandlingID) } returns null
+    }
+
+    private fun mockEøsPensjonistBehandlingMedHelseutgiftDekkesPeriode(fom: LocalDate, tom: LocalDate) {
+        val behandling = lagBehandling {
+            tema = Behandlingstema.PENSJONIST
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPerioder(any()) } returns listOf(
+            HelseutgiftDekkesPeriode.forTest {
+                fomDato = fom
+                tomDato = tom
+            }
+        )
+    }
+
+    private fun lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
+        id: Long,
+        behandlingstype: Behandlingstyper,
+        resultattype: Behandlingsresultattyper,
+        harVedtak: Boolean,
+        fom: LocalDate,
+        tom: LocalDate,
+        opprinneligBehandling: Behandling? = null
+    ): Behandlingsresultat = Behandlingsresultat.forTest {
+        type = resultattype
+        behandling {
+            this.id = id
+            status = Behandlingsstatus.AVSLUTTET
+            type = behandlingstype
+            tema = Behandlingstema.PENSJONIST
+            this.opprinneligBehandling = opprinneligBehandling
+            fagsak {
+                saksnummer = "annen-sak"
+                status = Saksstatuser.LOVVALG_AVKLART
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.EU_EOS
+            }
+        }
+        if (harVedtak) vedtakMetadata { }
+        helseutgiftDekkesPeriode {
+            fomDato = fom
+            tomDato = tom
+        }
     }
 }
