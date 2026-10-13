@@ -9,6 +9,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
@@ -24,9 +26,9 @@ import java.time.Duration
 import java.util.UUID
 
 /**
- * Verifiserer cross-type-dedupen (existsByLåsReferanseAndTypeIn over begge digital-søknad-typene):
- * redeliveryen oppretter IKKE en duplikat-prosess, selv om den rutes til en annen type enn første
- * levering. Dermed unngås både dobbelt forvaltningsmelding og 409 fra journalføringen.
+ * Verifiserer dedupen på skjemaId (slutten av låsreferansen, på tvers av alle digital-søknad-typene):
+ * redeliveryen oppretter IKKE en duplikat-prosess, heller ikke når første levering ble behandlet av en
+ * utgått type med gammelt låsformat. Dermed unngås både dobbelt forvaltningsmelding og 409 fra journalføringen.
  */
 class DigitalSøknadRedeliveryDedupIT(
     @Autowired @Qualifier("skjemaMottattMelding")
@@ -48,7 +50,7 @@ class DigitalSøknadRedeliveryDedupIT(
     }
 
     @Test
-    fun `redelivery av samme skjema oppretter ikke duplikat-prosess på tvers av type`() {
+    fun `redelivery av samme skjema oppretter ikke duplikat-prosess`() {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             fnr = testFnr
             orgnr = "REDELIVERY-ORG"
@@ -56,15 +58,12 @@ class DigitalSøknadRedeliveryDedupIT(
         val skjemaId = søknadsdata.skjema.id
         stubSkjemaEndpoints(skjemaId, søknadsdata)
 
-        // --- Levering 1: NY-flyt oppretter sak, behandling og skjema→sak-mapping ---
+        // --- Levering 1: oppretter sak, behandling og skjema→sak-mapping ---
         kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId))
 
         await.atMost(Duration.ofSeconds(15)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FERDIG
+            prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)?.status == ProsessStatus.FERDIG
         }
-        prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-            .single().type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
 
         // Levering 1 sender ett forvaltningsmelding-brev (default skjemadel ARBEIDSTAKERS_DEL → BRUKER)
         await.atMost(Duration.ofSeconds(5)).until {
@@ -75,29 +74,70 @@ class DigitalSøknadRedeliveryDedupIT(
         dedupLogWatcher.start()
         prosessinstansServiceLogger.addAppender(dedupLogWatcher)
 
-        // --- Levering 2: SAMME skjemaId (Kafka-redelivery). Saken finnes nå → rutes til EKSISTERENDE ---
+        // --- Levering 2: SAMME skjemaId (Kafka-redelivery). Saken finnes nå ---
         kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId))
 
-        // Dedupen skal hoppe over redeliveryen — og logge at den forsøkte EKSISTERENDE-typen (cross-type)
-        await.atMost(Duration.ofSeconds(15)).until {
-            dedupLogWatcher.list.toList().any {
-                it.formattedMessage.contains("hopper over redelivery") &&
-                    it.formattedMessage.contains(ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD.name)
-            }
-        }
+        ventPåDedupLogg(skjemaId)
 
-        // Ingen duplikat-prosess: fortsatt kun NY-prosessen for dette skjemaet
-        prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-            .also { it shouldHaveSize 1 }
-            .single().type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
-
-        // Ingen EKSISTERENDE-prosess ble opprettet av redeliveryen
+        // Ingen duplikat-prosess: fortsatt kun én prosess for dette skjemaet
         prosessinstansRepository.findAll()
-            .none { it.type == ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD } shouldBe true
+            .filter { it.type.erDigitalSøknadMottak() } shouldHaveSize 1
 
         // Kun ett forvaltningsmelding-brev — ikke dobbelt
         prosessinstansRepository.findAll()
             .filter { it.type == ProsessType.OPPRETT_OG_DISTRIBUER_BREV } shouldHaveSize 1
+    }
+
+    @Test
+    fun `redelivery av skjema behandlet med utgått type og gammelt låsformat oppretter ikke duplikat`() {
+        val skjemaId = UUID.randomUUID()
+        lagreFerdigProsessMedGammeltFormat(skjemaId)
+
+        dedupLogWatcher.start()
+        prosessinstansServiceLogger.addAppender(dedupLogWatcher)
+
+        kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId))
+
+        ventPåDedupLogg(skjemaId)
+        prosessinstansRepository.findAll()
+            .filter { it.type.erDigitalSøknadMottak() } shouldHaveSize 1
+    }
+
+    @Test
+    fun `ny søknad relatert til skjema med gammelt låsformat arver skjemaId-en som låsgruppe`() {
+        val gammelSkjemaId = UUID.randomUUID()
+        lagreFerdigProsessMedGammeltFormat(gammelSkjemaId)
+
+        val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto { fnr = testFnr }
+        val skjemaId = søknadsdata.skjema.id
+        stubSkjemaEndpoints(skjemaId, søknadsdata)
+
+        kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId, listOf(gammelSkjemaId)))
+
+        await.atMost(Duration.ofSeconds(15)).until {
+            prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)?.status == ProsessStatus.FERDIG
+        }
+        prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)!!.låsReferanse shouldBe "${gammelSkjemaId}_$skjemaId"
+    }
+
+    private fun lagreFerdigProsessMedGammeltFormat(skjemaId: UUID) {
+        // Lagres direkte i repoet, så ingen saga startes
+        prosessinstansRepository.save(
+            Prosessinstans.forTest {
+                id = null // la JPA generere id, ellers tolkes save som merge av en eksisterende rad
+                type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK
+                status = ProsessStatus.FERDIG
+                låsReferanse = skjemaId.toString()
+            }
+        )
+    }
+
+    private fun ventPåDedupLogg(skjemaId: UUID) {
+        await.atMost(Duration.ofSeconds(15)).until {
+            dedupLogWatcher.list.toList().any {
+                it.formattedMessage.contains("hopper over redelivery") && it.formattedMessage.contains(skjemaId.toString())
+            }
+        }
     }
 
     private fun stubSkjemaEndpoints(skjemaId: UUID, søknadsdata: UtsendtArbeidstakerSkjemaM2MDto) {

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
@@ -41,7 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 @ExtendWith(MockKExtension::class)
-internal class HåndterEksisterendeSakDigitalSøknadTest {
+internal class DigitalSøknadEksisterendeSakHåndtererTest {
 
     @MockK lateinit var fagsakService: FagsakService
     @MockK lateinit var behandlingService: BehandlingService
@@ -52,7 +51,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
     @MockK lateinit var jsonMapper: JsonMapper
     @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
-    private lateinit var steg: HåndterEksisterendeSakDigitalSøknad
+    private lateinit var håndterer: DigitalSøknadEksisterendeSakHåndterer
 
     private val saksnummer = "MEL-1234"
     private val behandlingId = 42L
@@ -63,8 +62,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
     @BeforeEach
     fun setup() {
-        ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER
-        steg = HåndterEksisterendeSakDigitalSøknad(
+        håndterer = DigitalSøknadEksisterendeSakHåndterer(
             fagsakService, behandlingService, behandlingsresultatService,
             mottatteOpplysningerService, oppgaveService, skjemaSakMappingService, jsonMapper,
             aktørSynkronisering
@@ -73,11 +71,6 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         every { jsonMapper.writeValueAsString(søknadsdata) } returns """{"referanseId":"test"}"""
         every { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) } just Runs
         every { skjemaSakMappingService.finnMappetSaksnummerForSkjemaIder(any()) } returns saksnummer
-    }
-
-    @Test
-    fun `inngangsSteg returnerer HÅNDTER_EKSISTERENDE_SAK_SØKNAD`() {
-        steg.inngangsSteg() shouldBe ProsessSteg.HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD
     }
 
     @Nested
@@ -95,7 +88,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
@@ -120,7 +113,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify { behandlingService.endreStatus(behandling, Behandlingsstatus.VURDER_DOKUMENT) }
             verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
@@ -140,7 +133,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
@@ -162,7 +155,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
             verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
@@ -182,7 +175,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify(exactly = 0) { behandlingService.endreStatus(any<Behandling>(), any()) }
             verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
@@ -214,7 +207,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
                 mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify { behandlingService.nyBehandling(fagsak, any(), eq(Behandlingstyper.NY_VURDERING), any(), any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
@@ -246,7 +239,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
 
             every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify { behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING, Behandlingstema.UTSENDT_ARBEIDSTAKER, null, null, any(), any(), null) }
             verify { fagsak.leggTilBehandling(nyBehandling) }
@@ -267,7 +260,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOpprettMottatteOpplysningerForNyBehandling()
             mockOppgaveOpprettelse()
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify {
                 behandlingService.nyBehandling(
@@ -303,7 +296,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             val aktørerSlot = slot<AktørerFraSøknad>()
             every { aktørSynkronisering.synkroniser(eq(fagsak), capture(aktørerSlot)) } just Runs
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
             verify { aktørSynkronisering.synkroniser(fagsak, any()) }
@@ -330,7 +323,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify(exactly = 0) { behandlingService.endreTema(any<Behandling>(), any()) }
             behandling.tema shouldBe Behandlingstema.YRKESAKTIV
@@ -358,7 +351,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
             mockOppgaveOpprettelse()
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify {
                 behandlingService.nyBehandling(
@@ -381,12 +374,12 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
         sakstype: Sakstyper = Sakstyper.EU_EOS
     ): Behandling {
         return Behandling.forTest {
-            id = this@HåndterEksisterendeSakDigitalSøknadTest.behandlingId
+            id = this@DigitalSøknadEksisterendeSakHåndtererTest.behandlingId
             this.status = status
             type = behandlingstype
             tema = behandlingstema
             this.fagsak = Fagsak.forTest {
-                this.saksnummer = this@HåndterEksisterendeSakDigitalSøknadTest.saksnummer
+                this.saksnummer = this@DigitalSøknadEksisterendeSakHåndtererTest.saksnummer
                 type = sakstype
             }
         }
@@ -417,7 +410,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify {
                 mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), false)
@@ -453,7 +446,7 @@ internal class HåndterEksisterendeSakDigitalSøknadTest {
             mockOppdaterMottatteOpplysninger()
             mockHentMottatteOpplysninger(behandlingId)
 
-            steg.utfør(prosessinstans)
+            håndterer.håndter(prosessinstans)
 
             verify {
                 mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), true)

@@ -4,7 +4,7 @@ Date: 2026-09-16
 
 ## Status
 
-Foreslått
+Foreslått. Routingen i pkt. 1 er erstattet av [ADR 0011](0011-samlet-prosess-for-mottak-av-digital-soknad.md).
 
 ## Context
 

@@ -364,6 +364,19 @@ object ProsessflytDefinisjon {
         MELOSYS_MOTTAK_DIGITAL_SØKNAD to ProsessFlyt(
             prosessType = MELOSYS_MOTTAK_DIGITAL_SØKNAD,
             HENT_DIGITAL_SØKNADSDATA,
+            AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD,
+            OPPRETT_ARKIVSAK_DIGITAL_SØKNAD,
+            OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD,
+            HENT_REGISTEROPPLYSNINGER,
+            VURDER_INNGANGSVILKÅR,
+            OPPRETT_OPPGAVE_DIGITAL_SØKNAD,
+            SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API,
+            SEND_FORVALTNINGSMELDING
+        ),
+        // Utgått: kun for prosessinstanser opprettet før MELOSYS_MOTTAK_DIGITAL_SØKNAD ble samlet (V172)
+        MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK to ProsessFlyt(
+            prosessType = MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK,
+            HENT_DIGITAL_SØKNADSDATA,
             OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD,
             OPPRETT_ARKIVSAK,
             OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD,
@@ -373,6 +386,7 @@ object ProsessflytDefinisjon {
             SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API,
             SEND_FORVALTNINGSMELDING
         ),
+        // Utgått: kun for prosessinstanser opprettet før MELOSYS_MOTTAK_DIGITAL_SØKNAD ble samlet (V172)
         MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD to ProsessFlyt(
             prosessType = MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD,
             HENT_DIGITAL_SØKNADSDATA,

@@ -94,7 +94,7 @@ class DigitalSøknadMottakIT(
         // Basic prosessinstans info
         prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FERDIG
-        prosessinstans.låsReferanse shouldBe skjemaId.toString()
+        prosessinstans.låsReferanse shouldBe "${skjemaId}_$skjemaId"
 
         // All steps completed successfully (SEND_FORVALTNINGSMELDING is the last step)
         prosessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
@@ -117,7 +117,7 @@ class DigitalSøknadMottakIT(
         behandling.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type shouldBe Behandlingstyper.FØRSTEGANG
 
-        // Verify arkivsak was created and gsakSaksnummer set on fagsak (step 3 — OPPRETT_ARKIVSAK)
+        // Verify arkivsak was created and gsakSaksnummer set on fagsak (step 3 — OPPRETT_ARKIVSAK_DIGITAL_SØKNAD)
         fagsak.gsakSaksnummer.shouldNotBeNull()
 
         // Verify journalpostId was set on behandling (step 4)

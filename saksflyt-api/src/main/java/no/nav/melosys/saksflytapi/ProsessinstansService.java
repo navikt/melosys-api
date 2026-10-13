@@ -2,6 +2,7 @@ package no.nav.melosys.saksflytapi;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -614,36 +615,57 @@ public class ProsessinstansService {
         }
     }
 
+    /**
+     * Oppretter prosessinstans for mottatt digital søknad. Om søknaden gir ny sak eller festes på en
+     * eksisterende sak avgjøres i sagaen, ikke her.
+     * <p>
+     * Låsreferansen er {@code {gruppe}_{skjemaId}}. Gruppen arves fra en prosessinstans for et relatert skjema,
+     * ellers er den skjemaets egen id. Relaterte søknader får dermed samme gruppePrefiks og settes PÅ_VENT til
+     * forrige i gruppen er FERDIG, slik at saken fra den første finnes når den neste avklarer sak.
+     * Dette forutsetter at meldingene konsumeres én og én (topicet har én partisjon).
+     */
     @Transactional
-    public void opprettProsessinstansMelosysDigitalSøknadMottatt(SkjemaMottattMelding melding) {
-        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD);
-    }
+    public void opprettProsessinstansDigitalSøknadMottatt(SkjemaMottattMelding melding) {
+        UUID skjemaId = melding.getSkjemaId();
 
-    @Transactional
-    public void opprettProsessinstansEksisterendeDigitalSøknad(SkjemaMottattMelding melding) {
-        opprettSøknadProsessinstans(melding, ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
-    }
-
-    private void opprettSøknadProsessinstans(SkjemaMottattMelding melding, ProsessType prosessType) {
-        String låsReferanse = melding.getSkjemaId().toString();
-
-        // Redelivery av samme skjema kan rutes til en annen prosesstype (NY → EKSISTERENDE etter at saken er opprettet),
-        // så dedupen må gjelde på tvers av begge digital-søknad-typene — ikke bare (skjemaId, denne typen).
-        if (prosessinstansRepo.existsByLåsReferanseAndTypeIn(låsReferanse, ProsessType.digitaleSøknadTyper())) {
-            logger.warn("Skjema med skjemaId {} har allerede en digital-søknad-prosess — hopper over redelivery (forsøkt type {}).",
-                melding.getSkjemaId(), prosessType);
+        // Redelivery av samme skjema skal ikke gi ny prosess, uavhengig av type og låsformat.
+        if (prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(ProsessType.digitaleSøknadTyper(), skjemaId.toString())) {
+            logger.warn("Skjema med skjemaId {} har allerede en digital-søknad-prosess — hopper over redelivery.", skjemaId);
             return;
         }
 
+        UUID gruppe = finnGruppeForDigitalSøknad(skjemaId, melding.getRelaterteSkjemaIder());
+        String låsReferanse = SøknadLåsReferanse.lag(gruppe, skjemaId).toString();
+
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(prosessType)
+            .medType(ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD)
             .medLåsReferanse(låsReferanse)
             .build();
 
-        prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, melding.getSkjemaId());
+        prosessinstans.setData(DIGITAL_SØKNAD_SKJEMA_ID, skjemaId);
         prosessinstans.setData(DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER, melding.getRelaterteSkjemaIder());
 
+        logger.info("Oppretter prosessinstans for digital søknad skjemaId={} med låsreferanse {}", skjemaId, låsReferanse);
         lagre(prosessinstans);
+    }
+
+    private UUID finnGruppeForDigitalSøknad(UUID skjemaId, List<UUID> relaterteSkjemaIder) {
+        List<String> grupper = relaterteSkjemaIder.stream()
+            .flatMap(relatertId -> prosessinstansRepo
+                .findAllByTypeInAndLåsReferanseEndingWith(ProsessType.digitaleSøknadTyper(), relatertId.toString()).stream())
+            .sorted(Comparator.comparing(Prosessinstans::getRegistrertDato))
+            .map(relatert -> new SøknadLåsReferanse(relatert.getLåsReferanse()).getGruppePrefiks())
+            .distinct()
+            .toList();
+
+        if (grupper.isEmpty()) {
+            return skjemaId;
+        }
+        if (grupper.size() > 1) {
+            logger.warn("Relaterte skjemaer for skjemaId {} tilhører flere låsgrupper {} — bruker eldste {}",
+                skjemaId, grupper, grupper.getFirst());
+        }
+        return UUID.fromString(grupper.getFirst());
     }
 
     @Transactional

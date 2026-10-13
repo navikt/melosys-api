@@ -3,7 +3,6 @@ package no.nav.melosys.service.soknad
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations.Companion.withKafkaCorrelationId
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.sak.SkjemaSakMappingService
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
@@ -50,7 +49,6 @@ private fun standardKonsumeringDelay() {
 @Service
 class DigitalSøknadMottattConsumer(
     private val prosessinstansService: ProsessinstansService,
-    private val skjemaSakMappingService: SkjemaSakMappingService,
     private val konsumeringDelay: () -> Unit = ::standardKonsumeringDelay
 ) {
 
@@ -68,16 +66,9 @@ class DigitalSøknadMottattConsumer(
             "Mottatt skjema-melding med skjemaId=${melding.skjemaId}, recordOffset=${consumerRecord.offset()}, recordKey=${consumerRecord.key()}"
         }
 
-        val alleIder = melding.relaterteSkjemaIder + melding.skjemaId
-
-        val harEksisterendeSaksnummer = skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(alleIder)
-
-        if (harEksisterendeSaksnummer) {
-            log.info { "Fant eksisterende sak(er) for skjemaId ${melding.skjemaId}" }
-            prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding)
-        } else {
-            prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
-        }
+        // Om søknaden gir ny sak eller festes på eksisterende sak avgjøres i sagaen. Relaterte søknader
+        // havner i samme låsgruppe og behandles én om gangen, se ProsessinstansService.
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
 
         konsumeringDelay()
     }
