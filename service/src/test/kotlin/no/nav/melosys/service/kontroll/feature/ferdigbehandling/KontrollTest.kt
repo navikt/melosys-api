@@ -874,7 +874,7 @@ internal class KontrollTest {
     }
 
     @Test
-    fun `helseutgift dekkes-perioder fra behandling erstattet av vedtatt ny vurdering skal ikke gi overlappende periode kontrollfeil`() {
+    fun `helseutgift dekkes-perioder fra opprinnelig behandling skal ikke gi overlappende periode kontrollfeil når ny vurdering er vedtatt`() {
         mockEøsPensjonistBehandlingMedHelseutgiftDekkesPeriode(fom = LocalDate.of(2012, 7, 1), tom = LocalDate.of(2012, 12, 31))
         val førstegangsbehandling = lagResultatIAnnenFagsakMedHelseutgiftDekkesPeriode(
             id = 11L,

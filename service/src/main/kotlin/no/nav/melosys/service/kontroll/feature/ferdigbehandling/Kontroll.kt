@@ -303,17 +303,17 @@ class Kontroll(
     }
 
     private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {
-        val tidligereBehandlingsResultat =
+        val behandlingsresultaterIAndreFagsaker =
             behandlingsresultatService.finnAlleBehandlingsresultatForAktør(behandling.fagsak.hentBrukersAktørID())
                 .filter { it.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer }
                 .filter { it.hentBehandling().fagsak.status !in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
 
-        val behandlingIDerErstattetAvVedtattNyVurdering = tidligereBehandlingsResultat
+        val behandlingIDerErstattetAvVedtattNyVurdering = behandlingsresultaterIAndreFagsaker
             .filter { it.hentBehandling().erNyVurdering() && it.harVedtak() }
             .mapNotNull { it.hentBehandling().opprinneligBehandling?.id }
             .toSet()
 
-        return tidligereBehandlingsResultat
+        return behandlingsresultaterIAndreFagsaker
             .filterNot { it.hentBehandling().id in behandlingIDerErstattetAvVedtattNyVurdering }
             .flatMap { it.helseutgiftDekkesPerioder }
     }
