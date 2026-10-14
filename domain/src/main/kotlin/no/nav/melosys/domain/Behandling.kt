@@ -243,8 +243,7 @@ class Behandling(
 
     fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
-    /** Se [Companion.erIkkeYrkesaktivLovvalg]. Gjelder også årsavregninger med tema IKKE_YRKESAKTIV. */
-    fun erIkkeYrkesaktivLovvalg(): Boolean = Companion.erIkkeYrkesaktivLovvalg(fagsak.type, tema)
+    fun erIkkeYrkesaktivLovvalg(): Boolean = erIkkeYrkesaktivLovvalg(fagsak.type, tema)
 
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
@@ -282,12 +281,6 @@ class Behandling(
     }
 
     companion object {
-        // Muliggjør også utvidelsesfunksjoner i tester
-        /**
-         * Lovvalg for ikke-yrkesaktiv i EØS og trygdeavtale: egen iverksettingsflyt, uten fakturering og uten A1.
-         * FTRL med tema IKKE_YRKESAKTIV er ikke med: der fastsettes medlemskap med trygdeavgift i vanlig
-         * vedtaksflyt, og vedtaket skal årsavregnes og faktureres.
-         */
         fun erIkkeYrkesaktivLovvalg(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
             (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
