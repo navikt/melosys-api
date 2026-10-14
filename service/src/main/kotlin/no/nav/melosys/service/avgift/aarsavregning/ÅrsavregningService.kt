@@ -554,7 +554,10 @@ class ÅrsavregningService(
         if (utenVedtak.isNotEmpty()) {
             log.info { "Hopper over ${utenVedtak.size} behandling(er) uten vedtak i sak $saksnummer ved oppslag for årsavregning" }
         }
-        val (ikkeYrkesaktive, øvrige) = medVedtak.partition { it.hentBehandling().erIkkeYrkesaktivVedtak() }
+        val (ikkeYrkesaktive, øvrige) = medVedtak.partition {
+            val behandling = it.hentBehandling()
+            behandling.erIkkeYrkesaktivLovvalg() && !behandling.erÅrsavregning()
+        }
         if (ikkeYrkesaktive.isNotEmpty()) {
             log.info { "Hopper over ${ikkeYrkesaktive.size} vedtak for ikke-yrkesaktiv i sak $saksnummer ved oppslag for årsavregning" }
         }

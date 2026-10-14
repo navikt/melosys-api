@@ -246,12 +246,6 @@ class Behandling(
     /** Se [Companion.erIkkeYrkesaktivLovvalg]. Gjelder også årsavregninger med tema IKKE_YRKESAKTIV. */
     fun erIkkeYrkesaktivLovvalg(): Boolean = Companion.erIkkeYrkesaktivLovvalg(fagsak.type, tema)
 
-    /**
-     * Beskriver behandlingen (sakstype og tema, ikke årsavregning); sjekker ikke at et vedtak finnes.
-     * Årsavregninger med tema IKKE_YRKESAKTIV fastsetter trygdeavgift og er ikke vedtak om lovvalg.
-     */
-    fun erIkkeYrkesaktivVedtak(): Boolean = erIkkeYrkesaktivLovvalg() && !erÅrsavregning()
-
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
         BESLUTNING_LOVVALG_NORGE == tema

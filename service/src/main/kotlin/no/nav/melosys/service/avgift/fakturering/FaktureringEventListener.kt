@@ -29,7 +29,10 @@ class FaktureringEventListener(
             return
         }
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(event.behandling.id)
-        if (behandlingsresultat.vedtakMetadata != null && !behandlingsresultat.hentBehandling().erIkkeYrkesaktivVedtak()) {
+        val behandlingIResultat = behandlingsresultat.hentBehandling()
+        if (behandlingsresultat.vedtakMetadata != null &&
+            (!behandlingIResultat.erIkkeYrkesaktivLovvalg() || behandlingIResultat.erÅrsavregning())
+        ) {
             // Ved vedtak med fakturering opprettes fakturaserie med riktig mottaker allerede.
             // Vedtak for ikke-yrkesaktive fakturerer ikke, så mottakeren må oppdateres her.
             return

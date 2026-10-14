@@ -205,7 +205,7 @@ class OpprettFakturaserie(
                 behandlingsresultatService.hentBehandlingsresultat(it.id)
             }
             // Vedtak for ikke-yrkesaktive uten egen fakturaserie skal ikke skjule serien fra et eldre vedtak
-            .filterNot { it.hentBehandling().erIkkeYrkesaktivVedtak() && it.fakturaserieReferanse == null }
+            .filterNot { it.hentBehandling().erIkkeYrkesaktivLovvalg() && it.fakturaserieReferanse == null }
             .sortedByDescending { it.vedtakMetadata?.vedtaksdato }
             .map { it.fakturaserieReferanse }
             .firstOrNull()
