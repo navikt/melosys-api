@@ -21,8 +21,11 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory.SKATTEPLIKTTYPE
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_SØKNAD
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.IKKE_YRKESAKTIV
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -1895,32 +1898,35 @@ class OpprettFakturaserieTest {
     @Test
     fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere vedtak for ikke-yrkesaktiv ikke har serie`() {
         val fagsak = lagEøsFagsak()
-        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
-        lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), null)
+        val referanseFraEldreVedtak = "referanse-utsendt-arbeidstaker"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = referanseFraEldreVedtak)
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = null)
 
-        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe FAKTURASERIE_REFERANSE
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraEldreVedtak
     }
 
     @Test
     fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere avslag for ikke-yrkesaktiv ikke har serie`() {
         val fagsak = lagEøsFagsak()
-        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
-        lagTidligereVedtak(
-            11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), null,
-            resultattype = Behandlingsresultattyper.AVSLAG_SØKNAD
-        )
+        val referanseFraEldreVedtak = "referanse-utsendt-arbeidstaker"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = referanseFraEldreVedtak)
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = null, resultattype = AVSLAG_SØKNAD)
 
-        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe FAKTURASERIE_REFERANSE
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraEldreVedtak
     }
 
     @Test
     fun `Ny fakturaserie erstatter serien til et nyere vedtak for ikke-yrkesaktiv når den finnes`() {
         val fagsak = lagEøsFagsak()
-        lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
-        lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), NY_FAKTURASERIE_REFERANSE)
+        val referanseFraIkkeYrkesaktivtVedtak = "referanse-ikke-yrkesaktiv"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = "referanse-utsendt-arbeidstaker")
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = referanseFraIkkeYrkesaktivtVedtak)
 
-        opprettFakturaserieForNyttVedtak(fagsak).fakturaserieReferanse shouldBe NY_FAKTURASERIE_REFERANSE
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraIkkeYrkesaktivtVedtak
     }
+
+    // Feltnavnet i FakturaserieDto sier ikke at referansen gjelder serien som erstattes
+    private val FakturaserieDto.referanseTilSerienSomErstattes: String? get() = fakturaserieReferanse
 
     private fun dagerSiden(dager: Long): Instant = Instant.now().minus(dager, ChronoUnit.DAYS)
 
@@ -1935,17 +1941,17 @@ class OpprettFakturaserieTest {
         behandlingId: Long,
         fagsak: Fagsak,
         behandlingstema: Behandlingstema,
-        vedtakstidspunkt: Instant,
-        referanse: String?,
+        vedtaksdato: Instant,
+        fakturaserieReferanse: String?,
         resultattype: Behandlingsresultattyper = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
     ) {
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = behandlingId
             type = resultattype
-            fakturaserieReferanse = referanse
+            this.fakturaserieReferanse = fakturaserieReferanse
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-                vedtaksdato = vedtakstidspunkt
+                this.vedtaksdato = vedtaksdato
             }
             behandling {
                 id = behandlingId
@@ -1957,7 +1963,7 @@ class OpprettFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
     }
 
-    private fun opprettFakturaserieForNyttVedtak(fagsak: Fagsak): FakturaserieDto {
+    private fun forespørselNyFakturaserie(fagsak: Fagsak): FakturaserieDto {
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
