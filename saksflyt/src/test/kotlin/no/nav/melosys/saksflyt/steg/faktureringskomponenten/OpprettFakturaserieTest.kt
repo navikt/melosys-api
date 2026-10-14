@@ -1893,7 +1893,7 @@ class OpprettFakturaserieTest {
     }
 
     @Test
-    fun `Nyere vedtak for ikke-yrkesaktiv uten fakturaserie gir referansen fra det eldre vedtaket`() {
+    fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere vedtak for ikke-yrkesaktiv ikke har serie`() {
         val fagsak = lagEøsFagsak()
         lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
         lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), null)
@@ -1902,7 +1902,7 @@ class OpprettFakturaserieTest {
     }
 
     @Test
-    fun `Nyere avslag for ikke-yrkesaktiv uten fakturaserie gir referansen fra det eldre vedtaket`() {
+    fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere avslag for ikke-yrkesaktiv ikke har serie`() {
         val fagsak = lagEøsFagsak()
         lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
         lagTidligereVedtak(
@@ -1914,7 +1914,7 @@ class OpprettFakturaserieTest {
     }
 
     @Test
-    fun `Vedtak for ikke-yrkesaktiv med egen fakturaserie gir sin egen referanse`() {
+    fun `Ny fakturaserie erstatter serien til et nyere vedtak for ikke-yrkesaktiv når den finnes`() {
         val fagsak = lagEøsFagsak()
         lagTidligereVedtak(10L, fagsak, Behandlingstema.UTSENDT_ARBEIDSTAKER, dagerSiden(400), FAKTURASERIE_REFERANSE)
         lagTidligereVedtak(11L, fagsak, Behandlingstema.IKKE_YRKESAKTIV, dagerSiden(30), NY_FAKTURASERIE_REFERANSE)
