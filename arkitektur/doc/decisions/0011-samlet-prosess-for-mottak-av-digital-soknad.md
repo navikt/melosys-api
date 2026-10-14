@@ -63,5 +63,9 @@ Enum-verdiene og kodeverk-radene beholdes for historikk.
   (`melosys.prosessinstanser.paa.vent`).
 - Manuell ferdigstilling via admin publiserer ikke ferdig-hendelse, så ventende prosesser
   i samme gruppe frigjøres ikke automatisk.
+- Sender arbeidsgiver og arbeidstaker inn nesten samtidig, kan skjema-api regne ut
+  `relaterteSkjemaIder` før den andre delen er lagret, eller sende delene i omvendt rekkefølge.
+  Da blir det to saker. Vinduet er typisk under ett sekund, og delene sendes inn av ulike personer
+  uavhengig av hverandre, så dette vurderes som neglisjerbart.
 - Under rullerende deploy kan en gammel pod opprette prosessinstanser med det gamle
   typenavnet etter migreringen.
