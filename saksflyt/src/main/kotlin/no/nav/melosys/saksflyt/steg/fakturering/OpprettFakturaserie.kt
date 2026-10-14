@@ -11,7 +11,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringIntervall
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.Innbetalingstype
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -204,7 +207,7 @@ class OpprettFakturaserie(
             .map {
                 behandlingsresultatService.hentBehandlingsresultat(it.id)
             }
-            // Vedtak for ikke-yrkesaktive uten egen fakturaserie skal ikke skjule serien fra et eldre vedtak
+            // Ikke-yrkesaktive har vedtaksdato, men ingen fakturaserie, og skal ikke hindre at en ny serie erstatter en eldre serie
             .filterNot { it.hentBehandling().erIkkeYrkesaktivLovvalg() && it.fakturaserieReferanse == null }
             .sortedByDescending { it.vedtakMetadata?.vedtaksdato }
             .map { it.fakturaserieReferanse }
