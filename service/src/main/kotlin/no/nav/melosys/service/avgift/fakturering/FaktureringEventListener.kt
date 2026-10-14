@@ -34,7 +34,7 @@ class FaktureringEventListener(
             (!behandlingIResultat.erIkkeYrkesaktivLovvalg() || behandlingIResultat.erÅrsavregning())
         ) {
             // Ved vedtak med fakturering opprettes fakturaserie med riktig mottaker allerede.
-            // Vedtak for ikke-yrkesaktive fakturerer ikke, så mottakeren må oppdateres her.
+            // Vedtak for ikke-yrkesaktive fakturerer ikke.
             return
         }
 
