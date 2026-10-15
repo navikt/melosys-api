@@ -214,8 +214,8 @@ internal class FaktureringEventListenerTest {
     }
 
     @Test
-    fun `Oppdater fakturamottaker når vedtak for ikke-yrkesaktiv avsluttes, siden det ikke fakturerer`() {
-        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.FØRSTEGANG)
+    fun `Vedtak for ikke-yrkesaktiv hindrer ikke oppdatering av fakturamottaker`() {
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektigOgFakturaserie(Behandlingstyper.FØRSTEGANG)
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
 
@@ -223,15 +223,15 @@ internal class FaktureringEventListenerTest {
     }
 
     @Test
-    fun `Ikke oppdater fakturamottaker når vedtatt årsavregning med tema ikke-yrkesaktiv avsluttes`() {
-        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(Behandlingstyper.ÅRSAVREGNING)
+    fun `Ikke oppdater fakturamottaker når vedtatt årsavregning med tema ikke-yrkesaktiv avsluttes, siden årsavregningen fakturerer selv`() {
+        val avsluttetBehandling = lagAvsluttetIkkeYrkesaktivMedByttetFullmektigOgFakturaserie(Behandlingstyper.ÅRSAVREGNING)
 
         faktureringEventListener.oppdaterFakturaMottakerHvisNødvendig(BehandlingEndretStatusEvent(AVSLUTTET, avsluttetBehandling))
 
         verify(exactly = 0) { prosessinstansService.opprettProsessinstansOppdaterFaktura(any()) }
     }
 
-    private fun lagAvsluttetIkkeYrkesaktivMedByttetFullmektig(behandlingstype: Behandlingstyper): Behandling {
+    private fun lagAvsluttetIkkeYrkesaktivMedByttetFullmektigOgFakturaserie(behandlingstype: Behandlingstyper): Behandling {
         val desember1 = LocalDate.of(2023, 12, 1).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
         val desember2 = LocalDate.of(2023, 12, 2).atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant()
 
@@ -259,7 +259,7 @@ internal class FaktureringEventListenerTest {
             orgnr = "999999999",
             registrertDato = desember1,
             endretDato = desember2
-        )
+        ).apply { this.fagsak = fagsak }
 
         every { behandlingsresultatService.hentBehandlingsresultat(avsluttetBehandling.id) } returns behandlingsresultat
         every { behandlingService.hentBehandling(avsluttetBehandling.id) } returns avsluttetBehandling
