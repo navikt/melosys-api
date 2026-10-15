@@ -57,19 +57,15 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
-    // Eksplisitt overload i stedet for @JvmOverloads: Java-kallere treffer da samme metode som Kotlin-tester verifiserer mot med mockk
+    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
     fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) =
         ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = false)
 
-    /**
-     * @param leggTilNøkkelord setter nøkkelord basert på behandlingstema (Utsendt arbeidstaker / Statsansatt)
-     * før oppgaven ferdigstilles. Feil ved setting av nøkkelord stopper ikke ferdigstillingen.
-     */
     fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
-            if (leggTilNøkkelord) leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgave.oppgaveId)
+            if (leggTilNøkkelord) leggTilNøkkelordForBehandlingstema(behandling, oppgave.oppgaveId)
             ferdigstillOppgave(oppgave.oppgaveId)
         } else {
             log.warn("Finner ingen oppgave for behandling $behandlingID, med oppgaveid ${behandling.oppgaveId}")
@@ -213,7 +209,7 @@ class OppgaveService(
         }
     }
 
-    private fun leggTilNøkkelordForUtsendtArbeidstaker(behandling: Behandling, oppgaveID: String) {
+    private fun leggTilNøkkelordForBehandlingstema(behandling: Behandling, oppgaveID: String) {
         val nøkkelord = when (behandling.tema) {
             Behandlingstema.UTSENDT_ARBEIDSTAKER -> NØKKELORD_UTSENDT_ARBEIDSTAKER
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY -> NØKKELORD_STATSANSATT

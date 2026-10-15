@@ -530,7 +530,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_utsendtArbeidstaker_nøkkelordSettesIkke() {
+    fun ferdigstillOppgaveMedBehandlingID_utenNøkkelord_utsendtArbeidstaker_nøkkelordSettesIkke() {
         val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)

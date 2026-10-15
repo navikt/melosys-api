@@ -126,8 +126,8 @@ public class EosVedtakService implements FattVedtakInterface {
                 fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
-        // Nøkkelord settes kun ved innvilgelse, ikke ved avslag
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId(), behandlingsresultat.erInnvilgelse());
+        boolean leggTilNøkkelord = behandlingsresultat.erInnvilgelse();
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId(), leggTilNøkkelord);
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
