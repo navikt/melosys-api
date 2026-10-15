@@ -146,7 +146,7 @@ class EosVedtakServiceKtTest {
                 eq(true)
             )
         }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(BEHANDLING_ID) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, true) }
         // Viktig: Behandling-objekt (ikke ID) sendes for å unngå entity reload og race condition
         verify {
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
@@ -195,7 +195,7 @@ class EosVedtakServiceKtTest {
                 eq(true)
             )
         }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(BEHANDLING_ID) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, true) }
     }
 
     /**
@@ -263,7 +263,7 @@ class EosVedtakServiceKtTest {
                 eq(true)
             )
         }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(BEHANDLING_ID) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, true) }
     }
 
     @Test
@@ -337,6 +337,7 @@ class EosVedtakServiceKtTest {
                 eq(true)
             )
         }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, false) }
     }
 
     @Test
@@ -362,6 +363,7 @@ class EosVedtakServiceKtTest {
             )
         }
         verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, false) }
     }
 
     @Test

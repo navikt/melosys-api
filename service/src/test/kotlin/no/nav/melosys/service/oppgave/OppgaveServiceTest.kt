@@ -486,10 +486,10 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingIDEuEøs_utsendtArbeidstaker_nøkkelordSettesFørFerdigstilling() {
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_utsendtArbeidstaker_nøkkelordSettesFørFerdigstilling() {
         val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(behandling.id)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
 
         verifyOrder {
             oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker"))
@@ -498,10 +498,10 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingIDEuEøs_tjenestepersonEllerFly_nøkkelordStatsansattSettes() {
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_tjenestepersonEllerFly_nøkkelordStatsansattSettes() {
         val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(behandling.id)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
 
         verifyOrder {
             oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt"))
@@ -510,21 +510,21 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingIDEuEøs_annetTema_nøkkelordSettesIkke() {
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_annetTema_nøkkelordSettesIkke() {
         val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(behandling.id)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
 
         verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
         verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingIDEuEøs_nøkkelordKallFeiler_oppgaveBlirLikevelFerdigstilt() {
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_nøkkelordKallFeiler_oppgaveBlirLikevelFerdigstilt() {
         val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingIDEuEøs(behandling.id)
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
 
         verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
     }

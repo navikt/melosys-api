@@ -57,13 +57,15 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
+    // Eksplisitt overload i stedet for @JvmOverloads: Java-kallere treffer da samme metode som Kotlin-tester verifiserer mot med mockk
     fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) =
         ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = false)
 
-    fun ferdigstillOppgaveMedBehandlingIDEuEøs(behandlingID: Long) =
-        ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = true)
-
-    private fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
+    /**
+     * @param leggTilNøkkelord setter nøkkelord basert på behandlingstema (Utsendt arbeidstaker / Statsansatt)
+     * før oppgaven ferdigstilles. Feil ved setting av nøkkelord stopper ikke ferdigstillingen.
+     */
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
