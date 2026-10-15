@@ -79,8 +79,8 @@ SELECT * FROM behandling WHERE id = 456;
 # Check logs
 grep "API kall feilet" /var/log/melosys.log
 
-# Look for correlationId
-grep "correlationId" /var/log/melosys.log
+# Look for traceId (logged as trace_id by the OpenTelemetry agent)
+grep "<traceId>" /var/log/melosys.log
 ```
 
 ## Logging
@@ -218,7 +218,7 @@ HTTP 204 No Content
   "status": 400,
   "error": "Bad Request",
   "message": "Description of error",
-  "correlationId": "uuid-...",
+  "traceId": "0af7651916cd43dd8448eb211c80319c",
   "feilkoder": ["CODE1"]
 }
 ```

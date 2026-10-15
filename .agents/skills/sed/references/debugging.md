@@ -224,8 +224,8 @@ grep "EessiService" application.log
 # SED saga steps
 grep "SendVedtakUtland\|SedMottakRuting\|OpprettSedGrunnlag" application.log
 
-# With correlation ID
-grep "<correlationId>" application.log | grep -i "sed\|eessi"
+# With trace ID
+grep "<traceId>" application.log | grep -i "sed\|eessi"
 ```
 
 ## Key Code Locations

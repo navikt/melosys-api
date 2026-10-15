@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.pdl;
 
 import java.util.Collections;
 
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,12 +20,10 @@ public class PDLClientProducer {
     @Bean
     public PDLClient pdlClientForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
-                                                   PDLAuthFilterAzure pdlAuthFilter,
-                                                   CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
+                                                   PDLAuthFilterAzure pdlAuthFilter) {
         return new PDLClientImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlAuthFilter)
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot PDL feilet."))
                 .build());
     }

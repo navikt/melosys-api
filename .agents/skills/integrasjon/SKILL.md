@@ -108,12 +108,10 @@ Service-to-service auth is Azure AD (on-behalf-of / client-credentials), attache
 fun myServiceClient(
     webClientBuilder: WebClient.Builder,
     genericAuthFilterFactory: GenericAuthFilterFactory,
-    correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
 ) = MyServiceClient(
     webClientBuilder
         .baseUrl(url)
         .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-        .filter(correlationIdOutgoingFilter)
         .filter(errorFilter("Kall mot MyService feilet."))
         .build()
 )
@@ -126,7 +124,7 @@ securityTokenServiceClient.getResponseForSamlToken()
 ```
 
 ### No auth (in-cluster)
-Some in-cluster sidecar/team-internal calls (e.g. `InngangsvilkaarClient`, `TrygdeavgiftClient`) attach no auth filter at all — only the correlation-id and error filters.
+Some in-cluster sidecar/team-internal calls (e.g. `InngangsvilkaarClient`, `TrygdeavgiftClient`) attach no auth filter at all — only the error filter. Trace context (`traceparent`) is propagated automatically by the NAIS OpenTelemetry agent.
 
 ## Module Structure
 
@@ -193,12 +191,10 @@ class MyServiceClientConfig(
     @Bean
     fun myServiceClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
     ) = MyServiceClient(
         webClientBuilder
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME)) // omit if in-cluster/no auth
-            .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot MyService feilet."))
             .build()
     )

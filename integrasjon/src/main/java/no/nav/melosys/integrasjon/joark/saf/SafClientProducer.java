@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +27,10 @@ public class SafClientProducer {
     }
 
     @Bean
-    public SafClient safClient(WebClient.Builder webClientBuilder,
-                                   CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
+    public SafClient safClient(WebClient.Builder webClientBuilder) {
         return new SafClient(
             webClientBuilder
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot SAF feilet."))
                 .defaultHeaders(this::defaultHeaders)
                 .baseUrl(url)

@@ -12,7 +12,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.kodeverk.impl.KodeverkClient
 import no.nav.melosys.integrasjon.kodeverk.impl.KodeverkClientConfig
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -43,7 +42,6 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         KodeverkClientConfig::class,
         MetricsTestConfig::class,

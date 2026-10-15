@@ -14,5 +14,6 @@ public record HentProsessinstansDto(UUID id,
                                     String feiletSteg,
                                     String sisteFeilmelding,
                                     ProsessStatus status,
-                                    String correlationId) {
+                                    String correlationId,
+                                    String traceId) {
 }

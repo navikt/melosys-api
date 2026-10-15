@@ -2,14 +2,13 @@ package no.nav.melosys.tjenester.gui.unntakshandtering
 
 import com.google.gson.JsonParser
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.KonfliktException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.ValideringException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
-import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -151,8 +150,8 @@ class ExceptionMapper {
             "status" to httpStatus.value(),
             "error" to statustekst(httpStatus),
             "message" to (responsMelding ?: message),
-            "correlationId" to MDC.get(MDCOperations.CORRELATION_ID)
-        ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
+        ) + listOfNotNull(Traceparent.traceId()?.let { "traceId" to it }) +
+            if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
 
         return ResponseEntity(body, headere, httpStatus)
     }
