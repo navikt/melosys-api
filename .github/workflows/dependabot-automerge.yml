@@ -37,7 +37,7 @@ jobs:
           ref: 0e342d25820ca0d2941dcdcad4b7bbb59ad59122 # v1.5.1
           path: automerge-dependabot
           persist-credentials: false
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: '24'
       # Repoet bruker pnpm; --ignore-scripts fordi prepare kjører husky, som er en dev-avhengighet.
