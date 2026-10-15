@@ -1,6 +1,5 @@
 package no.nav.melosys.service.soknad
 
-import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -23,14 +22,9 @@ class DigitalSøknadMottattConsumerTest {
 
     private lateinit var digitalSøknadMottattConsumer: DigitalSøknadMottattConsumer
 
-    private var antallPauser = 0
-
     @BeforeEach
     fun setUp() {
-        antallPauser = 0
-        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(
-            prosessinstansService, konsumeringDelay = { antallPauser++ }
-        )
+        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(prosessinstansService)
     }
 
     @Test
@@ -43,6 +37,5 @@ class DigitalSøknadMottattConsumerTest {
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
         verify(exactly = 1) { prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding) }
-        antallPauser shouldBe 1
     }
 }

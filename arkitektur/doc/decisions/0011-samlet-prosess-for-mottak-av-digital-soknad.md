@@ -55,6 +55,8 @@ Enum-verdiene og kodeverk-radene beholdes for historikk.
 - Relaterte søknader som mottas samtidig havner på samme sak.
 - Ingen ny infrastruktur, bare den eksisterende låsmekanismen i saksflyt.
 - Konsumenten gjør ikke lenger oppslag i databasen for routing.
+- Pausen på 20 s mellom meldinger i konsumenten (MELOSYS-8290) er fjernet, fordi relaterte
+  søknader nå serialiseres i saksflyt uavhengig av hvor tett meldingene kommer.
 
 **Avveininger**
 - En `FEILET` prosess holder gruppen, så relaterte søknader blir stående `PÅ_VENT` til
