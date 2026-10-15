@@ -2,6 +2,7 @@ package no.nav.melosys.itest.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -118,6 +119,7 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -135,6 +137,12 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtaksdato.shouldNotBeNull()
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -181,7 +189,7 @@ class IkkeYrkesaktivVedtakIT(
                     sakstype = Sakstyper.EU_EOS,
                     sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
                     behandligsresultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-                    vedtakstype = null,
+                    vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
                     medlemskapsperioder = listOf(),
                     lovvalgsperioder = listOf(
                         no.nav.melosys.integrasjon.hendelser.Periode(
@@ -248,6 +256,7 @@ class IkkeYrkesaktivVedtakIT(
             .build()
 
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -265,6 +274,12 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtaksdato.shouldNotBeNull()
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -355,6 +370,7 @@ class IkkeYrkesaktivVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+        val idag = LocalDate.now()
         executeAndWait(
             mapOf(
                 ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to 1,
@@ -372,6 +388,12 @@ class IkkeYrkesaktivVedtakIT(
             begrunnelseFritekst.shouldBe("begrunnelse")
             utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
             fastsattAvLand.shouldBe(Land_iso2.NO)
+            vedtakMetadata.shouldNotBeNull().apply {
+                vedtakstype.shouldBe(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                vedtaksdato.shouldNotBeNull()
+                // idag hentes før fattVedtak; passerer midnatt før fattVedtak setter klagefristen, blir den én dag senere.
+                vedtakKlagefrist.shouldBeIn(listOf(idag.plusWeeks(6), idag.plusWeeks(6).plusDays(1)))
+            }
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)

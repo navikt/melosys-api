@@ -243,6 +243,8 @@ class Behandling(
 
     fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
+    fun erIkkeYrkesaktivLovvalg(): Boolean = erIkkeYrkesaktivLovvalg(fagsak.type, tema)
+
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
         BESLUTNING_LOVVALG_NORGE == tema
@@ -279,7 +281,8 @@ class Behandling(
     }
 
     companion object {
-        // Tom - muliggjør utvidelsefunksjoner i tester
+        fun erIkkeYrkesaktivLovvalg(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
+            (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     open class Builder {
