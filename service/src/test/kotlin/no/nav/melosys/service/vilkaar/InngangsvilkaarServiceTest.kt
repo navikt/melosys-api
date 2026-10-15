@@ -455,6 +455,20 @@ class InngangsvilkaarServiceTest {
         verify(exactly = 0) { saksbehandlingRegler.harIngenFlyt(any()) }
     }
 
+    @Test
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling er Årsavregning for EØS medlemskap og lovvalg utsendt arbeidstaker`() {
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.ÅRSAVREGNING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+        }
+
+        inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
+    }
+
     private fun lagBehandlingMedPeriodeOgLand(): Behandling {
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
             periode = Periode(LocalDate.now(), null)
