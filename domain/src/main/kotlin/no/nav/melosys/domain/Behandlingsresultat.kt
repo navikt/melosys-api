@@ -405,8 +405,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun erGodkjenningRegistreringUnntak(): Boolean =
         erRegistrertUnntak() && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT
 
-    fun a1Produseres(): Boolean = erInnvilgelse() && !erUtpeking() && harVedtak()
-
     fun utlandSkalVarslesOmVedtak(): Boolean =
         harVedtak() &&
             ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1) && !harLovvalgsperiodeMedBestemmelse(
