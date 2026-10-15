@@ -6,7 +6,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.stereotype.Component
 
 /**
- * Utgått: brukes kun av prosessinstanser av typen MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK.
+ * Utgått: brukes kun av prosessinstanser av typen MELOSYS_MOTTAK_DIGITAL_SØKNAD.
  * Nye prosessinstanser bruker AvklarSakOgBehandlingDigitalSøknad.
  */
 @Component

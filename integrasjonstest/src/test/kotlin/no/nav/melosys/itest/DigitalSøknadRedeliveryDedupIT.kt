@@ -125,7 +125,7 @@ class DigitalSøknadRedeliveryDedupIT(
         prosessinstansRepository.save(
             Prosessinstans.forTest {
                 id = null // la JPA generere id, ellers tolkes save som merge av en eksisterende rad
-                type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK
+                type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
                 status = ProsessStatus.FERDIG
                 låsReferanse = skjemaId.toString()
             }

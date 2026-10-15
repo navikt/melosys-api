@@ -29,7 +29,7 @@ import java.time.Duration
 import java.util.UUID
 
 /**
- * Integrasjonstest for MELOSYS_MOTTAK_DIGITAL_SØKNAD-flyten når søknaden gjelder eksisterende sak.
+ * Integrasjonstest for MOTTAK_DIGITAL_SØKNAD-flyten når søknaden gjelder eksisterende sak.
  *
  * Scenariet:
  * 1. Send en første digital søknad → oppretter fagsak, behandling (FØRSTEGANG, OPPRETTET) og mapping
@@ -68,7 +68,7 @@ class DigitalSøknadEksisterendeSakIT(
 
         // Hent saksnummer fra den opprettede fagsaken
         val førsteProsessinstans = prosessinstansRepository.finnDigitalSøknadProsess(førsteSkjemaId).shouldNotBeNull()
-        førsteProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        førsteProsessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         val saksnummer = førsteProsessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
 
         // --- Steg 2: Send ny søknad med referanse til den første ---
@@ -92,7 +92,7 @@ class DigitalSøknadEksisterendeSakIT(
         // --- Steg 3: Verifiser eksisterende-sak-flyten ---
         val andreProsessinstans = prosessinstansRepository.finnDigitalSøknadProsess(andreSkjemaId).shouldNotBeNull()
 
-        andreProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        andreProsessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         andreProsessinstans.låsReferanse shouldBe "${førsteSkjemaId}_$andreSkjemaId"
         andreProsessinstans.hentData<Boolean>(ProsessDataKey.DIGITAL_SØKNAD_NY_SAK) shouldBe false
         andreProsessinstans.status shouldBe ProsessStatus.FERDIG
@@ -156,7 +156,7 @@ class DigitalSøknadEksisterendeSakIT(
         }
 
         val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         prosessinstans.hendelser.shouldHaveSize(0)
         prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer shouldBe nyesteSaksnummer
     }
@@ -173,7 +173,7 @@ class DigitalSøknadEksisterendeSakIT(
         }
 
         val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         return skjemaId to prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
     }
 

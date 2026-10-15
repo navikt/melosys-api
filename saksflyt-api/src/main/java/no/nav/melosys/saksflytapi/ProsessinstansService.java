@@ -638,7 +638,7 @@ public class ProsessinstansService {
         String låsReferanse = SøknadLåsReferanse.lag(gruppe, skjemaId).toString();
 
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD)
+            .medType(ProsessType.MOTTAK_DIGITAL_SØKNAD)
             .medLåsReferanse(låsReferanse)
             .build();
 

@@ -92,7 +92,7 @@ class DigitalSøknadMottakIT(
         val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
 
         // Basic prosessinstans info
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FERDIG
         prosessinstans.låsReferanse shouldBe "${skjemaId}_$skjemaId"
 

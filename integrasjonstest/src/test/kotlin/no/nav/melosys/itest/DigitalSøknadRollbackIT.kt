@@ -87,7 +87,7 @@ class DigitalSøknadRollbackIT(
         val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
 
         // Prosessinstans skal ha FEILET status med hendelse på riktig steg
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FEILET
         prosessinstans.hendelser.shouldHaveSize(1)
         prosessinstans.hendelser.first().steg shouldBe ProsessSteg.AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD

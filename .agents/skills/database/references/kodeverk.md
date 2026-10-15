@@ -185,8 +185,8 @@ REGISTRERING_UNNTAK_GODKJENN      - Approve exception
 REGISTRERING_UNNTAK_AVVIS         - Reject exception
 
 -- Digital søknad-mottak (V147, V152, V172) — from melosys-skjema-api
-MELOSYS_MOTTAK_DIGITAL_SØKNAD               - Receive digital application (new or existing sak, V172)
-MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK        - Deprecated: old new-sak flow (renamed in V172)
+MOTTAK_DIGITAL_SØKNAD                       - Receive digital application (new or existing sak, V172)
+MELOSYS_MOTTAK_DIGITAL_SØKNAD               - Deprecated: receive digital application (new sak)
 MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD  - Deprecated: receive digital application (existing sak)
 
 -- Other

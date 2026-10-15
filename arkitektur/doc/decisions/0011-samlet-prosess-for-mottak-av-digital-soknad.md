@@ -21,7 +21,7 @@ lagret mappingen.
 ## Decision
 
 ### 1. Én prosesstype som avgjør sak i sagaen
-Konsumenten oppretter alltid `MELOSYS_MOTTAK_DIGITAL_SØKNAD`. Steget
+Konsumenten oppretter alltid den nye prosesstypen `MOTTAK_DIGITAL_SØKNAD`. Steget
 `AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD` gjør mapping-oppslaget og bruker enten
 `DigitalSøknadEksisterendeSakHåndterer` eller `DigitalSøknadNySakOppretter`.
 Resultatet lagres i `DIGITAL_SØKNAD_NY_SAK`. `OPPRETT_ARKIVSAK_DIGITAL_SØKNAD` og
@@ -44,9 +44,9 @@ Redelivery dedupliseres på `skjemaId` (slutten av låsreferansen) på tvers av 
 digital-søknad-typene, både i gammelt og nytt låsformat.
 
 ### 3. Overgang
-`V172` gir den gamle ny-sak-flyten navnet `MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK` og flytter
-eksisterende prosessinstanser dit. `MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` beholdes.
-Begge er utgått, og flytene kan fjernes når ingen uferdige prosessinstanser bruker dem.
+`V172` legger inn `MOTTAK_DIGITAL_SØKNAD` og de nye stegene. `MELOSYS_MOTTAK_DIGITAL_SØKNAD` og
+`MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` beholdes med flytene sine, slik at eksisterende
+prosessinstanser fullføres uendret. Begge er utgått, og flytene kan fjernes når ingen uferdige prosessinstanser bruker dem.
 Enum-verdiene og kodeverk-radene beholdes for historikk.
 
 ## Consequences
@@ -67,5 +67,3 @@ Enum-verdiene og kodeverk-radene beholdes for historikk.
   `relaterteSkjemaIder` før den andre delen er lagret, eller sende delene i omvendt rekkefølge.
   Da blir det to saker. Vinduet er typisk under ett sekund, og delene sendes inn av ulike personer
   uavhengig av hverandre, så dette vurderes som neglisjerbart.
-- Under rullerende deploy kan en gammel pod opprette prosessinstanser med det gamle
-  typenavnet etter migreringen.

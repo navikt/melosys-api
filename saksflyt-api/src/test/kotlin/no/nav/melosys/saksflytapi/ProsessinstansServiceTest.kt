@@ -839,13 +839,13 @@ class ProsessinstansServiceTest {
 
         // Dedupen skal sjekke på tvers av alle digital-søknad-typene, også de utgåtte
         typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MOTTAK_DIGITAL_SØKNAD,
             ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
-            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD_NY_SAK,
             ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
         )
 
         piListCaptor.last().run {
-            type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe "${skjemaId}_$skjemaId"
             hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
         }
@@ -866,7 +866,7 @@ class ProsessinstansServiceTest {
         prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
 
         piListCaptor.last().run {
-            type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+            type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
             låsReferanse shouldBe "${gruppe}_$skjemaId"
             hentData<List<UUID>>(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER) shouldContainExactlyInAnyOrder melding.relaterteSkjemaIder
         }
@@ -920,7 +920,7 @@ class ProsessinstansServiceTest {
     }
 
     private fun digitalSøknadProsess(låsReferanse: String, registrertDato: LocalDateTime) = Prosessinstans.forTest {
-        type = ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        type = ProsessType.MOTTAK_DIGITAL_SØKNAD
         this.låsReferanse = låsReferanse
         this.registrertDato = registrertDato
     }
