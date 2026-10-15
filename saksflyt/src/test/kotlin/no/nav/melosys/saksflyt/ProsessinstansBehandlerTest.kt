@@ -12,6 +12,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.verify
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.metrics.MetrikkerNavn
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.slf4j.MDC
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Duration
 import java.time.LocalDateTime
@@ -113,6 +115,60 @@ class ProsessinstansBehandlerTest {
     }
 
     @Test
+    fun `behandleProsessinstansNå kjører stegene i lagret trace og gjenoppretter kallerens kontekst`() {
+        prosessinstans.setData(ProsessDataKey.TRACEPARENT, LAGRET_TRACEPARENT)
+        var traceIdISteg: String? = null
+        every { stegbehandler.utfør(prosessinstans) } answers { traceIdISteg = Traceparent.traceId() }
+
+
+        Traceparent.aktiver(KALLER_TRACEPARENT).use {
+            prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+            Traceparent.nåværende() shouldBe KALLER_TRACEPARENT
+        }
+
+
+        traceIdISteg shouldBe LAGRET_TRACE_ID
+    }
+
+    @Test
+    fun `behandleProsessinstansNå gjenoppretter kallerens kontekst når et steg feiler`() {
+        prosessinstans.setData(ProsessDataKey.TRACEPARENT, LAGRET_TRACEPARENT)
+        var traceIdISteg: String? = null
+        every { stegbehandler.utfør(prosessinstans) } answers {
+            traceIdISteg = Traceparent.traceId()
+            throw FunksjonellException("FEIL!")
+        }
+
+
+        Traceparent.aktiver(KALLER_TRACEPARENT).use {
+            prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+            Traceparent.nåværende() shouldBe KALLER_TRACEPARENT
+        }
+
+
+        traceIdISteg shouldBe LAGRET_TRACE_ID
+        prosessinstans.status shouldBe ProsessStatus.FEILET
+    }
+
+    @Test
+    fun `behandleProsessinstansNå legger legacy correlationId i MDC når traceparent mangler`() {
+        prosessinstans.setData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "gammel-correlation-id")
+        var correlationIdISteg: String? = null
+        every { stegbehandler.utfør(prosessinstans) } answers {
+            correlationIdISteg = MDC.get(ProsessinstansBehandler.LEGACY_CORRELATION_ID)
+        }
+
+
+        prosessinstansBehandler.behandleProsessinstansNå(prosessinstans)
+
+
+        correlationIdISteg shouldBe "gammel-correlation-id"
+        MDC.get(ProsessinstansBehandler.LEGACY_CORRELATION_ID).shouldBeNull()
+    }
+
+    @Test
     fun `behandleProsessinstansNå prosessinstans med status feilet blir ikke behandlet`() {
         prosessinstans.status = ProsessStatus.FEILET
 
@@ -187,5 +243,11 @@ class ProsessinstansBehandlerTest {
         sistFullførtSteg = null
         registrertDato = LocalDateTime.MIN
         this.endretDato = endretDato
+    }
+
+    companion object {
+        private const val LAGRET_TRACE_ID = "0af7651916cd43dd8448eb211c80319c"
+        private const val LAGRET_TRACEPARENT = "00-$LAGRET_TRACE_ID-b7ad6b7169203331-01"
+        private const val KALLER_TRACEPARENT = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
     }
 }

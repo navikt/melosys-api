@@ -38,6 +38,7 @@ import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 public class ProsessinstansBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
+    static final String LEGACY_CORRELATION_ID = "correlation-id";
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
@@ -124,6 +125,7 @@ public class ProsessinstansBehandler {
         Scope traceScope = Traceparent.aktiver(prosessinstans.getData(ProsessDataKey.TRACEPARENT));
         try {
             MDC.put("pid", prosessinstans.getId().toString());
+            settLegacyCorrelationId(prosessinstans);
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
                 prosessinstans = utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
@@ -134,6 +136,7 @@ public class ProsessinstansBehandler {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
             MDC.remove("pid");
+            MDC.remove(LEGACY_CORRELATION_ID);
             SaksflytSubjektHolder.reset();
             traceScope.close();
 
@@ -145,6 +148,17 @@ public class ProsessinstansBehandler {
 
             tellBehandlet(prosessinstans);
         }
+    }
+
+    /**
+     * Prosessinstanser opprettet før overgangen til traceparent har bare correlationId. Den legges i MDC
+     * slik at loggene fortsatt kan søkes opp med ID-en som admin-API-et (console) viser.
+     * Fjernes sammen med {@link ProsessDataKey#CORRELATION_ID_SAKSFLYT}.
+     */
+    private static void settLegacyCorrelationId(Prosessinstans prosessinstans) {
+        if (prosessinstans.getData(ProsessDataKey.TRACEPARENT) != null) return;
+        String correlationId = prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT);
+        if (correlationId != null) MDC.put(LEGACY_CORRELATION_ID, correlationId);
     }
 
     private void behandleFlytIkkeFunnet(Prosessinstans prosessinstans) {
