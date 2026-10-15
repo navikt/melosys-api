@@ -21,6 +21,9 @@ class ProsessinstansStatusCache(private val prosessinstansRepository: Prosessins
     fun antallProsessinstanserFeiletPåType(type: ProsessType): Double =
         antallProsessinstanserMedTypeOgStatus(type, STATUS_FEILET).toDouble()
 
+    fun antallProsessinstanserPåVentPåType(type: ProsessType): Double =
+        antallProsessinstanserMedTypeOgStatus(type, STATUS_PÅ_VENT).toDouble()
+
     fun antallProsessinstanserFeiletPåSteg(prosessSteg: ProsessSteg): Double =
         antallProsessinstanserMedStegOgStatus(prosessSteg, STATUS_FEILET).toDouble()
 
@@ -79,5 +82,6 @@ class ProsessinstansStatusCache(private val prosessinstansRepository: Prosessins
         private val PROSESS_TYPER = ProsessType.values().toSet()
         private val PROSESS_STEG = ProsessSteg.values().toSet()
         private val STATUS_FEILET = setOf(ProsessStatus.FEILET)
+        private val STATUS_PÅ_VENT = setOf(ProsessStatus.PÅ_VENT)
     }
 }

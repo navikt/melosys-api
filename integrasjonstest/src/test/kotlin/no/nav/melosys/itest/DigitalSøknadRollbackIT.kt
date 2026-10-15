@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.ninjasquad.springmockk.MockkSpyBean
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import no.nav.melosys.repository.FagsakRepository
@@ -42,7 +43,7 @@ class DigitalSøknadRollbackIT(
     private val kafkaTopic = "teammelosys.skjema.innsendt.v1-local"
 
     @Test
-    fun `rollback ved feil i OPPRETT_SAK_OG_BEHANDLING_SØKNAD - fagsak og behandling rulles tilbake`() {
+    fun `rollback ved feil i AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD - fagsak og behandling rulles tilbake`() {
         val testFnr = "30056928150"
 
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
@@ -75,22 +76,21 @@ class DigitalSøknadRollbackIT(
 
         // Send Kafka-melding — starter sagaen.
         // Steg 1 (HENT_SØKNADSDATA) lykkes.
-        // Steg 2 (OPPRETT_SAK_OG_BEHANDLING_SØKNAD) oppretter fagsak+behandling,
+        // Steg 2 (AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD) oppretter fagsak+behandling,
         // men kaster exception ved lagring av mottatte opplysninger → hele stegets transaksjon rulles tilbake.
         kafkaTemplate.send(kafkaTopic, melding)
 
         await.atMost(Duration.ofSeconds(10)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FEILET
+            prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)?.status == ProsessStatus.FEILET
         }
 
-        val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
+        val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
 
         // Prosessinstans skal ha FEILET status med hendelse på riktig steg
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         prosessinstans.status shouldBe ProsessStatus.FEILET
         prosessinstans.hendelser.shouldHaveSize(1)
-        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
+        prosessinstans.hendelser.first().steg shouldBe ProsessSteg.AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
 
         // KJERNEASSERTION: Verifiser at @Transactional(REQUIRES_NEW) på StegBehandler.utfør()
         // har rullet tilbake fagsak+behandling som ble opprettet av fagsakService.nyFagsakOgBehandling().

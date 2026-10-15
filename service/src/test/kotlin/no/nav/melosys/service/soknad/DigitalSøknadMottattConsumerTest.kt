@@ -1,16 +1,13 @@
 package no.nav.melosys.service.soknad
 
-import io.kotest.matchers.collections.shouldContainAll
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
-import io.mockk.Runs
-import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.sak.SkjemaSakMappingService
+import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,62 +20,22 @@ class DigitalSøknadMottattConsumerTest {
     @MockK
     private lateinit var prosessinstansService: ProsessinstansService
 
-    @MockK
-    private lateinit var skjemaSakMappingService: SkjemaSakMappingService
-
     private lateinit var digitalSøknadMottattConsumer: DigitalSøknadMottattConsumer
 
     @BeforeEach
     fun setUp() {
-        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(
-            prosessinstansService, skjemaSakMappingService, konsumeringDelay = {}
-        )
+        digitalSøknadMottattConsumer = DigitalSøknadMottattConsumer(prosessinstansService)
     }
 
     @Test
-    fun `mottaSkjemaMelding skal opprette ny sak når ingen eksisterende sak`() {
-        val skjemaId = UUID.randomUUID()
-        val melding = SkjemaMottattMelding(skjemaId)
-        val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
-
-        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(any()) } returns false
-        every { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) } just Runs
-
-        digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
-
-        verify { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(any()) }
-    }
-
-    @Test
-    fun `mottaSkjemaMelding skal bruke eksisterende sak når mapping finnes`() {
-        val skjemaId = UUID.randomUUID()
-        val melding = SkjemaMottattMelding(skjemaId)
-        val consumerRecord = ConsumerRecord<String, SkjemaMottattMelding>("topic", 0, 0, "key", melding)
-
-        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(any()) } returns true
-        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) } just Runs
-
-        digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
-
-        verify { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) }
-        verify(exactly = 0) { prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(any()) }
-    }
-
-    @Test
-    fun `mottaSkjemaMelding skal inkludere relaterteSkjemaIder i oppslag`() {
-        val skjemaId = UUID.randomUUID()
-        val relatertId = UUID.randomUUID()
-        val melding = SkjemaMottattMelding(skjemaId, listOf(relatertId))
+    fun `mottaSkjemaMelding skal opprette prosessinstans for digital søknad`() {
+        val melding = SkjemaMottattMelding(UUID.randomUUID(), listOf(UUID.randomUUID()))
         val consumerRecord = ConsumerRecord("topic", 0, 0, "key", melding)
-        val alleIderSlot = slot<Collection<UUID>>()
 
-        every { skjemaSakMappingService.harMappingMedGyldigSaksnummerForSkjemaId(capture(alleIderSlot)) } returns true
-        every { prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding) } just Runs
+        every { prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding) } just Runs
 
         digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
 
-        val capturedIds = alleIderSlot.captured
-        capturedIds shouldContainAll listOf(relatertId, skjemaId)
+        verify(exactly = 1) { prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding) }
     }
 }

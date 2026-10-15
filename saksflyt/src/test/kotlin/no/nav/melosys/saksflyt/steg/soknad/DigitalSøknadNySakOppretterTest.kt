@@ -22,7 +22,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class OpprettSakOgBehandlingDigitalSøknadTest {
+internal class DigitalSøknadNySakOppretterTest {
 
     @MockK lateinit var fagsakService: FagsakService
     @MockK lateinit var persondataFasade: PersondataFasade
@@ -49,7 +48,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     @MockK lateinit var behandlingService: BehandlingService
     @MockK(relaxed = true) lateinit var aktørSynkronisering: DigitalSøknadAktørSynkronisering
 
-    private lateinit var opprettSakOgBehandlingDigitalSøknad: OpprettSakOgBehandlingDigitalSøknad
+    private lateinit var nySakOppretter: DigitalSøknadNySakOppretter
     private lateinit var prosessinstans: Prosessinstans
 
     private val fnr = "12345678901"
@@ -60,15 +59,15 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     private val behandlingId = 42L
 
     private val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
-        fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-        orgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.orgnr
-        juridiskEnhetOrgnr = this@OpprettSakOgBehandlingDigitalSøknadTest.juridiskEnhetOrgnr
-        referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+        fnr = this@DigitalSøknadNySakOppretterTest.fnr
+        orgnr = this@DigitalSøknadNySakOppretterTest.orgnr
+        juridiskEnhetOrgnr = this@DigitalSøknadNySakOppretterTest.juridiskEnhetOrgnr
+        referanseId = this@DigitalSøknadNySakOppretterTest.referanseId
     }
 
     @BeforeEach
     fun setup() {
-        opprettSakOgBehandlingDigitalSøknad = OpprettSakOgBehandlingDigitalSøknad(
+        nySakOppretter = DigitalSøknadNySakOppretter(
             fagsakService, persondataFasade, mottatteOpplysningerService, jsonMapper,
             skjemaSakMappingService, behandlingService, aktørSynkronisering
         )
@@ -103,11 +102,6 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
     }
 
     @Test
-    fun `inngangsSteg returnerer OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD`() {
-        opprettSakOgBehandlingDigitalSøknad.inngangsSteg() shouldBe ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD
-    }
-
-    @Test
     fun `utfør oppretter fagsak og behandling med korrekte verdier`() {
         mockMottatteOpplysninger()
         val requestSlot = slot<OpprettSakRequest>()
@@ -121,7 +115,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         every { persondataFasade.hentAktørIdForIdent(fnr) } returns aktørId
         every { fagsakService.nyFagsakOgBehandling(capture(requestSlot)) } returns fagsak
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         val capturedRequest = requestSlot.captured
         capturedRequest.aktørID shouldBe aktørId
@@ -139,7 +133,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val aktørerSlot = slot<AktørerFraSøknad>()
         every { aktørSynkronisering.synkroniser(any(), capture(aktørerSlot)) } just Runs
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         aktørerSlot.captured.arbeidsgiverOrgnumre shouldBe listOf(orgnr)
         aktørerSlot.captured.skjemadel shouldBe Skjemadel.ARBEIDSTAKERS_DEL
@@ -152,8 +146,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             erOffentligArbeidsgiver = true
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+            fnr = this@DigitalSøknadNySakOppretterTest.fnr
+            referanseId = this@DigitalSøknadNySakOppretterTest.referanseId
         }
         val offentligProsessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.DIGITAL_SØKNADSDATA, offentligSøknadsdata)
@@ -172,7 +166,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(offentligProsessinstans)
+        nySakOppretter.opprett(offentligProsessinstans)
 
         requestSlot.captured.behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
     }
@@ -182,7 +176,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val behandling = mockFagsakOgBehandling()
         mockMottatteOpplysninger()
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         prosessinstans.behandling shouldBe behandling
     }
@@ -199,7 +193,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
             )
         } returns mockk<MottatteOpplysninger> { every { id } returns 99L }
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         soeknadSlot.captured.shouldNotBeNull()
 
@@ -216,7 +210,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         mockFagsakOgBehandling()
         mockMottatteOpplysninger()
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
     }
@@ -226,8 +220,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val arbeidsgiverSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+            fnr = this@DigitalSøknadNySakOppretterTest.fnr
+            referanseId = this@DigitalSøknadNySakOppretterTest.referanseId
         }
         val arbeidsgiverProsessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.DIGITAL_SØKNADSDATA, arbeidsgiverSøknadsdata)
@@ -246,7 +240,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(arbeidsgiverProsessinstans)
+        nySakOppretter.opprett(arbeidsgiverProsessinstans)
 
         verify { behandling.status = Behandlingsstatus.AVVENT_DOK_PART }
         verify { behandlingService.lagre(behandling) }
@@ -257,7 +251,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val behandling = mockFagsakOgBehandling()
         mockMottatteOpplysninger()
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(prosessinstans)
+        nySakOppretter.opprett(prosessinstans)
 
         verify(exactly = 0) { behandling.status = Behandlingsstatus.AVVENT_DOK_PART }
     }
@@ -267,8 +261,8 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         val arbeidsgiverMedKoblet = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
-            fnr = this@OpprettSakOgBehandlingDigitalSøknadTest.fnr
-            referanseId = this@OpprettSakOgBehandlingDigitalSøknadTest.referanseId
+            fnr = this@DigitalSøknadNySakOppretterTest.fnr
+            referanseId = this@DigitalSøknadNySakOppretterTest.referanseId
             medKobletArbeidsgiverSkjema()
         }
         val kobletProsessinstans = Prosessinstans.forTest {
@@ -287,7 +281,7 @@ internal class OpprettSakOgBehandlingDigitalSøknadTest {
         every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
             mockk<MottatteOpplysninger> { every { id } returns 99L }
 
-        opprettSakOgBehandlingDigitalSøknad.utfør(kobletProsessinstans)
+        nySakOppretter.opprett(kobletProsessinstans)
 
         verify(exactly = 0) { behandlingService.lagre(any()) }
     }

@@ -29,13 +29,13 @@ import java.time.Duration
 import java.util.UUID
 
 /**
- * Integrasjonstest for MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD-flyten.
+ * Integrasjonstest for MOTTAK_DIGITAL_SØKNAD-flyten når søknaden gjelder eksisterende sak.
  *
  * Scenariet:
  * 1. Send en første digital søknad → oppretter fagsak, behandling (FØRSTEGANG, OPPRETTET) og mapping
  * 2. Send en ny søknad med relaterteSkjemaIder som peker til den første
- * 3. Consumer finner eksisterende sak via mapping og starter eksisterende-sak-flyt
- * 4. HåndterEksisterendeSakSøknad finner åpen FØRSTEGANG-behandling i OPPRETTET-status
+ * 3. AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD finner eksisterende sak via mapping
+ * 4. DigitalSøknadEksisterendeSakHåndterer finner åpen FØRSTEGANG-behandling i OPPRETTET-status
  *    og oppdaterer mottatte opplysninger (uten statusendring, fordi OPPRETTET ikke trigger reset)
  *
  * Dekker også at en søknad som er relatert til flere åpne saker havner på den sist opprettede.
@@ -63,14 +63,12 @@ class DigitalSøknadEksisterendeSakIT(
         kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(førsteSkjemaId))
 
         await.atMost(Duration.ofSeconds(10)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(førsteSkjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FERDIG
+            prosessinstansRepository.finnDigitalSøknadProsess(førsteSkjemaId)?.status == ProsessStatus.FERDIG
         }
 
         // Hent saksnummer fra den opprettede fagsaken
-        val førsteProsessinstans = prosessinstansRepository
-            .findAllByLåsReferanseStartingWith(førsteSkjemaId.toString()).single()
-        førsteProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        val førsteProsessinstans = prosessinstansRepository.finnDigitalSøknadProsess(førsteSkjemaId).shouldNotBeNull()
+        førsteProsessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         val saksnummer = førsteProsessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
 
         // --- Steg 2: Send ny søknad med referanse til den første ---
@@ -88,15 +86,15 @@ class DigitalSøknadEksisterendeSakIT(
         kafkaTemplate.send(kafkaTopic, andreMelding)
 
         await.atMost(Duration.ofSeconds(10)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(andreSkjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FERDIG
+            prosessinstansRepository.finnDigitalSøknadProsess(andreSkjemaId)?.status == ProsessStatus.FERDIG
         }
 
         // --- Steg 3: Verifiser eksisterende-sak-flyten ---
-        val andreProsessinstans = prosessinstansRepository
-            .findAllByLåsReferanseStartingWith(andreSkjemaId.toString()).single()
+        val andreProsessinstans = prosessinstansRepository.finnDigitalSøknadProsess(andreSkjemaId).shouldNotBeNull()
 
-        andreProsessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        andreProsessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
+        andreProsessinstans.låsReferanse shouldBe "${førsteSkjemaId}_$andreSkjemaId"
+        andreProsessinstans.hentData<Boolean>(ProsessDataKey.DIGITAL_SØKNAD_NY_SAK) shouldBe false
         andreProsessinstans.status shouldBe ProsessStatus.FERDIG
         andreProsessinstans.sistFullførtSteg shouldBe ProsessSteg.SEND_FORVALTNINGSMELDING
         andreProsessinstans.hendelser.shouldHaveSize(0)
@@ -119,6 +117,9 @@ class DigitalSøknadEksisterendeSakIT(
         val mottatteOpplysninger = behandling.mottatteOpplysninger.shouldNotBeNull()
         val soeknad = mottatteOpplysninger.mottatteOpplysningerData as Soeknad
         soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactly listOf("ANDRE-ORG")
+
+        // Verifiser at eksisterende sak ikke fikk ny arkivsak
+        behandling.fagsak.gsakSaksnummer shouldBe førsteProsessinstans.behandling!!.fagsak.gsakSaksnummer
 
         // Verifiser at forvaltningsmelding ble bestilt for begge søknader (default skjemadel = ARBEIDSTAKERS_DEL → BRUKER)
         await.atMost(Duration.ofSeconds(5)).until {
@@ -151,12 +152,11 @@ class DigitalSøknadEksisterendeSakIT(
         kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId, relaterteSkjemaIder))
 
         await.atMost(Duration.ofSeconds(10)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FERDIG
+            prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)?.status == ProsessStatus.FERDIG
         }
 
-        val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
+        val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         prosessinstans.hendelser.shouldHaveSize(0)
         prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer shouldBe nyesteSaksnummer
     }
@@ -169,12 +169,11 @@ class DigitalSøknadEksisterendeSakIT(
         kafkaTemplate.send(kafkaTopic, SkjemaMottattMelding(skjemaId))
 
         await.atMost(Duration.ofSeconds(10)).until {
-            prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString())
-                .firstOrNull()?.status == ProsessStatus.FERDIG
+            prosessinstansRepository.finnDigitalSøknadProsess(skjemaId)?.status == ProsessStatus.FERDIG
         }
 
-        val prosessinstans = prosessinstansRepository.findAllByLåsReferanseStartingWith(skjemaId.toString()).single()
-        prosessinstans.type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
+        val prosessinstans = prosessinstansRepository.finnDigitalSøknadProsess(skjemaId).shouldNotBeNull()
+        prosessinstans.type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
         return skjemaId to prosessinstans.behandling.shouldNotBeNull().fagsak.saksnummer
     }
 
