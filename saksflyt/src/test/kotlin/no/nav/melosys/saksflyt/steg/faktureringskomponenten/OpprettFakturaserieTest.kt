@@ -21,8 +21,11 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory.SKATTEPLIKTTYPE
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_SØKNAD
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.IKKE_YRKESAKTIV
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenClient
@@ -1890,6 +1893,124 @@ class OpprettFakturaserieTest {
 
 
         verify { faktureringskomponentenClient wasNot Called }
+    }
+
+    @Test
+    fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere vedtak for ikke-yrkesaktiv ikke har serie`() {
+        val fagsak = lagEøsFagsak()
+        val referanseFraEldreVedtak = "referanse-utsendt-arbeidstaker"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = referanseFraEldreVedtak)
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = null)
+
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraEldreVedtak
+    }
+
+    @Test
+    fun `Ny fakturaserie erstatter serien fra eldre vedtak når nyere avslag for ikke-yrkesaktiv ikke har serie`() {
+        val fagsak = lagEøsFagsak()
+        val referanseFraEldreVedtak = "referanse-utsendt-arbeidstaker"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = referanseFraEldreVedtak)
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = null, resultattype = AVSLAG_SØKNAD)
+
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraEldreVedtak
+    }
+
+    @Test
+    fun `Ny fakturaserie erstatter serien til et nyere vedtak for ikke-yrkesaktiv når den finnes`() {
+        val fagsak = lagEøsFagsak()
+        val referanseFraIkkeYrkesaktivtVedtak = "referanse-ikke-yrkesaktiv"
+        lagTidligereVedtak(10L, fagsak, UTSENDT_ARBEIDSTAKER, vedtaksdato = dagerSiden(400), fakturaserieReferanse = "referanse-utsendt-arbeidstaker")
+        lagTidligereVedtak(11L, fagsak, IKKE_YRKESAKTIV, vedtaksdato = dagerSiden(30), fakturaserieReferanse = referanseFraIkkeYrkesaktivtVedtak)
+
+        forespørselNyFakturaserie(fagsak).referanseTilSerienSomErstattes shouldBe referanseFraIkkeYrkesaktivtVedtak
+    }
+
+    // Feltnavnet i FakturaserieDto sier ikke at referansen gjelder serien som erstattes
+    private val FakturaserieDto.referanseTilSerienSomErstattes: String? get() = fakturaserieReferanse
+
+    private fun dagerSiden(dager: Long): Instant = Instant.now().minus(dager, ChronoUnit.DAYS)
+
+    private fun lagEøsFagsak() = Fagsak.forTest {
+        type = Sakstyper.EU_EOS
+        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        betalingsvalg = Betalingstype.FAKTURA
+        medBruker()
+    }
+
+    private fun lagTidligereVedtak(
+        behandlingId: Long,
+        fagsak: Fagsak,
+        behandlingstema: Behandlingstema,
+        vedtaksdato: Instant,
+        fakturaserieReferanse: String?,
+        resultattype: Behandlingsresultattyper = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+    ) {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = behandlingId
+            type = resultattype
+            this.fakturaserieReferanse = fakturaserieReferanse
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                this.vedtaksdato = vedtaksdato
+            }
+            behandling {
+                id = behandlingId
+                tema = behandlingstema
+                status = Behandlingsstatus.AVSLUTTET
+                this.fagsak = fagsak
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+    }
+
+    private fun forespørselNyFakturaserie(fagsak: Fagsak): FakturaserieDto {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperiode {
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 12, 31)
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                vedtaksdato = Instant.now()
+            }
+            behandling {
+                id = BEHANDLING_ID
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.IVERKSETTER_VEDTAK
+                this.fagsak = fagsak
+            }
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.hentBehandling())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.hentBehandling()
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 1) { faktureringskomponentenClient.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        return slotFakturaserieDto.captured
     }
 
     companion object {

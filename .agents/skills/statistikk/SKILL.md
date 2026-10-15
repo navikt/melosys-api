@@ -42,7 +42,7 @@ Expert knowledge of statistics publishing for issued A1 certificates to the data
    ↓
 3. UtstedtA1Service.sendMeldingOmUtstedtA1(behandlingID) called
    ↓
-4. Check if behandlingsresultat.a1Produseres() is true
+4. Check if a1Produseres(behandlingsresultat) is true
    ↓
 5. Build UtstedtA1Melding with:
    - Serienummer: saksnummer + behandlingId

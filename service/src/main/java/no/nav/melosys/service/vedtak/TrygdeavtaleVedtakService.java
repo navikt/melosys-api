@@ -106,6 +106,8 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
 
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+            behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            behandlingsresultatService.lagre(behandlingsresultat);
             prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
             // HÅNDTERES_AV_PROSESSFLYT: IVERKSETT_VEDTAK_TRYGDEAVTALE-flyten som bestilles rett under eier synk-steget —
