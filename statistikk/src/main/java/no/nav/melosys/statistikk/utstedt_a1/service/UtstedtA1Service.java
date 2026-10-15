@@ -40,7 +40,7 @@ public class UtstedtA1Service {
     @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (!behandlingsresultat.a1Produseres() || behandlingsresultat.hentBehandling().erIkkeYrkesaktivLovvalg()) {
+        if (!a1Produseres(behandlingsresultat)) {
             log.info("Melding om utstedt A1 blir ikke sendt for behandling {}", behandlingID);
             return;
         }
@@ -55,6 +55,13 @@ public class UtstedtA1Service {
 
         log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
         sendMeldingOmUtstedtA1(behandlingsresultat);
+    }
+
+    private static boolean a1Produseres(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.harVedtak()
+            && behandlingsresultat.erInnvilgelse()
+            && !behandlingsresultat.erUtpeking()
+            && !behandlingsresultat.hentBehandling().erIkkeYrkesaktivLovvalg();
     }
 
     private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) {

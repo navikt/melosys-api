@@ -64,7 +64,7 @@ ORDER BY pi.registrert_dato DESC;
 
 **Symptom**: Vedtak created but no A1 in SAF/Joark
 
-**Check the resultat type**: whether an A1 is produced is decided in code by `Behandlingsresultat.a1Produseres()` (`erInnvilgelse() && !erUtpeking() && harVedtak()`), not by a single column. Inspect the result type and whether a vedtak exists:
+**Check the resultat type**: whether an A1 is produced is decided in code by `UtstedtA1Service.a1Produseres(behandlingsresultat)`, not by a single column. Inspect the result type and whether a vedtak exists:
 
 ```sql
 SELECT br.behandling_id, br.resultat_type
