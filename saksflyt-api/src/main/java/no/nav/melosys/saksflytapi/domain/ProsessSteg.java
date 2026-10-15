@@ -5,6 +5,7 @@ public enum ProsessSteg {
 
     AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
+    AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD("AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD", "Oppretter ny sak eller bruker eksisterende sak for mottatt søknad"),
     AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"), // Gjelder Lovvalgperiode
     AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE("AVSLUTT_TIDLIGERE_MEDL_ANMODNINGSPERIODE", "Avslutter tidligere anmodningsperiode i Medl"),
@@ -33,6 +34,7 @@ public enum ProsessSteg {
     OPPRETT_ANMODNINGSPERIODESVAR("ANMODNINGSPERIODESVAR", "Oppretter svar for en anmodningsperiode"),
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
+    OPPRETT_ARKIVSAK_DIGITAL_SØKNAD("OPPRETT_ARKIVSAK_DIGITAL_SØKNAD", "Oppretter arkivsak hvis mottatt søknad ga ny sak"),
     OPPRETT_FAKTURASERIE("OPPRETT_FAKTURASERIE", "Oppretter fakturaserie i faktureringskomponenten"),
     OPPRETT_MOTTATTEOPPLYSNINGER("OPPRETT_MOTTATTEOPPLYSNINGER", "Oppretter mottatteopplysninger"),
     OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
@@ -40,6 +42,7 @@ public enum ProsessSteg {
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD", "Oppretter og ferdigstiller journalpost med sakstilknytning for søknad"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
+    OPPRETT_OPPGAVE_DIGITAL_SØKNAD("OPPRETT_OPPGAVE_DIGITAL_SØKNAD", "Oppretter behandlingsoppgave hvis mottatt søknad ga ny sak"),
     OPPRETT_SAK_OG_BEH("OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     OPPRETT_NY_BEHANDLING("OPPRETT_NY_BEHANDLING", "Oppretter ny behandling i Melosys"),
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),

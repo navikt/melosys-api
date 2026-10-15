@@ -10,6 +10,7 @@ object MetrikkerNavn {
 
     private const val PROSESSINSTANSER = "$METRIKKER_NAMESPACE.prosessinstanser"
     const val PROSESSINSTANSER_FEILET = "$PROSESSINSTANSER.feilet"
+    const val PROSESSINSTANSER_PÅ_VENT = "$PROSESSINSTANSER.paa.vent"
     const val PROSESSINSTANSER_OPPRETTET = "$PROSESSINSTANSER.opprettet"
     const val PROSESSINSTANSER_TID_BRUKT = "$PROSESSINSTANSER.tid.brukt"
     const val PROSESSINSTANSER_STEG_UTFØRT = "$PROSESSINSTANSER.steg.utfoert"
