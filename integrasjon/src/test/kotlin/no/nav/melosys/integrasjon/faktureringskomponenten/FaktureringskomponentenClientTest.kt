@@ -15,7 +15,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,8 +35,6 @@ import java.util.*
     classes = [
         OAuthMockServer::class,
         GenericAuthFilterFactory::class,
-
-        CorrelationIdOutgoingFilter::class,
         FaktureringskomponentenClientConfig::class,
         FakeUnleash::class
     ]

@@ -1,7 +1,7 @@
 package no.nav.melosys.service.tilgangsmaskinen
 
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.exception.FunksjonellException
@@ -82,7 +82,7 @@ class TilgangsmaskinenAksesskontroll(
             SubjectHandler.getInstance().userID,
             personIdent,
             message,
-            MDCOperations.getCorrelationId()
+            Traceparent.traceId()
         )
         auditLogger.log(auditEvent)
     }

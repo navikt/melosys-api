@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,13 +27,12 @@ public class OppgaveClientProducer {
     @Bean
     @Primary
     public OppgaveClient oppgaveClient(
-        WebClient.Builder webClientBuilder, CorrelationIdOutgoingFilter correlationIdOutgoingFilter
+        WebClient.Builder webClientBuilder
     ) {
         return new OppgaveClient(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Oppgave feilet."))
                 .baseUrl(url)
                 .build()
@@ -45,13 +43,12 @@ public class OppgaveClientProducer {
     // kun versjonssegmentet i URL-en skiller.
     @Bean
     public OppgaveV2Client oppgaveV2Client(
-        WebClient.Builder webClientBuilder, CorrelationIdOutgoingFilter correlationIdOutgoingFilter
+        WebClient.Builder webClientBuilder
     ) {
         return new OppgaveV2Client(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Oppgave v2 feilet."))
                 .baseUrl(url.replace("/api/v1", "/api/v2"))
                 .build()

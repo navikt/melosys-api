@@ -34,7 +34,7 @@ class DigitalSøknadMottattConsumerTest {
 
         every { prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding) } just Runs
 
-        digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord, emptyMap())
+        digitalSøknadMottattConsumer.mottaSkjemaMelding(consumerRecord)
 
         verify(exactly = 1) { prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding) }
     }

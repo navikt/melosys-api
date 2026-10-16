@@ -195,7 +195,7 @@ prosessinstans.setData(ProsessDataKey.RESULT, resultObject);
 | `EESSI_MELDING` | MelosysEessiMelding | EESSI message data |
 | `AKTØR_ID` | String | Person actor ID |
 | `OPPGAVE_ID` | String | Task ID in Gosys |
-| `CORRELATION_ID_SAKSFLYT` | String | Correlation ID for tracing |
+| `TRACEPARENT` | String | W3C traceparent, restored when the prosessinstans runs |
 
 ## Error Handling
 

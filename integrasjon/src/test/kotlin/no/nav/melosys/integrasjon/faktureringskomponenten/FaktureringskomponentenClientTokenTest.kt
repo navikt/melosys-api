@@ -66,16 +66,6 @@ class FaktureringskomponentenClientTokenTest(
     }
 
     @Test
-    fun correlationIdLeggesPåRequest() {
-        verifyHeaders(
-            mapOf(
-                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
-            )
-        )
-        executeFromController()
-    }
-
-    @Test
     fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
         executeErrorFromServer { error ->
             Assertions.assertThat(error).contains(errorFromServerMessage())

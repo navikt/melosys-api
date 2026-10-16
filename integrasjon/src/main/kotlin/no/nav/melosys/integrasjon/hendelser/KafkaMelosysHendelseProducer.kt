@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.hendelser
 
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.TekniskException
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +19,6 @@ class KafkaMelosysHendelseProducer(
 ) {
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
         val hendelseRecord = ProducerRecord<String, MelosysHendelse>(topicName, melosysHendelse)
-        hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
         val future = kafkaTemplate.send(hendelseRecord)
 
         try {

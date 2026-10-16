@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldContainValue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -14,6 +15,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
@@ -86,6 +88,31 @@ class ProsessinstansServiceTest {
         prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
 
         verify { applicationEventPublisher.publishEvent(any<ProsessinstansOpprettetEvent>()) }
+    }
+
+    @Test
+    fun `lagre prosessinstans lagrer gjeldende traceparent`() {
+        val traceparent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.ANMODNING_OM_UNNTAK }
+
+
+        Traceparent.aktiver(traceparent).use {
+            prosessinstansService.lagre(prosessinstans, "Z123456", null)
+        }
+
+
+        piListCaptor.single().getData(ProsessDataKey.TRACEPARENT) shouldBe traceparent
+    }
+
+    @Test
+    fun `lagre prosessinstans uten aktiv trace lagrer ikke traceparent`() {
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.ANMODNING_OM_UNNTAK }
+
+
+        prosessinstansService.lagre(prosessinstans, "Z123456", null)
+
+
+        piListCaptor.single().getData(ProsessDataKey.TRACEPARENT).shouldBeNull()
     }
 
     @Test

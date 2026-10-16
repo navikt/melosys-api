@@ -167,7 +167,6 @@ Returns: Collection<AltinnDokument>
 @Bean
 fun soknadMottakWebClient(
     webClientBuilder: WebClient.Builder,
-    correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
     genericAuthFilterFactory: GenericAuthFilterFactory,
     @Value("\${MelosysSoknadMottak.url}") url: String
 ): WebClient
