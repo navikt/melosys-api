@@ -25,18 +25,6 @@ object TotalbeløpBeregner {
         return totalbeløpForAllePerioder(periodeMedBeløpList)
     }
 
-    fun hentTotalinntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
-        val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
-            val mdBelop = (it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt ?: it.grunnlagInntekstperiode!!.avgiftspliktigTotalinntekt).hentVerdi()
-            PeriodeMedBeløp(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
-                beløp = mdBelop
-            )
-        }
-        return totalbeløpForAllePerioder(periodeMedBeløpList)
-    }
-
     fun totalbeløpForAllePerioder(periodeMedBeløpList: List<PeriodeMedBeløp>): BigDecimal {
         return periodeMedBeløpList.sumOf { periode ->
             totalbeløpForPeriode(
