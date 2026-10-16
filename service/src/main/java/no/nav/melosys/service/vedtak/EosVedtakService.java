@@ -128,7 +128,8 @@ public class EosVedtakService implements FattVedtakInterface {
                 fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
+        boolean leggTilNøkkelord = behandlingsresultat.erInnvilgelse();
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId(), leggTilNøkkelord);
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
