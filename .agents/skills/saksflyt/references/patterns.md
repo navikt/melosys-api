@@ -24,42 +24,30 @@ public enum ProsessSteg {
 
 ### 2. Implement the Step Handler
 
-Create in `saksflyt/src/main/java/.../steg/{category}/MyNewStep.java`:
+Create in `saksflyt/src/main/kotlin/.../steg/{category}/MyNewStep.kt`:
 
-```java
-package no.nav.melosys.saksflyt.steg.{category};
+```kotlin
+package no.nav.melosys.saksflyt.steg.{category}
 
-import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessSteg;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import org.springframework.stereotype.Component;
+import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import org.springframework.stereotype.Component
 
 @Component
-public class MyNewStep implements StegBehandler {
+class MyNewStep(
+    private val someService: SomeService
+) : StegBehandler {
 
-    private final SomeService someService;
+    override fun inngangsSteg() = ProsessSteg.MY_NEW_STEP
 
-    public MyNewStep(SomeService someService) {
-        this.someService = someService;
-    }
+    override fun utfør(prosessinstans: Prosessinstans) {
+        val someValue = prosessinstans.hentData<String>(ProsessDataKey.SOME_KEY)
 
-    @Override
-    public ProsessSteg inngangsSteg() {
-        return ProsessSteg.MY_NEW_STEP;
-    }
+        someService.doSomething(prosessinstans.hentBehandling, someValue)
 
-    @Override
-    public void utfør(Prosessinstans prosessinstans) {
-        // Get data from prosessinstans
-        String someValue = prosessinstans.getData(ProsessDataKey.SOME_KEY);
-        Behandling behandling = prosessinstans.getBehandling();
-
-        // Do the work
-        someService.doSomething(behandling, someValue);
-
-        // Optionally store results for later steps
-        prosessinstans.setData(ProsessDataKey.RESULT_KEY, "result");
+        prosessinstans.setData(ProsessDataKey.RESULT_KEY, "result")
     }
 }
 ```
@@ -72,7 +60,7 @@ Edit `saksflyt/src/main/kotlin/.../prosessflyt/ProsessflytDefinisjon.kt`:
 SOME_PROCESS_TYPE to ProsessFlyt(
     prosessType = SOME_PROCESS_TYPE,
     EXISTING_STEP_1,
-    MY_NEW_STEP,  // Add your step in the right position
+    MY_NEW_STEP,
     EXISTING_STEP_2
 ),
 ```
@@ -80,7 +68,6 @@ SOME_PROCESS_TYPE to ProsessFlyt(
 ### 4. Write Tests
 
 ```kotlin
-// Unit test for the step
 @Test
 fun `utfør - should call service with correct parameters`() {
     val prosessinstans = lagProsessinstans {
@@ -288,16 +275,13 @@ class MyFlowIT {
 
     @Test
     fun `full flow should complete`() {
-        // Create saga
         val id = prosessinstansService.opprettMyProcess(behandling)
 
-        // Wait for async completion
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             val prosessinstans = prosessinstansRepository.findById(id).orElseThrow()
             assertThat(prosessinstans.status).isEqualTo(ProsessStatus.FERDIG)
         }
 
-        // Verify side effects
         verify(externalService).wasCalledWith(expected)
     }
 }
@@ -308,13 +292,11 @@ class MyFlowIT {
 ```kotlin
 @Test
 fun `concurrent sagas with same lock should wait`() {
-    // Create first saga
     val id1 = prosessinstansService.opprettSedMottak(sedMelding1)
 
-    // Create second with same RINA case
+    // sedMelding2 har samme RINA-saksnummer og dermed samme låsreferanse
     val id2 = prosessinstansService.opprettSedMottak(sedMelding2)
 
-    // Second should be waiting
     val prosessinstans2 = prosessinstansRepository.findById(id2).orElseThrow()
     assertThat(prosessinstans2.status).isEqualTo(ProsessStatus.PÅ_VENT)
 }
