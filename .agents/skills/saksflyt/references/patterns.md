@@ -43,7 +43,7 @@ class MyNewStep(
     override fun inngangsSteg() = ProsessSteg.MY_NEW_STEP
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val someValue = prosessinstans.hentData<String>(ProsessDataKey.SOME_KEY)
+        val someValue = prosessinstans.hentData(ProsessDataKey.SOME_KEY)
 
         someService.doSomething(prosessinstans.hentBehandling, someValue)
 
