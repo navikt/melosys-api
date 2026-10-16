@@ -37,6 +37,7 @@ Full logs saved at `/tmp/mvn.log`.
 ## Code Style
 
 - Write concise, readable and idiomatic code, without unnecessary comments.
+- Use existing domain terms. Do not invent new ones; ask first, as new terms must be agreed upon to keep a common domain language.
 - Prefer better naming over a comment.
 - Good comments explain *why* (e.g. legal basis, workaround, business rule), never *what* the code does.
 - No `// Given` / `// When` / `// Then` comments in tests; use blank lines.
