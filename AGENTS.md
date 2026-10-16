@@ -29,7 +29,14 @@ Full logs saved at `/tmp/mvn.log`.
 
 ## Key Conventions
 
-- Write new code in **Kotlin**; convert Java when touched
+- Write new code in **Kotlin**; convert Java to idiomatic Kotlin when touched
 - Spring Boot, Jakarta EE, Oracle DB with Flyway
 - Architecture details: see `.agents/skills/architecture/SKILL.md`
 - Module dependency graph for Kotlin conversion: see `.agents/skills/architecture/SKILL.md`
+
+## Code Style
+
+- Write concise, readable and idiomatic code, without unnecessary comments.
+- Prefer better naming over a comment.
+- Good comments explain *why* (e.g. legal basis, workaround, business rule), never *what* the code does.
+- No `// Given` / `// When` / `// Then` comments in tests; use blank lines.
