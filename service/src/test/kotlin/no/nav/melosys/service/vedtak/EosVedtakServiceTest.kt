@@ -338,7 +338,7 @@ class EosVedtakServiceKtTest {
                 eq(true)
             )
         }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, leggTilNøkkelord = false) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, leggTilNøkkelord = true) }
     }
 
     @Test
@@ -364,7 +364,7 @@ class EosVedtakServiceKtTest {
             )
         }
         verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
-        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, leggTilNøkkelord = false) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID, leggTilNøkkelord = true) }
     }
 
     @Test
