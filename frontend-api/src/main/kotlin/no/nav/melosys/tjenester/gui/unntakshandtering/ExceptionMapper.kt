@@ -150,8 +150,8 @@ class ExceptionMapper {
             "status" to httpStatus.value(),
             "error" to statustekst(httpStatus),
             "message" to (responsMelding ?: message),
-        ) + listOfNotNull(Traceparent.traceId()?.let { "traceId" to it }) +
-            if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
+            "traceId" to Traceparent.traceId(),
+        ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
 
         return ResponseEntity(body, headere, httpStatus)
     }
