@@ -84,6 +84,17 @@ class KafkaMelosysHendelseProducerTest {
         feil.message!! shouldContain "sakstype=FTRL"
     }
 
+    @Test
+    fun `synkron sendefeil gir feilmelding uten folkeregisterident`() {
+        every { kafkaTemplate.send(any<ProducerRecord<String, MelosysHendelse>>()) } throws
+            RuntimeException("serialisering feilet")
+
+        val feil = shouldThrow<TekniskException> { producer.produserBestillingsmelding(hendelse) }
+
+        feil.message!! shouldNotContain FOLKEREGISTERIDENT
+        feil.message!! shouldContain "sakstype=FTRL"
+    }
+
     private companion object {
         const val TOPIC = "teammelosys.melosys-hendelser.v1"
         const val FOLKEREGISTERIDENT = "30056928150"

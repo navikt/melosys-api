@@ -21,11 +21,10 @@ class KafkaMelosysHendelseProducer(
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
         val hendelseRecord = ProducerRecord<String, MelosysHendelse>(topicName, melosysHendelse)
         hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
-        val future = kafkaTemplate.send(hendelseRecord)
         val beskrivelse = melosysHendelse.melding.beskrivelseUtenPersonopplysninger()
 
         try {
-            val sendeResultat = future[15L, TimeUnit.SECONDS]
+            val sendeResultat = kafkaTemplate.send(hendelseRecord)[15L, TimeUnit.SECONDS]
             log.info("Melding sendt på topic $topicName: $beskrivelse. Offset: ${sendeResultat.recordMetadata.offset()}")
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
