@@ -36,28 +36,34 @@ class EtterregistreringAvVedtaksmeldingerController(
             "- `vedtakFra`, `vedtakTil`: deler utvalget i porsjoner etter vedtaksdato, ellers datoen " +
             "iverksettingen startet. Begge er med. Behandlinger uten dato er utenfor når en av dem er satt.\n" +
             "- `behandlingIder`: begrenser utvalget til disse behandlingene.\n" +
-            "- `maksAntall`: stopper etter så mange sendte meldinger. Kreves for skarp kjøring.\n" +
-            "- `maksFeil`: stopper etter så mange feil. Standard 100.\n\n" +
+            "- `maksAntall`: stopper etter så mange sendte meldinger. Kreves for skarp kjøring. Et nytt kall " +
+            "begynner forfra i utvalget, så gå videre med `vedtakFra` eller `behandlingIder`.\n" +
+            "- `maksFeil`: stopper når antall feil går over denne verdien. Standard 100.\n\n" +
             "### Før du kjører\n" +
             "- Appen har to podder, og status og rapport ligger i minnet på poden som fikk kallet. Kjør mot " +
             "én pod med port-forward, og sjekk `pod` i `/status`.\n" +
-            "- Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false. Send `/run` én gang, og " +
-            "sjekk `/status` før du sender et nytt.",
+            "- Kjøringen kan ligge i kø bak annet arbeid, og da er `isRunning` false. Et nytt kall i den tiden " +
+            "gir 409.",
     )
     @PostMapping("/run")
     fun run(@RequestBody request: EtterregistreringRequest): ResponseEntity<Map<String, Any?>> {
         request.valideringsfeil()?.let { feil ->
             return ResponseEntity.badRequest().body(mapOf("feil" to feil))
         }
-        if (etterregistrering.status()["isRunning"] == true) {
+        if (!etterregistrering.reserver()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                mapOf("feil" to "En kjøring pågår allerede — se /status, og vent til isRunning er false")
+                mapOf("feil" to "En kjøring venter eller pågår allerede — se /status")
             )
         }
 
         val parametre = request.tilParametre()
         log.info { "Starter etterregistrering av vedtaksmeldinger: $parametre" }
-        etterregistrering.kjørAsynkront(parametre)
+        try {
+            etterregistrering.kjørAsynkront(parametre)
+        } catch (e: Exception) {
+            etterregistrering.frigi()
+            throw e
+        }
 
         return ResponseEntity.ok(
             mapOf(

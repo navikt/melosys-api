@@ -32,8 +32,7 @@ class EtterregistreringUtvalg {
             }
 
     private companion object {
-        // Vedtaksdatoen mangler for vedtak fattet før vedtak_metadata ble innført; da brukes datoen
-        // iverksettingen startet, som i Q-14.
+        // Uten vedtaksdato brukes datoen iverksettingen startet, som i Q-14.
         val UTVALG_SQL = """
             SELECT b.id, b.saksnummer, TO_CHAR(COALESCE(vm.vedtak_dato, i.startet), 'YYYY-MM-DD')
             FROM behandling b

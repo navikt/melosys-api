@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotContain
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
@@ -135,6 +136,31 @@ class EtterregistreringAvVedtaksmeldingerTest {
     }
 
     @Test
+    fun `stopp på grunn av feil på siste behandling vises som avbrutt`() {
+        gittUtvalg(utvalgt(1, "MEL-1", "2024-01-01"))
+        every { bygger.bygg(any(), any()) } throws IllegalStateException("feil")
+
+        etterregistrering.kjør(parametre(skarp = true, maksAntall = 10, maksFeil = 0))
+
+        etterregistrering.status()["avbruttAarsak"] shouldBe "Stoppet etter for mange feil (maksFeil=0)"
+    }
+
+    @Test
+    fun `et nytt kall mens forrige ligger i kø avvises med 409, og kjøringen frigir plassen når den er ferdig`() {
+        gittUtvalg()
+        val køetJobb = spyk(etterregistrering)
+        every { køetJobb.kjørAsynkront(any()) } returns Unit
+        val controller = EtterregistreringAvVedtaksmeldingerController(køetJobb)
+
+        controller.run(EtterregistreringRequest(skarp = true, maksAntall = 1)).statusCode shouldBe HttpStatus.OK
+        controller.run(EtterregistreringRequest(skarp = true, maksAntall = 1)).statusCode shouldBe HttpStatus.CONFLICT
+        verify(exactly = 1) { køetJobb.kjørAsynkront(any()) }
+
+        køetJobb.kjør(parametre())
+        controller.run(EtterregistreringRequest()).statusCode shouldBe HttpStatus.OK
+    }
+
+    @Test
     fun `feil i utvalget gir tom rapport og feilVedUtvalg`() {
         every { utvalg.finnBehandlinger(any()) } throws RuntimeException("ORA-00942")
 
@@ -160,20 +186,9 @@ class EtterregistreringAvVedtaksmeldingerTest {
     }
 
     @Test
-    fun `kjøring som startes mens en annen pågår avvises med 409`() {
-        val etterregistreringMock: EtterregistreringAvVedtaksmeldinger = mockk(relaxed = true)
-        every { etterregistreringMock.status() } returns mapOf("isRunning" to true)
-
-        EtterregistreringAvVedtaksmeldingerController(etterregistreringMock).run(EtterregistreringRequest())
-            .statusCode shouldBe HttpStatus.CONFLICT
-
-        verify(exactly = 0) { etterregistreringMock.kjørAsynkront(any()) }
-    }
-
-    @Test
     fun `simulering starter med standardverdiene`() {
         val etterregistreringMock: EtterregistreringAvVedtaksmeldinger = mockk(relaxed = true)
-        every { etterregistreringMock.status() } returns mapOf("isRunning" to false)
+        every { etterregistreringMock.reserver() } returns true
 
         EtterregistreringAvVedtaksmeldingerController(etterregistreringMock).run(EtterregistreringRequest())
             .statusCode shouldBe HttpStatus.OK

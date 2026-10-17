@@ -15,6 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -45,12 +46,28 @@ class EtterregistreringAvVedtaksmeldinger(
 
     private val rapport = Rapport()
 
+    private val reservert = AtomicBoolean(false)
+
+    /**
+     * Kontrolleren reserverer før kjøringen legges i kø. `taskExecutor` har én tråd og ubegrenset kø,
+     * så uten reservasjonen ville et nytt kall mens den første venter, fått 200 og kjørt etterpå.
+     */
+    fun reserver(): Boolean = reservert.compareAndSet(false, true)
+
+    fun frigi() = reservert.set(false)
+
     @Async("taskExecutor")
     fun kjørAsynkront(parametre: EtterregistreringParametre) {
         kjør(parametre)
     }
 
-    fun kjør(parametre: EtterregistreringParametre) = runAsSystem {
+    fun kjør(parametre: EtterregistreringParametre) = try {
+        kjørSomSystem(parametre)
+    } finally {
+        frigi()
+    }
+
+    private fun kjørSomSystem(parametre: EtterregistreringParametre) = runAsSystem {
         jobMonitor.execute(maxErrorsBeforeStop = parametre.maksFeil) {
             this.parametre = parametre
             rapport.nullstill(parametre)
@@ -69,16 +86,16 @@ class EtterregistreringAvVedtaksmeldinger(
 
             val identPerSak = HashMap<String, String?>()
             for (behandling in behandlinger) {
-                if (jobMonitor.shouldStop) {
-                    avbruttAarsak = "Stoppet etter for mange feil (maksFeil=${parametre.maksFeil})"
-                    break
-                }
                 if (parametre.maksAntall != null && antallSendt >= parametre.maksAntall) {
                     avbruttAarsak = "maksAntall=${parametre.maksAntall} er nådd"
                     break
                 }
                 behandle(behandling, parametre.skarp, identPerSak)
                 antallBehandlet++
+                if (jobMonitor.shouldStop) {
+                    avbruttAarsak = "Stoppet etter for mange feil (maksFeil=${parametre.maksFeil})"
+                    break
+                }
             }
         }
     }
