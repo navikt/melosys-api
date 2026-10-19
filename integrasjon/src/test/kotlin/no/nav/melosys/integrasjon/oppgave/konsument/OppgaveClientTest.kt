@@ -27,7 +27,6 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
@@ -54,7 +53,6 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         OppgaveClientProducer::class,
         MetricsTestConfig::class,

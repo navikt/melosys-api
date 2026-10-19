@@ -1,13 +1,11 @@
 package no.nav.melosys.service.soknad
 
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations.Companion.withKafkaCorrelationId
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.messaging.handler.annotation.Headers
 import org.springframework.stereotype.Service
 
 private val log = KotlinLogging.logger { }
@@ -24,9 +22,8 @@ class DigitalSøknadMottattConsumer(
         containerFactory = "aivenSkjemaMottattContainerFactory"
     )
     fun mottaSkjemaMelding(
-        consumerRecord: ConsumerRecord<String, SkjemaMottattMelding>,
-        @Headers headers: Map<String, ByteArray>
-    ) = withKafkaCorrelationId(headers) {
+        consumerRecord: ConsumerRecord<String, SkjemaMottattMelding>
+    ) {
         val melding = consumerRecord.value()
         log.info {
             "Mottatt skjema-melding med skjemaId=${melding.skjemaId}, recordOffset=${consumerRecord.offset()}, recordKey=${consumerRecord.key()}"

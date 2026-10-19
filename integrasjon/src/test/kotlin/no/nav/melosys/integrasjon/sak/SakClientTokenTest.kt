@@ -71,16 +71,6 @@ class SakClientTokenTest(
         }
     }
 
-    @Test
-    fun correlationIdLeggesPåRequest() {
-        verifyHeaders(
-            mapOf(
-                Pair("X-Correlation-ID", WireMock.matching(UUID_REGEX)),
-            )
-        )
-        executeRequest()
-    }
-
     override fun getMockData(): String {
         return "{}"
     }

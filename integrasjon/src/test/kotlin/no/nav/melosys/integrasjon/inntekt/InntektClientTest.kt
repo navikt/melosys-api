@@ -21,7 +21,6 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestClientTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,7 +42,6 @@ import java.util.*
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         InntektClientConfig::class,
     ]

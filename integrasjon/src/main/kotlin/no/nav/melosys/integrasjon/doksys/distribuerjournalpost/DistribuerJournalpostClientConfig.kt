@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,7 +15,6 @@ class DistribuerJournalpostClientConfig {
     fun distribuerJournalpostWebClient(
         @Value("\${DistribuerJournalpost_v1.url}") url: String,
         webclientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         genericAuthFilterFactory: GenericAuthFilterFactory
     ): WebClient = webclientBuilder
         .baseUrl(url)
@@ -25,7 +23,6 @@ class DistribuerJournalpostClientConfig {
             httpHeaders.accept = listOf(MediaType.APPLICATION_JSON)
         }
         .filter(genericAuthFilterFactory.getAzureFilter("dokdistfordeling"))
-        .filter(correlationIdOutgoingFilter)
         .filter(errorFilter("Kall mot distribuer journalpost feilet."))
         .build()
 }

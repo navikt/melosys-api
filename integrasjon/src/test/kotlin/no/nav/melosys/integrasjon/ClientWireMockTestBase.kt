@@ -9,18 +9,13 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
-import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(
-    CorrelationIdOutgoingFilter::class,
-)
 abstract class ClientWireMockTestBase<T, R>(
     mockPort: Int,
     stsMockPort: Int,
@@ -154,8 +149,4 @@ abstract class ClientWireMockTestBase<T, R>(
     }
 
     open fun errorFromServerMessage() = "500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}"
-
-    companion object {
-        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
-    }
 }

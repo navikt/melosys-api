@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.azuread
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,7 +23,7 @@ class AzureAdClientProducer(
 
     @Bean
     fun azureAdClient(
-        webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
+        webClientBuilder: WebClient.Builder
     ): AzureAdClient {
 
         return AzureAdClient(
