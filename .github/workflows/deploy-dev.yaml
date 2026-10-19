@@ -194,7 +194,7 @@ jobs:
               private-key: ${{ secrets.MELOSYS_CI_PRIVATE_KEY }}
               owner: ${{ github.repository_owner }}
               repositories: |
-                navikt/melosys-e2e-tests
+                melosys-e2e-tests
         -   name: Checkout latest code
             uses: actions/checkout@v7.0.1
         -   name: Get commit message
