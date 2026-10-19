@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Metrics;
 import jakarta.annotation.Nullable;
-import no.nav.melosys.config.MDCOperations;
+import no.nav.melosys.config.observability.Traceparent;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
@@ -334,7 +334,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
         }
-        prosessinstans.setData(CORRELATION_ID_SAKSFLYT, MDCOperations.getCorrelationId());
+        prosessinstans.setData(TRACEPARENT, Traceparent.nåværende());
         prosessinstans.setData(PROCESS_PARENT_ID, ThreadLocalAccessInfo.getProcessId());
         propagerPrioritetFraParent(prosessinstans);
 

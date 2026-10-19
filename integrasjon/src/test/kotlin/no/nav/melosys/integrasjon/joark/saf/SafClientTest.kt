@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponse
 import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponseWrapper
 import no.nav.melosys.integrasjon.joark.saf.dto.SideInfo
@@ -61,7 +60,6 @@ import java.util.stream.Stream
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         SafClientProducer::class,
         MetricsTestConfig::class,

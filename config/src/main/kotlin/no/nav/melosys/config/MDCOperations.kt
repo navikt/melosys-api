@@ -2,8 +2,6 @@ package no.nav.melosys.config
 
 import org.slf4j.MDC
 import java.security.SecureRandom
-import java.util.*
-import jakarta.servlet.http.HttpServletRequest
 import javax.xml.namespace.QName
 
 class MDCOperations {
@@ -17,12 +15,6 @@ class MDCOperations {
 
         @JvmField
         val MDC_CONSUMER_ID = "consumerId"
-
-        @JvmField
-        val CORRELATION_ID = "correlation-id"
-
-        @JvmField
-        val X_CORRELATION_ID = "X-Correlation-ID"
 
         // QName for the callId header
         @JvmField
@@ -54,44 +46,6 @@ class MDCOperations {
             callId.append(randomNr)
             return callId.toString()
         }
-
-        @JvmStatic
-        fun getCorrelationId(): String {
-            val correlationId = MDC.get(CORRELATION_ID)
-            return if (correlationId.isNullOrBlank()) {
-                UUID.randomUUID().toString()
-            } else correlationId
-        }
-
-        @JvmStatic
-        fun getCorrelationId(request: HttpServletRequest): String {
-            val correlationId = request.getHeader(X_CORRELATION_ID)
-            return if (correlationId.isNullOrBlank()) {
-                UUID.randomUUID().toString()
-            } else correlationId
-        }
-
-        @JvmStatic
-        fun getCorrelationIdFromKafkaHeaders(kafkaHeaders: Map<String, ByteArray?>): String {
-            val bytes = kafkaHeaders[CORRELATION_ID]
-            return if (bytes != null && bytes.isNotEmpty()) {
-                String(bytes)
-            } else {
-                UUID.randomUUID().toString()
-            }
-        }
-
-        inline fun <T> withCorrelationId(correlationId: String, block: () -> T): T {
-            putToMDC(CORRELATION_ID, correlationId)
-            return try {
-                block()
-            } finally {
-                remove(CORRELATION_ID)
-            }
-        }
-
-        inline fun <T> withKafkaCorrelationId(kafkaHeaders: Map<String, ByteArray?>, block: () -> T): T =
-            withCorrelationId(getCorrelationIdFromKafkaHeaders(kafkaHeaders), block)
     }
 
 }

@@ -166,8 +166,7 @@ class FeilmerketNøkkelordOpprydding(
     private fun JsonNode.tekstEllerNull(): String? =
         if (isMissingNode || isNull) null else asString()
 
-    // Async-tråden mangler request-konteksten, så CorrelationIdOutgoingFilter (brukt av Oppgave-klienten)
-    // trenger at vi setter opp ThreadLocalAccessInfo med en system-prosess.
+    // Async-tråden mangler request-konteksten, så vi setter opp ThreadLocalAccessInfo med en system-prosess.
     private fun <T> runAsSystem(prosessSteg: String = "fjernFeilmerketNøkkelord", block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, prosessSteg)

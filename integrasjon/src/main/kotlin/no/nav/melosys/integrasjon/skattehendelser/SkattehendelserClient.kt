@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.skattehendelser
 import mu.KotlinLogging
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,14 +22,12 @@ class SkattehendelserWebClientConfig {
     @Bean
     fun skattehendelserWebClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         genericAuthFilterFactory: GenericAuthFilterFactory,
         @Value("\${MELOSYS_SKATTEHENDELSER_URL}") url: String
     ): WebClient = webClientBuilder
         .baseUrl(url)
         .codecs { it.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_SIZE_BYTES) }
         .filter(genericAuthFilterFactory.getAzureFilter("melosys-skattehendelser"))
-        .filter(correlationIdOutgoingFilter)
         .filter(errorFilter("Kall mot melosys-skattehendelser feilet."))
         .build()
 

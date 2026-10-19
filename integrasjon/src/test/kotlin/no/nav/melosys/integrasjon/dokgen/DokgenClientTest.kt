@@ -25,7 +25,6 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettigheterPlikterStandardvedlegg
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -49,7 +48,6 @@ import java.util.UUID
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        CorrelationIdOutgoingFilter::class,
         DokgenClientProducer::class,
         MetricsTestConfig::class,
     ]

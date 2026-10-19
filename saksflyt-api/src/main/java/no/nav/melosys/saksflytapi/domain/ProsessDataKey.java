@@ -23,6 +23,7 @@ public enum ProsessDataKey {
     BETALINGSINTERVALL("betalingsIntervall"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
+    /** Kun satt på eldre prosessinstanser. Nye får {@link #TRACEPARENT}. */
     CORRELATION_ID_SAKSFLYT("correlationId"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
@@ -70,6 +71,7 @@ public enum ProsessDataKey {
     SØKNADSLAND("land"),
     SØKNADSPERIODE("søknadsperiode"),
     TEMA("tema"),
+    TRACEPARENT("traceparent"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
     UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
     UTPEKING_AVVIS("utpekingAvvis"),
