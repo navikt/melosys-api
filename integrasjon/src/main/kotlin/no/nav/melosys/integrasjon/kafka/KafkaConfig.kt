@@ -32,6 +32,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.LoggingProducerListener
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -113,7 +114,9 @@ class KafkaConfig(
     @Bean
     @Qualifier("melosysHendelse")
     fun melosysHendelseKafkaTemplate(producerFactory: ProducerFactory<String, MelosysHendelse>): KafkaTemplate<String, MelosysHendelse> =
-        KafkaTemplate(producerFactory)
+        KafkaTemplate(producerFactory).apply {
+            setProducerListener(LoggingProducerListener<String, MelosysHendelse>().apply { setIncludeContents(false) })
+        }
 
     @Bean
     @Qualifier("melosysPoppHendelse")
