@@ -172,8 +172,9 @@ jobs:
       tag: ${{ github.event.merge_group.head_sha }}
       image_tag: mq-${{ github.event.merge_group.head_sha }}
       queue_ref: ${{ github.event.merge_group.head_ref }}
+      melosys_ci_client_id: ${{ vars.MELOSYS_CI_CLIENT_ID }}
     secrets:
-      E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
+      MELOSYS_CI_PRIVATE_KEY: ${{ secrets.MELOSYS_CI_PRIVATE_KEY }}
 
   e2e-for-merge:
     name: e2e-for-merge
