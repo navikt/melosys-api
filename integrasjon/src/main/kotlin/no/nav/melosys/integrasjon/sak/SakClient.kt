@@ -5,6 +5,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -19,6 +20,8 @@ class SakClient(
 
         val response = webClient
             .post()
+            // Sak API avviser kall uten X-Correlation-ID
+            .header(CORRELATION_ID_HEADER, UUID.randomUUID().toString())
             .bodyValue(sakDto)
             .retrieve()
             .bodyToMono<SakDto>()
@@ -27,5 +30,9 @@ class SakClient(
         log.info { "Opprettet sak i Sak API med id ${response.id} for saksnummer ${sakDto.saksnummer}" }
 
         return response
+    }
+
+    companion object {
+        const val CORRELATION_ID_HEADER = "X-Correlation-ID"
     }
 }

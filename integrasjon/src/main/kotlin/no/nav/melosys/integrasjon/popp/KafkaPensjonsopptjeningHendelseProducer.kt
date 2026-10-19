@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.popp
 
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.TekniskException
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +19,6 @@ class KafkaPensjonsopptjeningHendelseProducer(
 ) {
     fun sendPensjonsopptjeningHendelse(pensjonsopptjeningHendelse: PensjonsopptjeningHendelse) {
         val hendelseRecord = ProducerRecord<String, PensjonsopptjeningHendelse>(topicName, pensjonsopptjeningHendelse)
-        hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
         val completableFuture = kafkaTemplate.send(hendelseRecord)
         try {
             val resultat = completableFuture[KAFKA_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS]

@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.config;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.module.kotlin.KotlinModule;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.MdcInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +57,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new CorrelationIdInterceptor());
+        registry.addInterceptor(new MdcInterceptor());
 
         registry.addInterceptor(adminTilgangInterceptor).addPathPatterns("/admin/**");
     }

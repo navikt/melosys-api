@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.kontroll;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import no.nav.melosys.config.observability.Traceparent;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -124,7 +125,8 @@ public class ProsessinstansAdminService {
                 .map(ProsessinstansHendelse::getMelding)
                 .orElse(null),
             prosessinstans.getStatus(),
-            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
+            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT),
+            Traceparent.traceIdFra(prosessinstans.getData(ProsessDataKey.TRACEPARENT)));
     }
 
     private void setStatusRestartet(Collection<Prosessinstans> prosessinstanser) {

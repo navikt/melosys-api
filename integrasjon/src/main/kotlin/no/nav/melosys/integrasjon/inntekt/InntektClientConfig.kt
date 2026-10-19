@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.inntekt
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,14 +20,12 @@ class InntektClientConfig(
     fun inntektClient(
         webClientBuilder: WebClient.Builder,
         systemContextExchangeFilter: GenericAuthFilterFactory,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): InntektClient {
         return InntektClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(systemContextExchangeFilter.getAzureFilter(CLIENT_NAME))
                 .filter(headerFilter())
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Henting av inntekt fra inntektskomponenten feilet"))
                 .build()
         )

@@ -24,7 +24,6 @@ import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
@@ -46,7 +45,6 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         MelosysSkjemaApiWebClientConfig::class,
         MelosysSkjemaApiClient::class,

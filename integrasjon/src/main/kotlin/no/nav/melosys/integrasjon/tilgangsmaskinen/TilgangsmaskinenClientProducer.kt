@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.tilgangsmaskinen
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,13 +21,11 @@ class TilgangsmaskinenClientProducer(
     @Bean
     fun tilgangsmaskineClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): TilgangsmaskinenClient {
         return TilgangsmaskinenClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Tilgangsmaskinen feilet"))
                 .defaultHeaders(this::defaultHeaders)
                 .build()
