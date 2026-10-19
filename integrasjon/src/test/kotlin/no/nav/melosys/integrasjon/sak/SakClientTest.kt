@@ -105,6 +105,7 @@ class SakClientTest(
             postRequestedFor(urlEqualTo("/api/v1/saker"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(SakClient.CORRELATION_ID_HEADER, matching("[0-9a-f-]{36}"))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(
