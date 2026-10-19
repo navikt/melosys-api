@@ -27,8 +27,7 @@ class EtterregistreringAvVedtaksmeldingerController(
         description =
             "Finner avsluttede FTRL-behandlinger med vedtak og en innvilget medlemskapsperiode som slutter på eller etter " +
             "`periodeTomFra`, og sender den samme vedtaksmeldingen som steget SEND_MELDING_OM_VEDTAK, i " +
-            "vedtaksrekkefølge. Henlagte behandlinger og annullerte saker er ikke med. Utvalget er det samme som Q-14 i " +
-            "melosys-kode-wiki. Uten `skarp` slås " +
+            "vedtaksrekkefølge. Henlagte behandlinger og annullerte saker er ikke med. Uten `skarp` slås " +
             "identen opp og meldingen bygges, men ingenting sendes. melosys-skattehendelser hopper over " +
             "perioder personen har fra før, så et nytt kall på samme utvalg er trygt.\n\n" +
             "Følg kjøringen i `/status`, og se tallene per vedtaksmåned i `/rapport`.\n\n" +

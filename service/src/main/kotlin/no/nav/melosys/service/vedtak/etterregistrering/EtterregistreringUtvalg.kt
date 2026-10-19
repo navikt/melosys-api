@@ -7,8 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 /**
- * Samme utvalg som Q-14 i melosys-kode-wiki, så simuleringen kan sammenlignes med spørringen:
- * avsluttede FTRL-behandlinger med vedtak og minst én innvilget medlemskapsperiode som har fom og slutter
+ * Avsluttede FTRL-behandlinger med vedtak og minst én innvilget medlemskapsperiode som har fom og slutter
  * på eller etter [periodeTomFra]. Bare slike perioder registrerer melosys-skattehendelser.
  */
 @Component
@@ -33,7 +32,7 @@ class EtterregistreringUtvalg {
 
     private companion object {
         // Steget som sender vedtaksmeldingen, kjører bare ved iverksetting, så behandlingen må ha vedtaksdato
-        // eller fullført iverksetting. Uten vedtaksdato brukes datoen iverksettingen startet, som i Q-14.
+        // eller fullført iverksetting. Uten vedtaksdato brukes datoen iverksettingen startet.
         // Henleggelse fjerner ikke de innvilgede periodene, resultattypen kan endres etter vedtaket, og en
         // annullert sak beholder periodene i de tidligere vedtakene. Avslag og ferdigbehandling er ikke vedtak
         // om medlemskap, selv om periodene kan stå igjen.
