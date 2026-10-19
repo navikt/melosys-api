@@ -241,15 +241,11 @@ class EtterregistreringAvVedtaksmeldinger(
         private fun måned(behandling: UtvalgtBehandling) =
             perVedtaksmåned.getOrPut(behandling.vedtaksmåned()) { Månedstall(behandling.vedtaksmåned()) }
 
-        private fun UtvalgtBehandling.vedtaksmåned() = vedtaksdato?.toString()?.substring(0, 7) ?: UTEN_DATO
+        private fun UtvalgtBehandling.vedtaksmåned() = vedtaksdato.toString().substring(0, 7)
 
         private class Månedstall(val måned: String, var iUtvalget: Int = 0, var sendt: Int = 0, var utenIdent: Int = 0, var feilet: Int = 0) {
             fun tilRad() = VedtaksmånedRad(måned, iUtvalget, sendt, utenIdent, feilet)
         }
-    }
-
-    companion object {
-        const val UTEN_DATO = "uten dato"
     }
 }
 
@@ -262,18 +258,16 @@ data class EtterregistreringParametre(
     val maksFeil: Int,
     val skarp: Boolean,
 ) {
-    /** Med vedtakFra eller vedtakTil er behandlinger uten dato utenfor. */
     fun omfatter(behandling: UtvalgtBehandling): Boolean {
         if (behandlingIder != null && behandling.behandlingId !in behandlingIder) return false
-        if (vedtakFra == null && vedtakTil == null) return true
-        val dato = behandling.vedtaksdato ?: return false
+        val dato = behandling.vedtaksdato
         return (vedtakFra == null || !dato.isBefore(vedtakFra)) && (vedtakTil == null || !dato.isAfter(vedtakTil))
     }
 }
 
 data class EtterregistreringRapport(
     val skarp: Boolean?,
-    /** Sortert på vedtaksmåned, med behandlinger uten dato til slutt. */
+    /** Sortert på vedtaksmåned. */
     val perVedtaksmaaned: List<VedtaksmånedRad>,
     /** I simulering: behandlingene som ville blitt sendt. */
     val sendteBehandlingIder: List<Long>,

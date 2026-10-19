@@ -45,7 +45,7 @@ class EtterregistreringAvVedtaksmeldingerTest {
         gittUtvalg(
             utvalgt(1, "MEL-1", "2024-03-10"),
             utvalgt(2, "MEL-2", "2024-03-20"),
-            utvalgt(3, "MEL-3", null),
+            utvalgt(3, "MEL-3", "2024-04-01"),
         )
 
         etterregistrering.kjør(parametre(skarp = false))
@@ -57,7 +57,7 @@ class EtterregistreringAvVedtaksmeldingerTest {
             sendteBehandlingIder shouldContainExactly listOf(1L, 2L, 3L)
             perVedtaksmaaned shouldContainExactly listOf(
                 VedtaksmånedRad("2024-03", iUtvalget = 2, sendt = 2, utenIdent = 0, feilet = 0),
-                VedtaksmånedRad(EtterregistreringAvVedtaksmeldinger.UTEN_DATO, iUtvalget = 1, sendt = 1, utenIdent = 0, feilet = 0),
+                VedtaksmånedRad("2024-04", iUtvalget = 1, sendt = 1, utenIdent = 0, feilet = 0),
             )
         }
         etterregistrering.status()["antallSendt"] shouldBe 3
@@ -119,20 +119,19 @@ class EtterregistreringAvVedtaksmeldingerTest {
     }
 
     @Test
-    fun `vedtakFra, vedtakTil og behandlingIder avgrenser utvalget, og behandlinger uten dato er da utenfor`() {
+    fun `vedtakFra, vedtakTil og behandlingIder avgrenser utvalget`() {
         gittUtvalg(
             utvalgt(1, "MEL-1", "2024-12-31"),
             utvalgt(2, "MEL-2", "2025-01-01"),
             utvalgt(3, "MEL-3", "2025-06-30"),
             utvalgt(4, "MEL-4", "2025-07-01"),
-            utvalgt(5, "MEL-5", null),
         )
 
         etterregistrering.kjør(parametre(vedtakFra = LocalDate.of(2025, 1, 1), vedtakTil = LocalDate.of(2025, 6, 30)))
         etterregistrering.rapport().sendteBehandlingIder shouldContainExactly listOf(2L, 3L)
 
-        etterregistrering.kjør(parametre(behandlingIder = setOf(5L, 1L)))
-        etterregistrering.rapport().sendteBehandlingIder shouldContainExactly listOf(1L, 5L)
+        etterregistrering.kjør(parametre(behandlingIder = setOf(4L, 1L)))
+        etterregistrering.rapport().sendteBehandlingIder shouldContainExactly listOf(1L, 4L)
     }
 
     @Test
@@ -226,8 +225,8 @@ class EtterregistreringAvVedtaksmeldingerTest {
         every { persondataService.finnFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns Optional.of(FOLKEREGISTERIDENT)
     }
 
-    private fun utvalgt(id: Long, saksnummer: String, vedtaksdato: String?, aktørId: String = FagsakTestFactory.BRUKER_AKTØR_ID) =
-        UtvalgtBehandling(id, saksnummer, vedtaksdato?.let(LocalDate::parse)) to Behandling.forTest {
+    private fun utvalgt(id: Long, saksnummer: String, vedtaksdato: String, aktørId: String = FagsakTestFactory.BRUKER_AKTØR_ID) =
+        UtvalgtBehandling(id, saksnummer, LocalDate.parse(vedtaksdato)) to Behandling.forTest {
             this.id = id
             fagsak {
                 this.saksnummer = saksnummer

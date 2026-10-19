@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 /**
  * Samme utvalg som Q-14 i melosys-kode-wiki, så simuleringen kan sammenlignes med spørringen:
- * avsluttede FTRL-behandlinger med minst én innvilget medlemskapsperiode som har fom og slutter
+ * avsluttede FTRL-behandlinger med vedtak og minst én innvilget medlemskapsperiode som har fom og slutter
  * på eller etter [periodeTomFra]. Bare slike perioder registrerer melosys-skattehendelser.
  */
 @Component
@@ -27,16 +27,21 @@ class EtterregistreringUtvalg {
                 UtvalgtBehandling(
                     behandlingId = (rad[0] as Number).toLong(),
                     saksnummer = rad[1] as String,
-                    vedtaksdato = (rad[2] as String?)?.let(LocalDate::parse),
+                    vedtaksdato = LocalDate.parse(rad[2] as String),
                 )
             }
 
     private companion object {
-        // Uten vedtaksdato brukes datoen iverksettingen startet, som i Q-14.
+        // Steget som sender vedtaksmeldingen, kjører bare ved iverksetting, så behandlingen må ha vedtaksdato
+        // eller fullført iverksetting. Uten vedtaksdato brukes datoen iverksettingen startet, som i Q-14.
+        // Henleggelse fjerner ikke de innvilgede periodene, resultattypen kan endres etter vedtaket, og en
+        // annullert sak beholder periodene i de tidligere vedtakene. Avslag og ferdigbehandling er ikke vedtak
+        // om medlemskap, selv om periodene kan stå igjen.
         val UTVALG_SQL = """
             SELECT b.id, b.saksnummer, TO_CHAR(COALESCE(vm.vedtak_dato, i.startet), 'YYYY-MM-DD')
             FROM behandling b
             JOIN fagsak f ON f.saksnummer = b.saksnummer
+            JOIN behandlingsresultat br ON br.behandling_id = b.id
             LEFT JOIN vedtak_metadata vm ON vm.behandlingsresultat_id = b.id
             LEFT JOIN (
                 SELECT pi.behandling_id, MIN(pi.registrert_dato) AS startet
@@ -46,7 +51,10 @@ class EtterregistreringUtvalg {
                 GROUP BY pi.behandling_id
             ) i ON i.behandling_id = b.id
             WHERE f.fagsak_type = 'FTRL'
+              AND f.status <> 'ANNULLERT'
               AND b.status = 'AVSLUTTET'
+              AND br.resultat_type NOT IN ('HENLEGGELSE', 'HENLEGGELSE_BORTFALT', 'ANNULLERT', 'AVSLAG_MANGLENDE_OPPL', 'FERDIGBEHANDLET')
+              AND COALESCE(vm.vedtak_dato, i.startet) IS NOT NULL
               AND EXISTS (
                   SELECT 1 FROM medlemskapsperiode mp
                   WHERE mp.behandlingsresultat_id = b.id
@@ -54,7 +62,7 @@ class EtterregistreringUtvalg {
                     AND mp.fom_dato IS NOT NULL
                     AND mp.tom_dato >= :periodeTomFra
               )
-            ORDER BY COALESCE(vm.vedtak_dato, i.startet) NULLS LAST, b.id
+            ORDER BY COALESCE(vm.vedtak_dato, i.startet), b.id
         """.trimIndent()
     }
 }
@@ -62,6 +70,6 @@ class EtterregistreringUtvalg {
 data class UtvalgtBehandling(
     val behandlingId: Long,
     val saksnummer: String,
-    /** Vedtaksdatoen, ellers datoen iverksettingen startet. Null når ingen av dem finnes. */
-    val vedtaksdato: LocalDate?,
+    /** Vedtaksdatoen, ellers datoen iverksettingen startet. */
+    val vedtaksdato: LocalDate,
 )

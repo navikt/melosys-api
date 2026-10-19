@@ -25,16 +25,17 @@ class EtterregistreringAvVedtaksmeldingerController(
     @Operation(
         summary = "Send vedtaksmeldingen på nytt til melosys-skattehendelser (simulering eller skarp kjøring)",
         description =
-            "Finner avsluttede FTRL-behandlinger med en innvilget medlemskapsperiode som slutter på eller etter " +
+            "Finner avsluttede FTRL-behandlinger med vedtak og en innvilget medlemskapsperiode som slutter på eller etter " +
             "`periodeTomFra`, og sender den samme vedtaksmeldingen som steget SEND_MELDING_OM_VEDTAK, i " +
-            "vedtaksrekkefølge. Utvalget er det samme som Q-14 i melosys-kode-wiki. Uten `skarp` slås " +
+            "vedtaksrekkefølge. Henlagte behandlinger og annullerte saker er ikke med. Utvalget er det samme som Q-14 i " +
+            "melosys-kode-wiki. Uten `skarp` slås " +
             "identen opp og meldingen bygges, men ingenting sendes. melosys-skattehendelser hopper over " +
             "perioder personen har fra før, så et nytt kall på samme utvalg er trygt.\n\n" +
             "Følg kjøringen i `/status`, og se tallene per vedtaksmåned i `/rapport`.\n\n" +
             "### Felter\n" +
             "- `periodeTomFra`: standard 2024-01-01.\n" +
             "- `vedtakFra`, `vedtakTil`: deler utvalget i porsjoner etter vedtaksdato, ellers datoen " +
-            "iverksettingen startet. Begge er med. Behandlinger uten dato er utenfor når en av dem er satt.\n" +
+            "iverksettingen startet. Begge er med.\n" +
             "- `behandlingIder`: begrenser utvalget til disse behandlingene.\n" +
             "- `maksAntall`: stopper etter så mange sendte meldinger. Kreves for skarp kjøring. Et nytt kall " +
             "begynner forfra i utvalget, så gå videre med `vedtakFra` eller `behandlingIder`.\n" +

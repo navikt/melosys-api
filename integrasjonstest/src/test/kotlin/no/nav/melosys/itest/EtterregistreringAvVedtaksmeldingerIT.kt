@@ -6,9 +6,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
@@ -108,6 +110,27 @@ class EtterregistreringAvVedtaksmeldingerIT(
         etterregistrering.rapport().sendteBehandlingIder shouldBe emptyList()
     }
 
+    @Test
+    fun `behandlinger som er henlagt, ikke har vedtak eller ligger i en annullert sak, er ikke med`() {
+        val sak = lagreSak("MEL-8361F", Sakstyper.FTRL, AKTØR_MED_IDENT)
+        val vedtatt = lagreBehandling(sak, periode("2024-01-01", "2024-12-31"), vedtaksdato = "2024-04-01")
+        lagreBehandling(sak, periode("2024-01-01", "2024-12-31"), vedtaksdato = null)
+        listOf(
+            Behandlingsresultattyper.HENLEGGELSE,
+            Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
+            Behandlingsresultattyper.ANNULLERT,
+            Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
+            Behandlingsresultattyper.FERDIGBEHANDLET,
+        ).forEach { lagreBehandling(sak, periode("2024-01-01", "2024-12-31"), vedtaksdato = "2024-05-01", resultattype = it) }
+
+        val annullertSak = lagreSak("MEL-8361G", Sakstyper.FTRL, AKTØR_MED_IDENT, Saksstatuser.ANNULLERT)
+        lagreBehandling(annullertSak, periode("2024-01-01", "2024-12-31"), vedtaksdato = "2024-06-01")
+
+        etterregistrering.kjør(parametre(skarp = false))
+
+        etterregistrering.rapport().sendteBehandlingIder shouldContainExactly listOf(vedtatt)
+    }
+
     private fun parametre(skarp: Boolean, maksAntall: Int? = null, periodeTomFra: LocalDate = LocalDate.of(2024, 1, 1)) =
         EtterregistreringParametre(periodeTomFra = periodeTomFra, maksAntall = maksAntall, maksFeil = 100, skarp = skarp)
 
@@ -116,11 +139,17 @@ class EtterregistreringAvVedtaksmeldingerIT(
     private fun periode(fom: String, tom: String, resultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET) =
         TestPeriode(LocalDate.parse(fom), LocalDate.parse(tom), resultat)
 
-    private fun lagreSak(saksnummer: String, sakstype: Sakstyper, aktørId: String): Fagsak = fagsakRepository.save(
+    private fun lagreSak(
+        saksnummer: String,
+        sakstype: Sakstyper,
+        aktørId: String,
+        saksstatus: Saksstatuser = FagsakTestFactory.SAKSSTATUS,
+    ): Fagsak = fagsakRepository.save(
         Fagsak.forTest {
             this.saksnummer = saksnummer
             type = sakstype
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status = saksstatus
             medBruker { this.aktørId = aktørId }
         }
     )
@@ -130,8 +159,10 @@ class EtterregistreringAvVedtaksmeldingerIT(
         periode: TestPeriode,
         vedtaksdato: String? = null,
         status: Behandlingsstatus = Behandlingsstatus.AVSLUTTET,
+        resultattype: Behandlingsresultattyper = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
     ): Long = behandlingsresultatRepository.saveAndFlush(
         Behandlingsresultat.forTest {
+            type = resultattype
             behandling {
                 medFagsak(fagsak)
                 type = Behandlingstyper.FØRSTEGANG
