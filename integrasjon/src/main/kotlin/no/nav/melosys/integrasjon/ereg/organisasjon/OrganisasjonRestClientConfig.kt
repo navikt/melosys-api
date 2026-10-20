@@ -4,7 +4,6 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.errorFilter
 import no.nav.melosys.integrasjon.felles.lagException
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,13 +23,11 @@ class OrganisasjonRestClientConfig(
     @Bean
     fun organisasjonRestClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): OrganisasjonRestClient {
         return OrganisasjonRestClient(
             webClientBuilder
                 .baseUrl(url)
                 .filter(headerFilter())
-                .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Henting av organisasjon fra ereg feilet") { feilmelding, statusCode, errorBody ->
                     if (statusCode == HttpStatus.NOT_FOUND)
                         IkkeFunnetException("$feilmelding $statusCode - $errorBody")

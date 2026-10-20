@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.oppgave.Oppgave
@@ -56,10 +57,15 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
-    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) {
+    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) =
+        ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = false)
+
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
+            if (leggTilNøkkelord) leggTilNøkkelordForBehandlingstema(behandling, oppgave.oppgaveId)
             ferdigstillOppgave(oppgave.oppgaveId)
         } else {
             log.warn("Finner ingen oppgave for behandling $behandlingID, med oppgaveid ${behandling.oppgaveId}")
@@ -198,6 +204,20 @@ class OppgaveService(
         if (gjelderÅr == null) return
         try {
             oppgaveFasade.leggTilNøkkelord(oppgaveID, setOf("Årsavregning $gjelderÅr"))
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke sette nøkkelord på oppgave $oppgaveID for behandling ${behandling.id}" }
+        }
+    }
+
+    private fun leggTilNøkkelordForBehandlingstema(behandling: Behandling, oppgaveID: String) {
+        val nøkkelord = when (behandling.tema) {
+            Behandlingstema.UTSENDT_ARBEIDSTAKER -> NØKKELORD_UTSENDT_ARBEIDSTAKER
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY -> NØKKELORD_STATSANSATT
+            else -> return
+        }
+
+        try {
+            oppgaveFasade.leggTilNøkkelord(oppgaveID, setOf(nøkkelord))
         } catch (e: Exception) {
             log.warn(e) { "Kunne ikke sette nøkkelord på oppgave $oppgaveID for behandling ${behandling.id}" }
         }
@@ -464,6 +484,8 @@ class OppgaveService(
 
     companion object {
         private const val UKJENT = "UKJENT"
+        private const val NØKKELORD_UTSENDT_ARBEIDSTAKER = "Utsendt arbeidstaker"
+        private const val NØKKELORD_STATSANSATT = "Statsansatt"
         private fun mapPeriode(mottatteOpplysningerData: MottatteOpplysningerData): PeriodeDto {
             val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(
                 null,

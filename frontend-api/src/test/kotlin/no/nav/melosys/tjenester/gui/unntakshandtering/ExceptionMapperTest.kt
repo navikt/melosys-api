@@ -249,7 +249,7 @@ class ExceptionMapperTest {
     }
 
     private fun assertResponse(
-        responseEntity: ResponseEntity<Map<String, Any>>,
+        responseEntity: ResponseEntity<Map<String, Any?>>,
         expectedStatus: HttpStatus,
         expectedMessage: String,
         forventetFeilmeldinger: List<String>? = null
@@ -257,6 +257,7 @@ class ExceptionMapperTest {
         assertEquals(expectedStatus, responseEntity.statusCode)
         assertTrue { responseEntity.body is Map<*, *> }
         assertEquals(expectedMessage, responseEntity.body!!["message"])
+        assertTrue { responseEntity.body!!.containsKey("traceId") }
         if (forventetFeilmeldinger == null) {
             assertNull(responseEntity.body!!["feilkoder"])
         } else {

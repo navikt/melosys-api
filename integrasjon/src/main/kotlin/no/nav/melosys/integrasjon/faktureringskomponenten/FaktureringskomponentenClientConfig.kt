@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.faktureringskomponenten
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,13 +16,11 @@ class FaktureringskomponentenClientConfig(
 ) {
     @Bean
     fun faktureringskomponentenClient(
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter?,
         webClientBuilder: WebClient.Builder
     ): FaktureringskomponentenClient {
         return object : FaktureringskomponentenClient(webClientBuilder
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter("faktureringskomponenten"))
-            .filter(correlationIdOutgoingFilter!!)
             .filter(errorFilter("Kall mot Faktureringskomponenten feilet"))
             .defaultHeaders { httpHeaders: HttpHeaders -> defaultHeaders(httpHeaders) }
             .build()) {}

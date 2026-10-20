@@ -88,6 +88,10 @@ spec:
     - secret: {{APP_NAME}}
     - secret: {{APP_NAME}}-unleash-api-token
   env:
+  # Autoinstrumenteringen legger javaagenten til denne verdien. Uten den erstatter agenten
+  # JAVA_TOOL_OPTIONS fra Dockerfile, og appen går i UTC.
+  - name: JAVA_TOOL_OPTIONS
+    value: "-Dfile.encoding=UTF-8 -Duser.language=no -Duser.country=NO -Duser.timezone=Europe/Oslo"
   - name: SPRING_PROFILES_ACTIVE
     value: nais
   - name: GROUP_MELOSYS_INNLOGGING

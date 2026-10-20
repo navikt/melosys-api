@@ -16,6 +16,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -482,6 +483,76 @@ internal class OppgaveServiceTest {
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Årsavregning 2024")) }
+    }
+
+    @Test
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_utsendtArbeidstaker_nøkkelordSettesFørFerdigstilling() {
+        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+
+        verifyOrder {
+            oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker"))
+            oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID)
+        }
+    }
+
+    @Test
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_tjenestepersonEllerFly_nøkkelordStatsansattSettes() {
+        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+
+        verifyOrder {
+            oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt"))
+            oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID)
+        }
+    }
+
+    @Test
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_annetTema_nøkkelordSettesIkke() {
+        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
+
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
+    }
+
+    @Test
+    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_nøkkelordKallFeiler_oppgaveBlirLikevelFerdigstilt() {
+        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
+
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
+    }
+
+    @Test
+    fun ferdigstillOppgaveMedBehandlingID_utenNøkkelord_utsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
+
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
+    }
+
+    private fun lagEøsBehandlingMedMocker(tema: Behandlingstema): Behandling {
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = Sakstyper.EU_EOS
+                medBruker()
+            }
+            type = Behandlingstyper.FØRSTEGANG
+            this.tema = tema
+        }.apply { oppgaveId = BEH_OPPG_ID }
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
+        every { oppgaveFasade.ferdigstillOppgave(any()) } returns Unit
+        return behandling
     }
 
     private fun lagÅrsavregningsbehandlingMedMocker(): Behandling {

@@ -92,8 +92,6 @@ class KafkaXxxProducer(
 ) {
     fun send(message: MessageType) {
         val record = ProducerRecord<String, MessageType>(topicName, message)
-        record.headers().add(CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
-
         val future = kafkaTemplate.send(record)
         val result = future[15L, TimeUnit.SECONDS]
         log.info("Sent to $topicName, offset: ${result.recordMetadata.offset()}")
