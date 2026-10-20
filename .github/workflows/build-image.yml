@@ -1,5 +1,5 @@
 name: Build and Push Image
-run-name: Build and Push Image · ${{ inputs.image_tag }}
+run-name: Build and Push Image · ${{ inputs.requested_by || github.actor }} · ${{ inputs.image_tag }}
 on:
   workflow_dispatch:
     inputs:
@@ -7,6 +7,11 @@ on:
         description: 'Custom image tag (e.g., e2e-test-123, feature-x; latest, mq-* and e2e-ok-* are reserved)'
         required: true
         type: string
+      requested_by:
+        description: 'Who ordered the build; set by e2e-brancher.yml in melosys-e2e-tests, which runs as the Melosys CI app. Empty means the actor.'
+        required: false
+        type: string
+        default: ''
       skip_tests:
         description: 'Skip tests for faster build'
         required: false

@@ -19,20 +19,21 @@ class KafkaMelosysHendelseProducer(
 ) {
     fun produserBestillingsmelding(melosysHendelse: MelosysHendelse) {
         val hendelseRecord = ProducerRecord<String, MelosysHendelse>(topicName, melosysHendelse)
-        val future = kafkaTemplate.send(hendelseRecord)
+        val beskrivelse = melosysHendelse.melding.beskrivelseUtenPersonopplysninger()
 
         try {
-            val sendeResultat = future[15L, TimeUnit.SECONDS]
-            log.info(
-                "Melding sendt på topic $topicName " +
-                    "data: ${melosysHendelse.melding}\n" +
-                    "Offset: ${sendeResultat.recordMetadata.offset()} "
-            )
+            val sendeResultat = kafkaTemplate.send(hendelseRecord)[15L, TimeUnit.SECONDS]
+            log.info("Melding sendt på topic $topicName: $beskrivelse. Offset: ${sendeResultat.recordMetadata.offset()}")
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
-            throw TekniskException("Avbrutt ved sending av melding om faktura bestilt for hendelse ${melosysHendelse.melding}")
+            throw TekniskException("Avbrutt ved sending av melding på topic $topicName: $beskrivelse")
         } catch (e: Exception) {
-            throw TekniskException("Kunne ikke sende melding om faktura bestilt for hendelse ${melosysHendelse.melding}", e)
+            throw TekniskException("Kunne ikke sende melding på topic $topicName: $beskrivelse", e)
         }
+    }
+
+    private fun HendelseMelding.beskrivelseUtenPersonopplysninger(): String = when (this) {
+        is VedtakHendelseMelding -> "VedtakHendelseMelding(sakstype=$sakstype, medlemskapsperioder=${medlemskapsperioder.size})"
+        else -> this::class.simpleName ?: "HendelseMelding"
     }
 }
