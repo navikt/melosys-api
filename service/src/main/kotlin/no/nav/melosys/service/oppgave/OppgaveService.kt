@@ -118,11 +118,22 @@ class OppgaveService(
         @Nullable aktørID: String? = null,
         @Nullable tilordnetRessurs: String? = null,
         @Nullable orgnr: String? = null
+    ) = opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, orgnr, leggTilNøkkelord = false)
+
+    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
+    @Transactional
+    fun opprettEllerGjenbrukBehandlingsoppgave(
+        behandling: Behandling,
+        journalpostID: String?,
+        aktørID: String?,
+        tilordnetRessurs: String?,
+        orgnr: String?,
+        leggTilNøkkelord: Boolean
     ) {
         val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
         if (eksisterendeOppgave == null || !eksisterendeOppgave.erAktiv() || kreverNyOppgave(behandling.type)) {
-            lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
+            lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr, leggTilNøkkelord)
         } else {
             if (behandling.oppgaveId == null) {
                 // Last behandlingen på nytt for å unngå optimistisk låsefeil (stale object)
@@ -134,6 +145,7 @@ class OppgaveService(
                 oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
                 log.info("Oppgave oppdatert med ny tilordnetRessurs, for behandling ${behandling.id}")
             }
+            if (leggTilNøkkelord) leggTilNøkkelordForUtsendtArbeidstaker(behandling, eksisterendeOppgave.oppgaveId)
         }
     }
 
@@ -180,7 +192,6 @@ class OppgaveService(
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )
         leggTilNøkkelordForÅrsavregning(behandling, behandlingsoppgave, oppgaveID, gjelderÅr)
-        leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
     }
 
     // Nøkkelord finnes kun i Oppgave-API v2 (beta) og settes derfor i et separat kall etter
@@ -260,7 +271,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgave(
         behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
-        aktørID: String?, orgnr: String?
+        aktørID: String?, orgnr: String?, leggTilNøkkelord: Boolean
     ) {
         val gjelderÅr = finnGjelderÅrForÅrsavregning(behandling)
         val oppgave =
@@ -281,7 +292,7 @@ class OppgaveService(
         settOppgaveIdPåBehandling(behandling, oppgaveID)
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
         leggTilNøkkelordForÅrsavregning(behandling, oppgave, oppgaveID, gjelderÅr)
-        leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
+        if (leggTilNøkkelord) leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
     }
 
     private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {

@@ -485,26 +485,36 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun opprettEllerGjenbrukBehandlingsoppgave_eøsUtsendtArbeidstaker_nøkkelordUtsendtArbeidstakerSettes() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsUtsendtArbeidstaker_nøkkelordUtsendtArbeidstakerSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
     }
 
     @Test
-    fun opprettEllerGjenbrukBehandlingsoppgave_eøsTjenestepersonEllerFly_nøkkelordStatsansattSettes() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsTjenestepersonEllerFly_nøkkelordStatsansattSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt")) }
     }
 
     @Test
-    fun opprettEllerGjenbrukBehandlingsoppgave_eøsAnnetTema_nøkkelordSettesIkke() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsAnnetTema_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_utenNøkkelordEøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
 
@@ -513,31 +523,52 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun opprettEllerGjenbrukBehandlingsoppgave_eøsNøkkelordKallFeiler_oppgaveBlirLikevelOpprettet() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordGjenbruktOppgave_nøkkelordSettesPåEksisterendeOppgave() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordIkkeEøs_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstyper.TRYGDEAVTALE)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordKallFeiler_oppgaveBlirLikevelOpprettet() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
         verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
         behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
-    fun oppdaterOppgave_eøsUtsendtArbeidstaker_nøkkelordSettes() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun oppdaterOppgave_eøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
         oppgaveService.oppdaterOppgave(BEH_OPPG_ID, behandling)
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
-        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
     }
 
-    private fun lagEøsBehandlingMedMocker(tema: Behandlingstema): Behandling {
+    private fun lagSøknadsbehandlingMedMocker(tema: Behandlingstema, sakstype: Sakstyper = Sakstyper.EU_EOS): Behandling {
         val behandling = Behandling.forTest {
             id = 1L
             fagsak {
-                type = Sakstyper.EU_EOS
+                type = sakstype
                 medBruker()
             }
             type = Behandlingstyper.FØRSTEGANG

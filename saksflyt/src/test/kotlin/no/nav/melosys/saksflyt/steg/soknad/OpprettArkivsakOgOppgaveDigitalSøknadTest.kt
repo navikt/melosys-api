@@ -5,6 +5,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
@@ -27,6 +28,7 @@ internal class OpprettArkivsakOgOppgaveDigitalSøknadTest {
     private val opprettOppgave = OpprettOppgaveDigitalSøknad(oppgaveService)
 
     private fun prosessinstans(nySak: Boolean) = Prosessinstans.forTest {
+        type = ProsessType.MOTTAK_DIGITAL_SØKNAD
         behandling { fagsak { medBruker() } }
         medData(ProsessDataKey.DIGITAL_SØKNAD_NY_SAK, nySak)
     }
@@ -52,13 +54,13 @@ internal class OpprettArkivsakOgOppgaveDigitalSøknadTest {
     fun `oppretter oppgave når søknaden ga ny sak`() {
         opprettOppgave.utfør(prosessinstans(nySak = true))
 
-        verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) }
+        verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), true) }
     }
 
     @Test
     fun `oppretter ikke oppgave når søknaden gjelder eksisterende sak`() {
         opprettOppgave.utfør(prosessinstans(nySak = false))
 
-        verify(exactly = 0) { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), any()) }
     }
 }
