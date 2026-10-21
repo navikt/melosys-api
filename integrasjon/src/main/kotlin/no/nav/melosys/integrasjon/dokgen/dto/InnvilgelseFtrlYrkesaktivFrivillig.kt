@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
@@ -9,6 +10,9 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.OrdinærSatsPåfølgendeÅrDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.TjuefemProsentRegelDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.ÅrsinntektDto
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -49,6 +53,11 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     val har25ProsentRegelPeriode: Boolean = false,
     val harKunMedlemskapsperioderIForegåendeÅr: Boolean = false,
     val avgiftsgrunnlag: Avgiftsgrunnlag? = null,
+    val visOrdinærBeregningstabell: Boolean = true,
+    val tjuefemProsentRegel: TjuefemProsentRegelDto? = null,
+    @JsonProperty("årsinntektUnderMinstebeløp")
+    val årsinntektUnderMinstebeløp: List<ÅrsinntektDto> = emptyList(),
+    val ordinærSatsPåfølgendeÅr: OrdinærSatsPåfølgendeÅrDto? = null,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -81,6 +90,10 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         har25ProsentRegelPeriode: Boolean = false,
         harKunMedlemskapsperioderIForegåendeÅr: Boolean = false,
         avgiftsgrunnlag: Avgiftsgrunnlag? = null,
+        visOrdinærBeregningstabell: Boolean = true,
+        tjuefemProsentRegel: TjuefemProsentRegelDto? = null,
+        årsinntektUnderMinstebeløp: List<ÅrsinntektDto> = emptyList(),
+        ordinærSatsPåfølgendeÅr: OrdinærSatsPåfølgendeÅrDto? = null,
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -112,5 +125,9 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         har25ProsentRegelPeriode,
         harKunMedlemskapsperioderIForegåendeÅr,
         avgiftsgrunnlag,
+        visOrdinærBeregningstabell,
+        tjuefemProsentRegel,
+        årsinntektUnderMinstebeløp,
+        ordinærSatsPåfølgendeÅr,
     )
 }

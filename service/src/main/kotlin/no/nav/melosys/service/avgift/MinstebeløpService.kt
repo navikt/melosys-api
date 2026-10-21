@@ -13,6 +13,9 @@ class MinstebeløpService(
     fun finnMinstebeløp(perioder: Collection<Trygdeavgiftsperiode>): MinstebeløpResponse? =
         perioder.filter { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }.maxByOrNull { it.periodeTil }
             ?.let { trygdeavgiftClient.hentMinstebeløp(it.periodeTil.year) }
+
+    fun finnMinstebeløpForÅr(perioder: Collection<Trygdeavgiftsperiode>, år: Int): MinstebeløpResponse? =
+        if (perioder.any { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }) trygdeavgiftClient.hentMinstebeløp(år) else null
 }
 
 
