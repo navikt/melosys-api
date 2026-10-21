@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -57,15 +58,10 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
-    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
-    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) =
-        ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = false)
-
-    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
-            if (leggTilNøkkelord) leggTilNøkkelordForBehandlingstema(behandling, oppgave.oppgaveId)
             ferdigstillOppgave(oppgave.oppgaveId)
         } else {
             log.warn("Finner ingen oppgave for behandling $behandlingID, med oppgaveid ${behandling.oppgaveId}")
@@ -184,6 +180,7 @@ class OppgaveService(
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )
         leggTilNøkkelordForÅrsavregning(behandling, behandlingsoppgave, oppgaveID, gjelderÅr)
+        leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
     }
 
     // Nøkkelord finnes kun i Oppgave-API v2 (beta) og settes derfor i et separat kall etter
@@ -209,7 +206,8 @@ class OppgaveService(
         }
     }
 
-    private fun leggTilNøkkelordForBehandlingstema(behandling: Behandling, oppgaveID: String) {
+    private fun leggTilNøkkelordForUtsendtArbeidstaker(behandling: Behandling, oppgaveID: String) {
+        if (behandling.fagsak.type != Sakstyper.EU_EOS) return
         val nøkkelord = when (behandling.tema) {
             Behandlingstema.UTSENDT_ARBEIDSTAKER -> NØKKELORD_UTSENDT_ARBEIDSTAKER
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY -> NØKKELORD_STATSANSATT
@@ -283,6 +281,7 @@ class OppgaveService(
         settOppgaveIdPåBehandling(behandling, oppgaveID)
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
         leggTilNøkkelordForÅrsavregning(behandling, oppgave, oppgaveID, gjelderÅr)
+        leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
     }
 
     private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {
