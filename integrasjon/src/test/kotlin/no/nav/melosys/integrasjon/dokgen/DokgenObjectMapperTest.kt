@@ -5,6 +5,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import no.nav.melosys.domain.Behandlingsmaate
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftPerAvgiftsdelDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftssatsDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.OrdinærSatsPåfølgendeÅrDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.ÅrsinntektDto
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.junit.jupiter.api.Test
 
@@ -69,6 +74,24 @@ class DokgenObjectMapperTest {
         json shouldContain "eøsEllerTrygdeavtale"
         json shouldContain "avslåttMedlemskapsIPensjonsdel"
         json shouldContain "avslåttMedlemskapsperiodeFørMottaksdatoHelsedel"
+    }
+
+    @Test
+    fun `felt i DTOene for 25 prosent-regelen som starter med å skal serialiseres med riktige feltnavn`() {
+        val avgiftssats = objectMapper.writeValueAsString(
+            AvgiftssatsDto(2026, null, Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL, null, true, "FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON", null)
+        )
+        val avgiftPerAvgiftsdel = objectMapper.writeValueAsString(
+            AvgiftPerAvgiftsdelDto(2026, null, Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL, java.math.BigDecimal.ONE)
+        )
+        val årsinntekt = objectMapper.writeValueAsString(ÅrsinntektDto(2026, java.math.BigDecimal.ONE))
+        val ordinærSats = objectMapper.writeValueAsString(OrdinærSatsPåfølgendeÅrDto(2026, 2027, emptyList()))
+
+        avgiftssats shouldContain """"år":2026"""
+        avgiftPerAvgiftsdel shouldContain """"år":2026"""
+        årsinntekt shouldContain """"år":2026"""
+        årsinntekt shouldContain """"årsinntekt":1"""
+        ordinærSats shouldContain """"år":2027"""
     }
 
     private data class DtoMedNorskeFeltnavn(

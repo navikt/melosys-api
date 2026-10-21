@@ -144,12 +144,17 @@ class InnvilgelseFtrlMapper(
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
-        val minstebelop = minstebeløpService.finnMinstebeløp(behandlingsresultat.trygdeavgiftsperioder)
+        val trygdeavgiftsperioder = trygdeavgiftsperioderIFrivilligBrev(behandlingsresultat)
+        val trygdeavgift = TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder)
+        val minstebelop = minstebeløpService.finnMinstebeløpForÅr(
+            trygdeavgiftsperioder,
+            trygdeavgiftsperioder.minOfOrNull { it.periodeFra.year } ?: LocalDate.now().year
+        )
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.hentBehandling().type,
-            avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
+            avgiftsperioder = trygdeavgiftsperioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom },
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
             bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().hentBestemmelse(),
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
@@ -173,8 +178,12 @@ class InnvilgelseFtrlMapper(
             harKunMedlemskapsperioderIForegåendeÅr = utledHarKunMedlemskapsperioderIForegåendeÅr(behandlingsresultat),
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
-            harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            harMinstebelopPeriode = trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
+            har25ProsentRegelPeriode = trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            visOrdinærBeregningstabell = trygdeavgift.visOrdinærBeregningstabell,
+            tjuefemProsentRegel = trygdeavgift.tjuefemProsentRegel,
+            årsinntektUnderMinstebeløp = trygdeavgift.årsinntektUnderMinstebeløp,
+            ordinærSatsPåfølgendeÅr = trygdeavgift.ordinærSatsPåfølgendeÅr,
         )
     }
 
@@ -338,17 +347,25 @@ class InnvilgelseFtrlMapper(
         }
 
 
-    private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> {
-        val perioderMedInntekt = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag()
-        val perioder = if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            val gruppertePerioder = perioderMedInntekt.groupBy { it.periodeTil.year }
-            val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
-            gruppertePerioder[valgtÅr] ?: emptyList()
-        } else {
-            perioderMedInntekt
-        }
+    private fun mapAvgiftsPerioder(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeDto> =
+        trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 1).map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
 
-        return perioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
+    /**
+     * Året etter tas bare med når 25 %-regelen eller minstebeløpet gjelder i inneværende år eller året etter.
+     */
+    private fun trygdeavgiftsperioderIFrivilligBrev(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
+        val inneværendeOgNesteÅr = trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 2)
+        return if (inneværendeOgNesteÅr.any { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }) inneværendeOgNesteÅr
+        else trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 1)
+    }
+
+    private fun trygdeavgiftsperioderIBrev(behandlingsresultat: Behandlingsresultat, antallÅr: Int): List<Trygdeavgiftsperiode> {
+        val perioderMedInntekt = behandlingsresultat.trygdeavgiftsperioderMedInntektsgrunnlag()
+        if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) return perioderMedInntekt
+
+        val gruppertePerioder = perioderMedInntekt.groupBy { it.periodeTil.year }
+        val førsteÅr = velgRelevantÅr(gruppertePerioder.keys, LocalDate.now().year)
+        return (førsteÅr until førsteÅr + antallÅr).flatMap { gruppertePerioder[it].orEmpty() }
     }
 
     /**
