@@ -1,10 +1,6 @@
 package no.nav.melosys.domain.arkiv
 
 import no.nav.melosys.domain.eessi.SedType
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.msm.AltinnDokument
-import java.nio.charset.StandardCharsets
-import java.util.*
 
 class FysiskDokument : ArkivDokument() {
 
@@ -21,32 +17,6 @@ class FysiskDokument : ArkivDokument() {
             tittel = hentTittelForSedType(sedType)
             brevkode = sedType.name
             addDokumentVariant(DokumentVariant.lagDokumentVariant(sedPdf))
-        }
-
-        @JvmStatic
-        fun lagFysiskHovedDokumentAltinn(
-            altinnDokument: AltinnDokument,
-            mottatteOpplysninger: MottatteOpplysninger
-        ) = FysiskDokument().apply {
-            dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
-            tittel = hentTittelForAltinnDokument(altinnDokument.dokumentType)
-            val innhold = Base64.getDecoder().decode(altinnDokument.innhold)
-            dokumentVarianter = listOf(
-                DokumentVariant.lagDokumentVariant(innhold),
-                DokumentVariant.lagDokumentVariant(
-                    mottatteOpplysninger.originalData.toByteArray(StandardCharsets.UTF_8),
-                    DokumentVariant.Filtype.XML,
-                    DokumentVariant.VariantFormat.ORIGINAL
-                )
-            )
-        }
-
-        @JvmStatic
-        fun lagFysiskDokumentAltinn(altinnDokument: AltinnDokument) = FysiskDokument().apply {
-            dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
-            tittel = hentTittelForAltinnDokument(altinnDokument.dokumentType)
-            val innhold = Base64.getDecoder().decode(altinnDokument.innhold)
-            addDokumentVariant(DokumentVariant.lagDokumentVariant(innhold))
         }
 
         @JvmStatic
@@ -76,11 +46,6 @@ class FysiskDokument : ArkivDokument() {
             SedType.A008 -> "Melding om relevant informasjon"
             SedType.A011 -> "Innvilgelse av søknad om unntak"
             else -> throw IllegalArgumentException("Kan ikke opprette journalpost av sed-type $sedType")
-        }
-
-        private fun hentTittelForAltinnDokument(dokumentType: AltinnDokument.AltinnDokumentType): String = when (dokumentType) {
-            AltinnDokument.AltinnDokumentType.SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
-            AltinnDokument.AltinnDokumentType.FULLMAKT -> "Fullmakt"
         }
 
         @JvmStatic

@@ -9,7 +9,6 @@ APP_NAME_SAF: saf
 APP_NAME_SAK: sak
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
-APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
 APP_NAME_MELOSYS_SKJEMA_API: melosys-skjema-api
 APP_NAME_SKATTEHENDELSER: skattehendelser-q2
 APP_NAME_DOKARKIV: dokarkiv-q1
@@ -38,8 +37,6 @@ Melosys-admin:
   driftsgruppe: 0000-GA-MELOSYS
 MelosysEessi:
   url: http://localhost:8081/api
-MelosysSoknadMottak:
-  url: http://localhost:8082/api
 NAIS_CLUSTER_NAME: dev-fss
 OppgaveAPI_v1:
   url: http://localhost:8083/api/v1
@@ -84,9 +81,6 @@ kafka:
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer-local
       topic: teammelosys.skattehendelser.v1-local
-    soknad-mottak:
-      groupid: teammelosys-soknad-mottak-consumer-local
-      topic: teammelosys.soknad-mottak.v1-local
     skjema-mottatt:
       groupid: teammelosys-skjema-mottatt-consumer
       topic: teammelosys.skjema.innsendt.v1-local

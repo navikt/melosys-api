@@ -34,6 +34,7 @@ public enum ProsessType {
     MOTTAK_DIGITAL_SØKNAD("MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad (ny eller eksisterende sak)"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
+    /** Utgått: melosys-soknad-mottak er arkivert. Beholdes for prosessinstanser opprettet før flyten ble fjernet. */
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
     /** Utgått: erstattet av MOTTAK_DIGITAL_SØKNAD. Beholdes for prosessinstanser opprettet før sammenslåingen. */
     MELOSYS_MOTTAK_DIGITAL_SØKNAD("MELOSYS_MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad"),

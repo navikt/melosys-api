@@ -5,7 +5,6 @@ import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
-import no.nav.melosys.integrasjon.SoknadMottatt
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
 import org.apache.kafka.clients.CommonClientConfigs
@@ -61,14 +60,6 @@ class KafkaConfig(
         @Value("\${kafka.aiven.manglende-fakturabetaling.groupid}") groupId: String
     ): KafkaConsumerContainerFactory<ManglendeFakturabetalingMelding> =
         kafkaListenerContainerFactoryStopOnError<ManglendeFakturabetalingMelding>(objectMapper, kafkaProperties, groupId)
-
-    @Bean
-    fun aivenSoknadMottattContainerFactory(
-        objectMapper: ObjectMapper,
-        kafkaProperties: KafkaProperties,
-        @Value("\${kafka.aiven.soknad-mottak.groupid}") groupId: String
-    ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> =
-        kafkaListenerContainerFactoryStopOnError<SoknadMottatt>(objectMapper, kafkaProperties, groupId)
 
     @Bean
     fun aivenSkjemaMottattContainerFactory(
