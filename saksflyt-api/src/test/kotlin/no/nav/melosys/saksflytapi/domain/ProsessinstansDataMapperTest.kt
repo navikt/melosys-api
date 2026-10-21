@@ -2,6 +2,7 @@ package no.nav.melosys.saksflytapi.domain
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.saksflytapi.skjema.lagUtsendtArbeidstakerSkjemaM2MDto
 import no.nav.melosys.skjema.types.SkjemaType
 import no.nav.melosys.skjema.types.common.SkjemaStatus
 import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
@@ -23,6 +24,8 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetada
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData
 import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 class ProsessinstansDataMapperTest {
@@ -298,5 +301,34 @@ class ProsessinstansDataMapperTest {
         result.skjema?.id shouldBe skjemaId
         result.referanseId shouldBe "ref-123"
         result.skjema?.metadata.shouldBeInstanceOf<DegSelvMetadata>()
+    }
+
+    @Test
+    fun `eldre lagret skjema uten nye felt bruker bakoverkompatible standardverdier`() {
+        val json = mapper.valueToTree<JsonNode>(lagUtsendtArbeidstakerSkjemaM2MDto())
+        fjernFelterRekursivt(json, "skjemaDefinisjonVersjon", "erOffentligArbeidsgiver")
+
+        val hentet = mapper.treeToValue(json, UtsendtArbeidstakerSkjemaM2MDto::class.java)
+
+        hentet.skjema.skjemaDefinisjonVersjon shouldBe "1"
+        hentet.skjema.metadata.erOffentligArbeidsgiver shouldBe null
+    }
+
+    @Test
+    fun `antallAnsatte fra EREG overlever round-trip av søknadsdata via Prosessinstans`() {
+        val prosessinstans = Prosessinstans.forTest()
+        val dto = lagUtsendtArbeidstakerSkjemaM2MDto { antallAnsatte = 7 }
+
+        prosessinstans.setData(ProsessDataKey.DIGITAL_SØKNADSDATA, dto)
+        val hentet = prosessinstans.hentData<UtsendtArbeidstakerSkjemaM2MDto>(ProsessDataKey.DIGITAL_SØKNADSDATA)
+
+        hentet.skjema.metadata.antallAnsatte shouldBe 7
+    }
+
+    private fun fjernFelterRekursivt(node: JsonNode, vararg feltnavn: String) {
+        if (node is ObjectNode) {
+            feltnavn.forEach { node.remove(it) }
+        }
+        node.forEach { fjernFelterRekursivt(it, *feltnavn) }
     }
 }
