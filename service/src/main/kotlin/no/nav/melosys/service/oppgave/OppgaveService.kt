@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -57,15 +58,10 @@ class OppgaveService(
         oppgaveFasade.ferdigstillOppgave(oppgaveID)
     }
 
-    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
-    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) =
-        ferdigstillOppgaveMedBehandlingID(behandlingID, leggTilNøkkelord = false)
-
-    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long, leggTilNøkkelord: Boolean) {
+    fun ferdigstillOppgaveMedBehandlingID(behandlingID: Long) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val oppgave = finnBehandlingsoppgaveForBehandlingID(behandlingID)
         if (oppgave != null) {
-            if (leggTilNøkkelord) leggTilNøkkelordForBehandlingstema(behandling, oppgave.oppgaveId)
             ferdigstillOppgave(oppgave.oppgaveId)
         } else {
             log.warn("Finner ingen oppgave for behandling $behandlingID, med oppgaveid ${behandling.oppgaveId}")
@@ -122,11 +118,22 @@ class OppgaveService(
         @Nullable aktørID: String? = null,
         @Nullable tilordnetRessurs: String? = null,
         @Nullable orgnr: String? = null
+    ) = opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, orgnr, leggTilNøkkelord = false)
+
+    // Ikke @JvmOverloads: Java-kallere ville truffet en generert overload som mockk-verify i Kotlin-tester ikke matcher
+    @Transactional
+    fun opprettEllerGjenbrukBehandlingsoppgave(
+        behandling: Behandling,
+        journalpostID: String?,
+        aktørID: String?,
+        tilordnetRessurs: String?,
+        orgnr: String?,
+        leggTilNøkkelord: Boolean
     ) {
         val eksisterendeOppgave = hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling)
 
         if (eksisterendeOppgave == null || !eksisterendeOppgave.erAktiv() || kreverNyOppgave(behandling.type)) {
-            lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr)
+            lagBehandlingsoppgave(behandling, tilordnetRessurs, journalpostID, aktørID, orgnr, leggTilNøkkelord)
         } else {
             if (behandling.oppgaveId == null) {
                 // Last behandlingen på nytt for å unngå optimistisk låsefeil (stale object)
@@ -138,6 +145,7 @@ class OppgaveService(
                 oppdaterOppgave(eksisterendeOppgave.oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(tilordnetRessurs).build())
                 log.info("Oppgave oppdatert med ny tilordnetRessurs, for behandling ${behandling.id}")
             }
+            if (leggTilNøkkelord) leggTilNøkkelordForUtsendtArbeidstaker(behandling, eksisterendeOppgave.oppgaveId)
         }
     }
 
@@ -209,7 +217,8 @@ class OppgaveService(
         }
     }
 
-    private fun leggTilNøkkelordForBehandlingstema(behandling: Behandling, oppgaveID: String) {
+    private fun leggTilNøkkelordForUtsendtArbeidstaker(behandling: Behandling, oppgaveID: String) {
+        if (behandling.fagsak.type != Sakstyper.EU_EOS) return
         val nøkkelord = when (behandling.tema) {
             Behandlingstema.UTSENDT_ARBEIDSTAKER -> NØKKELORD_UTSENDT_ARBEIDSTAKER
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY -> NØKKELORD_STATSANSATT
@@ -262,7 +271,7 @@ class OppgaveService(
 
     private fun lagBehandlingsoppgave(
         behandling: Behandling, tilordnetRessurs: String?, journalpostID: String?,
-        aktørID: String?, orgnr: String?
+        aktørID: String?, orgnr: String?, leggTilNøkkelord: Boolean
     ) {
         val gjelderÅr = finnGjelderÅrForÅrsavregning(behandling)
         val oppgave =
@@ -283,6 +292,7 @@ class OppgaveService(
         settOppgaveIdPåBehandling(behandling, oppgaveID)
         log.info("Opprettet oppgave $oppgaveID for behandling ${behandling.id}")
         leggTilNøkkelordForÅrsavregning(behandling, oppgave, oppgaveID, gjelderÅr)
+        if (leggTilNøkkelord) leggTilNøkkelordForUtsendtArbeidstaker(behandling, oppgaveID)
     }
 
     private fun hentEksisterendeOppgaveSomIkkeErTilknyttetBehandling(behandling: Behandling): Oppgave? {

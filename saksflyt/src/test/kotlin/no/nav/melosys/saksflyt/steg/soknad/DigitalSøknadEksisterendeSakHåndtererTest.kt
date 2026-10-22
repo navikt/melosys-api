@@ -205,7 +205,7 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
             every { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns nyBehandling
             every { mottatteOpplysningerService.opprettSøknadDigital(any(), any(), any(), any()) } returns
                 mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
-            every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
+            every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), any()) } just Runs
 
             håndterer.håndter(prosessinstans)
 
@@ -237,14 +237,14 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
                 mottatteOpplysningerService.opprettSøknadDigital(eq(99L), any(), any(), any())
             } returns mockk<MottatteOpplysninger> { every { id } returns mottatteOpplysningerId }
 
-            every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
+            every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), any()) } just Runs
 
             håndterer.håndter(prosessinstans)
 
             verify { behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING, Behandlingstema.UTSENDT_ARBEIDSTAKER, null, null, any(), any(), null) }
             verify { fagsak.leggTilBehandling(nyBehandling) }
             verify { mottatteOpplysningerService.opprettSøknadDigital(99L, any(), any(), any()) }
-            verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any()) }
+            verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(nyBehandling, any(), any(), any(), any(), leggTilNøkkelord = true) }
             verify { skjemaSakMappingService.lagreMapping(any(), any(), any(), any(), any()) }
             prosessinstans.behandling shouldBe nyBehandling
         }
@@ -512,7 +512,7 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
     }
 
     private fun mockOppgaveOpprettelse() {
-        every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
+        every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), any()) } just Runs
     }
 
     private fun lagProsessinstansMedOffentligSøknad(): Pair<UtsendtArbeidstakerSkjemaM2MDto, Prosessinstans> {

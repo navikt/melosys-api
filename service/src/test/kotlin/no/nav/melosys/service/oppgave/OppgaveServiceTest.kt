@@ -16,7 +16,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.personDokumentForTest
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -486,72 +485,101 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_utsendtArbeidstaker_nøkkelordSettesFørFerdigstilling() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsUtsendtArbeidstaker_nøkkelordUtsendtArbeidstakerSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
-        verifyOrder {
-            oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker"))
-            oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID)
-        }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_tjenestepersonEllerFly_nøkkelordStatsansattSettes() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsTjenestepersonEllerFly_nøkkelordStatsansattSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
-        verifyOrder {
-            oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt"))
-            oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID)
-        }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt")) }
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_annetTema_nøkkelordSettesIkke() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsAnnetTema_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_utenNøkkelordEøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordGjenbruktOppgave_nøkkelordSettesPåEksisterendeOppgave() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordIkkeEøs_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstyper.TRYGDEAVTALE)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
         verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
-        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_medNøkkelord_nøkkelordKallFeiler_oppgaveBlirLikevelFerdigstilt() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordKallFeiler_oppgaveBlirLikevelOpprettet() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id, leggTilNøkkelord = true)
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
 
-        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
-    fun ferdigstillOppgaveMedBehandlingID_utenNøkkelord_utsendtArbeidstaker_nøkkelordSettesIkke() {
-        val behandling = lagEøsBehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+    fun oppdaterOppgave_eøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
-        oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
+        oppgaveService.oppdaterOppgave(BEH_OPPG_ID, behandling)
 
+        verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
         verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
-        verify { oppgaveFasade.ferdigstillOppgave(BEH_OPPG_ID) }
     }
 
-    private fun lagEøsBehandlingMedMocker(tema: Behandlingstema): Behandling {
+    private fun lagSøknadsbehandlingMedMocker(tema: Behandlingstema, sakstype: Sakstyper = Sakstyper.EU_EOS): Behandling {
         val behandling = Behandling.forTest {
             id = 1L
             fagsak {
-                type = Sakstyper.EU_EOS
+                type = sakstype
                 medBruker()
             }
             type = Behandlingstyper.FØRSTEGANG
             this.tema = tema
-        }.apply { oppgaveId = BEH_OPPG_ID }
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        }
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
-        every { oppgaveFasade.ferdigstillOppgave(any()) } returns Unit
         return behandling
     }
 

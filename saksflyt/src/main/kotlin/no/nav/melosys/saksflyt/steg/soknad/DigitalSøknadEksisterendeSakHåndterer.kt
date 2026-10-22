@@ -189,7 +189,8 @@ class DigitalSøknadEksisterendeSakHåndterer(
             null,
             fagsak.finnBrukersAktørID(),
             null,
-            fagsak.finnVirksomhetsOrgnr()
+            fagsak.finnVirksomhetsOrgnr(),
+            leggTilNøkkelord = true
         )
         log.info { "Opprettet oppgave for ny behandling ${nyBehandling.id}" }
 
