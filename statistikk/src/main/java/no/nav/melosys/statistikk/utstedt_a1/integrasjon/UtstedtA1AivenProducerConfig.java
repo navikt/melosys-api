@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import tools.jackson.databind.ObjectMapper;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -18,6 +17,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import no.nav.melosys.integrasjon.kafka.KafkaProdusentJsonMapper;
 import no.nav.melosys.integrasjon.kafka.ObjectMapperSerializer;
 
 @Configuration
@@ -42,10 +42,10 @@ public class UtstedtA1AivenProducerConfig {
 
     @Bean
     @Qualifier("aivenUtstedtA1")
-    public KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate(ObjectMapper objectMapper) {
+    public KafkaTemplate<String, UtstedtA1Melding> aivenKafkaTemplate() {
         Map<String, Object> props = commonProps();
         ProducerFactory<String, UtstedtA1Melding> producerFactory =
-            new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new ObjectMapperSerializer<>(objectMapper));
+            new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new ObjectMapperSerializer<>(KafkaProdusentJsonMapper.jsonMapper));
 
         return new KafkaTemplate<>(producerFactory);
     }

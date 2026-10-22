@@ -88,7 +88,7 @@ class KafkaConfig(
         kafkaListenerContainerFactoryStopOnError<Skattehendelse>(objectMapper, kafkaProperties, groupId)
 
     @Bean
-    fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
+    fun producerFactoryMelosysHendelse(): ProducerFactory<String, MelosysHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
                 CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-producer",
@@ -96,11 +96,11 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            ObjectMapperSerializer(objectMapper)
+            ObjectMapperSerializer(KafkaProdusentJsonMapper.jsonMapper)
         )
 
     @Bean
-    fun producerFactoryPensjonsopptjeningHendelse(objectMapper: ObjectMapper): ProducerFactory<String, PensjonsopptjeningHendelse> =
+    fun producerFactoryPensjonsopptjeningHendelse(): ProducerFactory<String, PensjonsopptjeningHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
                 CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-popp-producer",
@@ -108,7 +108,7 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            ObjectMapperSerializer(objectMapper)
+            ObjectMapperSerializer(KafkaProdusentJsonMapper.jsonMapper)
         )
 
     @Bean
