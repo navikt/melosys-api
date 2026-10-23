@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksbehandling
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
@@ -16,6 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -547,6 +550,82 @@ class SaksbehandlingReglerTest {
                 0L
             ),
         )
+    }
+
+    @Nested
+    inner class FinnSisteBehandlingMedVedtakSomKanReplikeres {
+        private val fagsak = Fagsak.forTest { type = Sakstyper.FTRL }
+        private val tidspunkt = LocalDate.of(2026, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+
+        @Test
+        fun `velger nyeste vedtaksdato og hopper over behandling uten vedtak og behandlingen som er unntatt`() {
+            leggTil(id = 1, vedtaksdato = tidspunkt)
+            leggTil(id = 2, vedtaksdato = tidspunkt.plus(2, ChronoUnit.DAYS))
+            leggTil(id = 3, vedtaksdato = null)
+            leggTil(id = 4, vedtaksdato = tidspunkt.plus(3, ChronoUnit.DAYS))
+
+            saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak, unntattBehandlingID = 4)
+                ?.id shouldBe 2L
+        }
+
+        @Test
+        fun `velger nyeste vedtak selv om behandlingen er registrert før en annen med vedtak`() {
+            leggTil(id = 1, vedtaksdato = tidspunkt.plus(2, ChronoUnit.DAYS), registrertDato = tidspunkt)
+            leggTil(id = 2, vedtaksdato = tidspunkt.plus(1, ChronoUnit.DAYS), registrertDato = tidspunkt.plus(1, ChronoUnit.DAYS))
+
+            saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak, unntattBehandlingID = 99)
+                ?.id shouldBe 1L
+        }
+
+        @Test
+        fun `bruker registreringsdato når vedtaksdato er lik`() {
+            leggTil(id = 1, vedtaksdato = tidspunkt, registrertDato = tidspunkt.plus(1, ChronoUnit.DAYS))
+            leggTil(id = 2, vedtaksdato = tidspunkt, registrertDato = tidspunkt)
+
+            saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak, unntattBehandlingID = 99)
+                ?.id shouldBe 1L
+        }
+
+        @Test
+        fun `hopper over vedtak som ikke kan replikeres`() {
+            leggTil(id = 1, vedtaksdato = tidspunkt)
+            leggTil(id = 2, vedtaksdato = tidspunkt.plus(1, ChronoUnit.DAYS), resultattype = Behandlingsresultattyper.OPPHØRT)
+            leggTil(id = 3, vedtaksdato = tidspunkt.plus(2, ChronoUnit.DAYS), type = Behandlingstyper.ÅRSAVREGNING)
+
+            saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak, unntattBehandlingID = 99)
+                ?.id shouldBe 1L
+        }
+
+        @Test
+        fun `gir null når ingen behandling har vedtak`() {
+            leggTil(id = 1, vedtaksdato = null)
+
+            saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak, unntattBehandlingID = 99)
+                .shouldBeNull()
+        }
+
+        private fun leggTil(
+            id: Long,
+            vedtaksdato: Instant?,
+            registrertDato: Instant = tidspunkt,
+            type: Behandlingstyper = Behandlingstyper.NY_VURDERING,
+            resultattype: Behandlingsresultattyper = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        ) {
+            val behandling = Behandling.forTest {
+                this.id = id
+                this.type = type
+                tema = Behandlingstema.YRKESAKTIV
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = this@FinnSisteBehandlingMedVedtakSomKanReplikeres.fagsak
+            }
+            fagsak.leggTilBehandling(behandling)
+            every { behandlingsresultatRepository.findById(id) } returns Optional.of(Behandlingsresultat.forTest {
+                this.id = id
+                this.type = resultattype
+                this.registrertDato = registrertDato
+                if (vedtaksdato != null) vedtakMetadata { this.vedtaksdato = vedtaksdato }
+            })
+        }
     }
 
     @ParameterizedTest
