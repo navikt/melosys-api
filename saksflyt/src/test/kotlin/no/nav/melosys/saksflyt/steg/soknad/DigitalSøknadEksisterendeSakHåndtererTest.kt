@@ -250,7 +250,7 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
         }
 
         @Test
-        fun `oppretter ny vurdering med ARBEID_TJENESTEPERSON_ELLER_FLY for offentlig virksomhet`() {
+        fun `oppretter ny vurdering med ARBEID_TJENESTEPERSON_ELLER_FLY for statlig virksomhet`() {
             val fagsak = lagFagsakUtenAktivBehandling()
             val nyBehandling = mockk<Behandling>(relaxed = true)
             val (offentligSøknadsdata, prosessinstans) = lagProsessinstansMedOffentligSøknad()
@@ -518,7 +518,7 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
     private fun lagProsessinstansMedOffentligSøknad(): Pair<UtsendtArbeidstakerSkjemaM2MDto, Prosessinstans> {
         val offentligSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-            erOffentligArbeidsgiver = true
+            erStatligArbeidsgiver = true
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
         }
         val prosessinstans = Prosessinstans.forTest {

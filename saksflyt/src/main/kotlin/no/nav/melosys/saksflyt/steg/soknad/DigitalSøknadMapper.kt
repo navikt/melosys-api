@@ -29,10 +29,10 @@ internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
 internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
     Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
 
-internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean {
+internal fun UtsendtArbeidstakerSkjemaM2MDto.erStatligArbeidsgiver(): Boolean {
     val skjemaer = listOfNotNull(skjema, kobletSkjema)
     val registerverdier = skjemaer
-        .mapNotNull { it.metadata.erOffentligArbeidsgiver }
+        .mapNotNull { it.metadata.erStatligArbeidsgiver }
         .distinct()
     check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende klassifisering i EREG" }
     return checkNotNull(registerverdier.singleOrNull()) {
@@ -69,7 +69,7 @@ object DigitalSøknadMapper {
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
 
-        // Arbeidssted: AG vinner. Offentlig tjenesteperson som sender før arbeidsgiver oppgir det selv.
+        // Arbeidssted: AG vinner. Statsansatt som sender før arbeidsgiver oppgir det selv.
         val arbeidssted = arbeidsgiversDel?.arbeidsstedIUtlandet ?: arbeidstakersDel?.arbeidsstedIUtlandet
         mapArbeidssteder(søknad, arbeidssted, periodeOgLand?.utsendelseLand)
 
@@ -78,7 +78,7 @@ object DigitalSøknadMapper {
             mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
         // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra lønnslistene og
-        // arbeidstakers virksomhetsliste. Offentlig tjenesteperson som sender før arbeidsgiver svarer på
+        // arbeidstakers virksomhetsliste. Statsansatt som sender før arbeidsgiver svarer på
         // lønnsspørsmålet i skatteforholdet. Identiske oppføringer dedupliseres.
         søknad.foretakUtland = mapUtenlandskeVirksomheter(
             listOfNotNull(
@@ -160,7 +160,7 @@ object DigitalSøknadMapper {
         dto: UtsendtArbeidstakerSkjemaM2MDto,
         virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
     ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
+        erOffentligVirksomhet = dto.erStatligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
         // Antall ansatte er hentet fra EREG (juridisk enhet), resten er oppgitt av arbeidsgiver
         antallAnsatte = listOfNotNull(dto.skjema, dto.kobletSkjema).firstNotNullOfOrNull { it.metadata.antallAnsatte }

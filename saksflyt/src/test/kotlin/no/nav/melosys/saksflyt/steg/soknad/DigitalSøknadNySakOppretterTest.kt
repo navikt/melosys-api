@@ -141,10 +141,10 @@ internal class DigitalSøknadNySakOppretterTest {
     }
 
     @Test
-    fun `utfør setter behandlingstema ARBEID_TJENESTEPERSON_ELLER_FLY for offentlig virksomhet`() {
+    fun `utfør setter behandlingstema ARBEID_TJENESTEPERSON_ELLER_FLY for statlig virksomhet`() {
         val offentligSøknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-            erOffentligArbeidsgiver = true
+            erStatligArbeidsgiver = true
             data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
             fnr = this@DigitalSøknadNySakOppretterTest.fnr
             referanseId = this@DigitalSøknadNySakOppretterTest.referanseId
