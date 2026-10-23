@@ -17,6 +17,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -27,6 +28,7 @@ class OppretteÅrsavregningVedEndring(
     private val årsavregningService: ÅrsavregningService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val prosessInstansService: ProsessinstansService,
+    private val saksbehandlingRegler: SaksbehandlingRegler,
     private val unleash: Unleash
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg? {
@@ -90,10 +92,13 @@ class OppretteÅrsavregningVedEndring(
         if (behandling.erFørstegangsvurdering()) {
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
         } else if (behandling.erNyVurdering()) {
-            val opprinneligBehandling = behandling.hentOpprinneligBehandling()
-            val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+            val sammenligningsgrunnlag = finnSammenligningsgrunnlag(behandling)
+            if (sammenligningsgrunnlag == null) {
+                log.info("Ingen tidligere vedtak å sammenligne med for behandling ${behandling.id}, oppretter ikke årsavregning")
+                return
+            }
 
-            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, opprinneligBehandlingsresultat)
+            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, sammenligningsgrunnlag)
             if (årMedEndringer.isNotEmpty()) {
                 opprettÅrsavregning(årMedEndringer, behandling, sendInnhentingsbrev)
             }
@@ -102,15 +107,29 @@ class OppretteÅrsavregningVedEndring(
         }
     }
 
+    /**
+     * MELOSYS-8353: en behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke
+     * være grunnlag for årsavregning (MELOSYS-8308). Har den opprinnelige behandlingen vedtak, brukes den som før.
+     */
+    private fun finnSammenligningsgrunnlag(behandling: Behandling): Behandlingsresultat? {
+        val opprinneligBehandlingsresultat =
+            behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id)
+        if (opprinneligBehandlingsresultat.harVedtak()) {
+            return opprinneligBehandlingsresultat
+        }
+        return saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(behandling.fagsak, behandling.id)
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+    }
+
     private fun finnÅrMedEndringer(
         behandlingsresultat: Behandlingsresultat,
-        opprinneligBehandlingsresultat: Behandlingsresultat
+        sammenligningsgrunnlag: Behandlingsresultat
     ): Set<Int> {
-        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(opprinneligBehandlingsresultat)
+        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(sammenligningsgrunnlag)
             .union(hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat))
 
         return potensielleÅr.filter { år ->
-            perioderForÅr(behandlingsresultat, år) != perioderForÅr(opprinneligBehandlingsresultat, år)
+            perioderForÅr(behandlingsresultat, år) != perioderForÅr(sammenligningsgrunnlag, år)
         }.toSet()
     }
 

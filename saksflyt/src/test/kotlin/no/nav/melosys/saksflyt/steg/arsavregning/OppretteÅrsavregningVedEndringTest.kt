@@ -6,6 +6,7 @@ import io.mockk.Called
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
@@ -20,6 +21,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -48,20 +50,134 @@ class OppretteÅrsavregningVedEndringTest {
     @RelaxedMockK
     private lateinit var prosessInstansService: ProsessinstansService
 
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
     private lateinit var oppretteÅrsavregningVedEndring: OppretteÅrsavregningVedEndring
 
 
     @BeforeEach
     fun setUp() {
-        clearMocks(prosessInstansService, årsavregningService, behandlingsresultatService)
+        clearMocks(prosessInstansService, årsavregningService, behandlingsresultatService, saksbehandlingRegler)
         val fakeUnleash = FakeUnleash().apply { enableAll() }
         oppretteÅrsavregningVedEndring = OppretteÅrsavregningVedEndring(
             årsavregningService,
             behandlingsresultatService,
             prosessInstansService,
+            saksbehandlingRegler,
             fakeUnleash
         )
     }
+
+    @Test
+    fun `ny vurdering - opprinnelig behandling uten vedtak - sammenligner med siste vedtak og oppretter ikke årsavregning for år bare menybehandlingen hadde`() {
+        val sisteVedtak = lagFtrlBehandlingsresultat(id = 3L, type = Behandlingstyper.FØRSTEGANG, medVedtak = true) {
+            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.NY_VURDERING, medVedtak = false) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        val nyVurdering = lagFtrlBehandlingsresultat(
+            id = 2L,
+            type = Behandlingstyper.NY_VURDERING,
+            medVedtak = true,
+            opprinneligBehandling = menybehandling.hentBehandling()
+        ) {
+            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns menybehandling
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns nyVurdering
+        every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns sisteVedtak
+        every { saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(any(), 2L) } returns sisteVedtak.hentBehandling()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
+
+        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
+
+        verify { prosessInstansService wasNot Called }
+    }
+
+    @Test
+    fun `ny vurdering - opprinnelig behandling uten vedtak - oppretter årsavregning for år som er endret mot siste vedtak`() {
+        val sisteVedtak = lagFtrlBehandlingsresultat(id = 3L, type = Behandlingstyper.FØRSTEGANG, medVedtak = true) {
+            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.NY_VURDERING, medVedtak = false) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        val nyVurdering = lagFtrlBehandlingsresultat(
+            id = 2L,
+            type = Behandlingstyper.NY_VURDERING,
+            medVedtak = true,
+            opprinneligBehandling = menybehandling.hentBehandling()
+        ) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns menybehandling
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns nyVurdering
+        every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns sisteVedtak
+        every { saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(any(), 2L) } returns sisteVedtak.hentBehandling()
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
+
+        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `ny vurdering - ingen tidligere vedtak i saken - oppretter ikke årsavregning`() {
+        val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, medVedtak = false) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
+        }
+        val nyVurdering = lagFtrlBehandlingsresultat(
+            id = 2L,
+            type = Behandlingstyper.NY_VURDERING,
+            medVedtak = true,
+            opprinneligBehandling = menybehandling.hentBehandling()
+        ) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 6, 30))
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns menybehandling
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns nyVurdering
+        every { saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(any(), 2L) } returns null
+
+        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
+
+        verify { prosessInstansService wasNot Called }
+    }
+
+    private fun lagFtrlBehandlingsresultat(
+        id: Long,
+        type: Behandlingstyper,
+        medVedtak: Boolean,
+        opprinneligBehandling: Behandling? = null,
+        perioder: BehandlingsresultatTestFactory.Builder.() -> Unit
+    ) = Behandlingsresultat.forTest {
+        this.id = id
+        if (medVedtak) vedtakMetadata { }
+        behandling {
+            this.id = id
+            this.type = type
+            tema = Behandlingstema.YRKESAKTIV
+            fagsak {
+                saksnummer = SAKSNUMMER
+                this.type = Sakstyper.FTRL
+            }
+            this.opprinneligBehandling = opprinneligBehandling
+        }
+        perioder()
+    }
+
+    private fun BehandlingsresultatTestFactory.Builder.medlemskapsperiode(fom: LocalDate, tom: LocalDate) =
+        medlemskapsperiode {
+            this.fom = fom
+            this.tom = tom
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            trygdedekning = Trygdedekninger.FULL_DEKNING
+        }
 
     @Test
     fun `oppretter årsavregninger for førstegangsbehandling tilbake i tid`() {
@@ -248,6 +364,7 @@ class OppretteÅrsavregningVedEndringTest {
     fun `ny vurdering medlemskapsperiode scenario`(scenario: PeriodeEndringScenario) {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
+            vedtakMetadata { }
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
@@ -317,6 +434,7 @@ class OppretteÅrsavregningVedEndringTest {
     fun `ny vurdering - endrer tom dato - kun årsavregning for året med tom endring`() {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
+            vedtakMetadata { }
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
@@ -377,6 +495,7 @@ class OppretteÅrsavregningVedEndringTest {
     fun `ny vurdering - åpen tom dato - endrer pliktig så alle år før nå skal gi årsavregning`() {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
+            vedtakMetadata { }
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
@@ -730,6 +849,7 @@ class OppretteÅrsavregningVedEndringTest {
     fun `ny vurdering lovvalgsperiode scenario`(scenario: PeriodeEndringScenario) {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
+            vedtakMetadata { }
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
@@ -805,6 +925,7 @@ class OppretteÅrsavregningVedEndringTest {
     fun `ny vurdering helseutgiftdekkes scenario`(scenario: PeriodeEndringScenario) {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
+            vedtakMetadata { }
             behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
