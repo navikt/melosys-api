@@ -41,7 +41,8 @@ class ManglendeInnbetalingAdminController(
         if (referanser.isEmpty() || referanser.size > MAKS_ANTALL_REFERANSER) {
             throw FunksjonellException("Må ha 1–$MAKS_ANTALL_REFERANSER unike fakturaserieReferanser, fikk ${referanser.size}")
         }
-        val saker = manglendeInnbetalingAdminService.hentSaker(referanser)
+        if (null in referanser) throw FunksjonellException("fakturaserieReferanser kan ikke inneholde null")
+        val saker = manglendeInnbetalingAdminService.hentSaker(referanser.filterNotNull())
         log.info { "Admin: Hentet saker for ${referanser.size} fakturaserieReferanser, ${saker.count { it.saksnummer != null }} funnet" }
         return ResponseEntity.ok(FakturaserieSakerDto(saker))
     }
@@ -60,7 +61,7 @@ class ManglendeInnbetalingAdminController(
     }
 }
 
-data class FakturaserieReferanserDto(val fakturaserieReferanser: List<String>)
+data class FakturaserieReferanserDto(val fakturaserieReferanser: List<String?>)
 
 data class FakturaserieSakerDto(val saker: List<FakturaserieSakDto>)
 

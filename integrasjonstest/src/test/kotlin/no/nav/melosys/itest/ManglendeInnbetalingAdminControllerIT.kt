@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import io.mockk.every
@@ -27,6 +28,7 @@ import no.nav.melosys.saksflyt.steg.behandling.OpprettManglendeInnbetalingBehand
 import no.nav.melosys.saksflyt.steg.brev.SendManglendeInnbetalingVarselBrev
 import no.nav.melosys.saksflyt.steg.oppgave.OpprettOppgave
 import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -62,6 +64,8 @@ import tools.jackson.databind.ObjectMapper
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.UUID
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [Application::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -118,6 +122,8 @@ class ManglendeInnbetalingAdminControllerIT(
         hentSaker(emptyList(), maskinToken()).andExpect(status().isBadRequest)
         hentSaker((0..1000).map { "REF$it" }, maskinToken()).andExpect(status().isBadRequest)
         hentSaker((0 until 1000).map { "REF$it" }, maskinToken()).andExpect(status().isOk)
+        hentSaker(listOf(null), maskinToken()).andExpect(status().isBadRequest)
+        hentSaker(listOf(SERIE_A, null), maskinToken()).andExpect(status().isBadRequest)
     }
 
     @Test
@@ -153,6 +159,33 @@ class ManglendeInnbetalingAdminControllerIT(
         svar.forEach { it["registrert"].asString() shouldMatch Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z""") }
     }
 
+    @Test
+    fun `prosesser leser prosessdataene når låsreferansen ikke kan brukes, og ødelagte data gir bare null-felt for den raden`() {
+        val sommertid = LocalDateTime.of(2026, 7, 1, 10, 0)
+        lagreProsess(NY_BEHANDLING, lås = null, fakturanummer = "23004121", serie = SERIE_A, registrert = sommertid)
+        // Fakturanummer som ikke er rene tall gir en låsreferanse som ikke kan tolkes
+        lagreProsess(NY_BEHANDLING, lås = "UBETALT_${SERIE_B}_F-77", fakturanummer = "F-77", serie = SERIE_B)
+        lagreProsess(VARSELBREV, lås = null, fakturanummer = "23004122", serie = null)
+        ødeleggData(lagreProsess(NY_BEHANDLING, lås = null, fakturanummer = "23004123", serie = SERIE_A))
+        ødeleggData(lagreProsess(VARSELBREV, lås = null, fakturanummer = "23004124", serie = null))
+
+        val svar = hentProsesser(maskinToken()).andExpect(status().isOk).json()["prosesser"]
+        val prosesser = objectMapper.treeToValue(svar, Array<ManglendeInnbetalingProsessDto>::class.java)
+
+        prosesser.map { listOf(it.prosesstype, it.fakturanummer, it.fakturaserieReferanse) } shouldContainExactlyInAnyOrder listOf(
+            listOf(NY_BEHANDLING.name, "23004121", SERIE_A),
+            listOf(NY_BEHANDLING.name, "F-77", SERIE_B),
+            listOf(VARSELBREV.name, "23004122", null),
+            listOf(NY_BEHANDLING.name, null, null),
+            listOf(VARSELBREV.name, null, null),
+        )
+        // registrert_dato er veggtid i JVM-sonen, og skal ut som det tilsvarende UTC-tidspunktet
+        prosesser.single { it.fakturanummer == "23004121" }.registrert shouldBe
+            sommertid.atZone(ZoneId.systemDefault()).toInstant()
+        svar.single { it["fakturanummer"]?.asString() == "23004121" }["registrert"].asString() shouldBe
+            sommertid.atZone(ZoneId.systemDefault()).toInstant().toString()
+    }
+
     private fun lagFagsak(saksnummer: String, status: Saksstatuser): Fagsak = fagsakRepository.save(
         Fagsak.forTest {
             this.saksnummer = saksnummer
@@ -183,10 +216,35 @@ class ManglendeInnbetalingAdminControllerIT(
         )
     }
 
+    private fun lagreProsess(
+        type: ProsessType,
+        lås: String?,
+        fakturanummer: String,
+        serie: String?,
+        registrert: LocalDateTime = LocalDateTime.now()
+    ): UUID = prosessinstansRepository.save(
+        Prosessinstans.builder()
+            .medType(type)
+            .medStatus(ProsessStatus.FERDIG)
+            .medLåsReferanse(lås)
+            .medRegistrertDato(registrert)
+            .medData(ProsessDataKey.FAKTURANUMMER, fakturanummer)
+            .medData(ProsessDataKey.FAKTURASERIE_REFERANSE, serie)
+            .build()
+    ).id!!
+
+    // Ugyldig \u-escape får Properties.load til å kaste, slik PropertiesConverter også ville gjort
+    private fun ødeleggData(id: UUID) {
+        jdbcTemplate.update(
+            "UPDATE prosessinstans SET data = ? WHERE uuid = HEXTORAW(?)",
+            "fakturanummer=\\uZZZZ", id.toString().replace("-", "")
+        ) shouldBe 1
+    }
+
     private fun melding(serie: String, fakturanummer: String) =
         ManglendeFakturabetalingMelding(serie, Betalingsstatus.IKKE_BETALT, LocalDate.of(2026, 8, 14), fakturanummer)
 
-    private fun hentSaker(referanser: List<String>, token: String?): ResultActions = mockMvc.perform(
+    private fun hentSaker(referanser: List<String?>, token: String?): ResultActions = mockMvc.perform(
         post("/admin/fakturaserier/saker")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(mapOf("fakturaserieReferanser" to referanser)))
@@ -247,6 +305,8 @@ class ManglendeInnbetalingAdminControllerIT(
     companion object {
         private const val SERIE_A = "01HHFM03YMHHQAVZ4SQF9Y29E4"
         private const val SERIE_B = "01HHFM03YMHHQAVZ4SQF9Y29E5"
+        private val NY_BEHANDLING = ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING
+        private val VARSELBREV = ProsessType.MANGLENDE_INNBETALING_VARSELBREV
 
         // Settes på prosessen av steget som ellers finner behandlingen via seriereferansen
         @Volatile
