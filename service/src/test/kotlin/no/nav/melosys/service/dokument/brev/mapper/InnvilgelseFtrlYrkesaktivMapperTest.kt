@@ -967,7 +967,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
-            avgiftsperioder.map { it.fom.year } shouldContainExactly listOf(iÅr + 1, iÅr)
+            avgiftsperioder.map { it.fom.year } shouldContainExactly listOf(iÅr, iÅr + 1)
             minstebelopVerdi shouldBe BigDecimal(99650)
             minstebelopAar shouldBe iÅr
             har25ProsentRegelPeriode.shouldBeTrue()

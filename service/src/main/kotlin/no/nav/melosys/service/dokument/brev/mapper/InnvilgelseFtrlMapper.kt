@@ -163,7 +163,7 @@ class InnvilgelseFtrlMapper(
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.hentBehandling().type,
-            avgiftsperioder = trygdeavgiftsperioder.map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom },
+            avgiftsperioder = trygdeavgiftsperioder.map { it.toAvgiftsperiodeDto() }.sortedBy { it.fom },
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
             bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().hentBestemmelse(),
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
