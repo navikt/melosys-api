@@ -28,10 +28,10 @@ internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
 internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
     Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
 
-internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean {
+internal fun UtsendtArbeidstakerSkjemaM2MDto.erStatligArbeidsgiver(): Boolean {
     val skjemaer = listOfNotNull(skjema, kobletSkjema)
     val registerverdier = skjemaer
-        .mapNotNull { it.metadata.erOffentligArbeidsgiver }
+        .mapNotNull { it.metadata.erStatligArbeidsgiver }
         .distinct()
     check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende klassifisering i EREG" }
     return checkNotNull(registerverdier.singleOrNull()) {
@@ -150,7 +150,7 @@ object DigitalSøknadMapper {
         dto: UtsendtArbeidstakerSkjemaM2MDto,
         virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
     ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
+        erOffentligVirksomhet = dto.erStatligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
         // Antall ansatte er hentet fra EREG (juridisk enhet), resten er oppgitt av arbeidsgiver
         antallAnsatte = listOfNotNull(dto.skjema, dto.kobletSkjema).firstNotNullOfOrNull { it.metadata.antallAnsatte }

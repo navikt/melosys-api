@@ -207,7 +207,7 @@ internal class DigitalSøknadMapperTest {
         fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens registermetadata`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
                 data = arbeidsgiverData()
             }
 
@@ -220,7 +220,7 @@ internal class DigitalSøknadMapperTest {
         fun `erOffentligVirksomhet hentes fra arbeidstakers metadata når arbeidsgiver-del mangler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
                 data = arbeidstakerData()
             }
 
@@ -742,7 +742,7 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
                 orgnr = "KOMBI-123"
-                erOffentligArbeidsgiver = false
+                erStatligArbeidsgiver = false
                 data = kombinertData(
                     utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom),
                     arbeidsgiversData = UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto.ArbeidsgiversData(

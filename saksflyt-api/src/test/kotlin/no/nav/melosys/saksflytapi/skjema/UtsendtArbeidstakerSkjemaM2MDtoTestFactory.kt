@@ -33,7 +33,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var arbeidstakerNavn: String = "Test Arbeidstaker"
         var skjemadel: Skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
         var skjemaDefinisjonVersjon: String = "2"
-        var erOffentligArbeidsgiver: Boolean? = false
+        var erStatligArbeidsgiver: Boolean? = false
         var antallAnsatte: Int? = null
         var metadata: UtsendtArbeidstakerMetadata? = null
         var data: no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData =
@@ -63,7 +63,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                 data,
                 metadataOverride = metadata,
                 skjemaDefinisjonVersjon = skjemaDefinisjonVersjon,
-                erOffentligArbeidsgiver = erOffentligArbeidsgiver,
+                erStatligArbeidsgiver = erStatligArbeidsgiver,
                 antallAnsatte = antallAnsatte
             )
             val kobletSkjema = kobletSkjemaBuilder?.let {
@@ -76,7 +76,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     it.arbeidsgiverNavn,
                     it.arbeidstakerNavn,
                     skjemaDefinisjonVersjon = it.skjemaDefinisjonVersjon,
-                    erOffentligArbeidsgiver = it.erOffentligArbeidsgiver,
+                    erStatligArbeidsgiver = it.erStatligArbeidsgiver,
                     antallAnsatte = it.antallAnsatte
                 )
             }
@@ -121,7 +121,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
             arbeidstakerNavn: String = this.arbeidstakerNavn,
             metadataOverride: UtsendtArbeidstakerMetadata? = null,
             skjemaDefinisjonVersjon: String = "2",
-            erOffentligArbeidsgiver: Boolean? = false,
+            erStatligArbeidsgiver: Boolean? = false,
             antallAnsatte: Int? = null
         ) = UtsendtArbeidstakerSkjemaDto(
             id = UUID.randomUUID(),
@@ -136,7 +136,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                     arbeidstakerNavn = arbeidstakerNavn,
-                    erOffentligArbeidsgiver = erOffentligArbeidsgiver,
+                    erStatligArbeidsgiver = erStatligArbeidsgiver,
                     antallAnsatte = antallAnsatte
                 )
                 Skjemadel.ARBEIDSGIVERS_DEL -> ArbeidsgiverMetadata(
@@ -144,7 +144,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                     arbeidstakerNavn = arbeidstakerNavn,
-                    erOffentligArbeidsgiver = erOffentligArbeidsgiver,
+                    erStatligArbeidsgiver = erStatligArbeidsgiver,
                     antallAnsatte = antallAnsatte
                 )
                 Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL -> DegSelvMetadata(
@@ -152,7 +152,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
                     arbeidsgiverNavn = arbeidsgiverNavn,
                     juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                     arbeidstakerNavn = arbeidstakerNavn,
-                    erOffentligArbeidsgiver = erOffentligArbeidsgiver,
+                    erStatligArbeidsgiver = erStatligArbeidsgiver,
                     antallAnsatte = antallAnsatte
                 )
             },
@@ -169,7 +169,7 @@ object UtsendtArbeidstakerSkjemaM2MDtoTestFactory {
         var arbeidsgiverNavn: String = "Test AS",
         var arbeidstakerNavn: String = "Test Arbeidstaker",
         var skjemaDefinisjonVersjon: String = "2",
-        var erOffentligArbeidsgiver: Boolean? = false,
+        var erStatligArbeidsgiver: Boolean? = false,
         var antallAnsatte: Int? = null,
         var data: UtsendtArbeidstakerArbeidsgiversSkjemaDataDto = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto()
     )
