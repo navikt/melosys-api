@@ -19,4 +19,5 @@ object ToggleName {
     const val MELOSYS_TEKSTBLOKKER_DYNAMISK_PLACEHOLDER = "melosys.tekstblokker.dynamisk-placeholder"
     const val MELOSYS_ADMINISTRASJON = "melosys.administrasjon"
     const val MELOSYS_TILDEL_OPPGAVE = "melosys.tildel_oppgave"
+    const val MELOSYS_VEDLEGG_AVGIFTSGRUNNLAG = "melosys.vedlegg.avgiftsgrunnlag"
 }

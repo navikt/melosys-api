@@ -81,6 +81,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
             minstebeløpService,
+            AvgiftsgrunnlagMapper(unleash),
             unleash
         )
     }

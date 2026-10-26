@@ -60,6 +60,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             mockTrygdeavgiftMottakerService,
             mockTrygdeavgiftsberegningService,
             mockMinstebeløpService,
+            AvgiftsgrunnlagMapper(unleash),
             unleash
         )
     }

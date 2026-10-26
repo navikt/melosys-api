@@ -31,6 +31,7 @@ class InformasjonTrygdeavgiftMapper(
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val minstebeløpService: MinstebeløpService,
+    private val avgiftsgrunnlagMapper: AvgiftsgrunnlagMapper,
     private val unleash: Unleash
 ) {
 
@@ -57,6 +58,7 @@ class InformasjonTrygdeavgiftMapper(
 
         val minstebeløp = minstebeløpService.finnMinstebeløp(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder)
         val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+        val trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat)
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -64,7 +66,7 @@ class InformasjonTrygdeavgiftMapper(
             tomDato = tomDato,
             bostedLand = førstePeriode.bostedLandkode.beskrivelse,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
-            trygdeavgiftMottaker = utledTrygdeavgiftsmottaker(behandlingsresultat),
+            trygdeavgiftMottaker = trygdeavgiftMottaker,
             erNordisk = NordiskeLand.erNordiskLand(førstePeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
@@ -75,7 +77,8 @@ class InformasjonTrygdeavgiftMapper(
             minstebelopVerdi = minstebeløp?.beloep,
             minstebelopAar = minstebeløp?.aar,
             harMinstebelopPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.MINSTEBELØP },
-            har25ProsentRegelPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL }
+            har25ProsentRegelPeriode = perioder.any { it.beregningsregel == Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL },
+            avgiftsgrunnlag = avgiftsgrunnlagMapper.mapNårAvgiftBetalesTilNav(perioder, trygdeavgiftMottaker),
         )
     }
 

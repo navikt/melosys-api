@@ -42,7 +42,8 @@ class InnvilgelsePensjonistPliktigFtrl(
     val minstebelopAar: Int? = null,
     val harMinstebelopPeriode: Boolean = false,
     val har25ProsentRegelPeriode: Boolean = false,
-    val harKunMedlemskapsperioderIForegåendeÅr: Boolean = false
+    val harKunMedlemskapsperioderIForegåendeÅr: Boolean = false,
+    val avgiftsgrunnlag: Avgiftsgrunnlag? = null,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -70,7 +71,8 @@ class InnvilgelsePensjonistPliktigFtrl(
         minstebelopAar: Int? = null,
         harMinstebelopPeriode: Boolean = false,
         har25ProsentRegelPeriode: Boolean = false,
-        harKunMedlemskapsperioderIForegåendeÅr: Boolean = false
+        harKunMedlemskapsperioderIForegåendeÅr: Boolean = false,
+        avgiftsgrunnlag: Avgiftsgrunnlag? = null,
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -97,6 +99,7 @@ class InnvilgelsePensjonistPliktigFtrl(
         minstebelopAar,
         harMinstebelopPeriode,
         har25ProsentRegelPeriode,
-        harKunMedlemskapsperioderIForegåendeÅr
+        harKunMedlemskapsperioderIForegåendeÅr,
+        avgiftsgrunnlag,
     )
 }

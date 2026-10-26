@@ -38,6 +38,7 @@ class InnvilgelseFtrlMapper(
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val minstebeløpService: MinstebeløpService,
+    private val avgiftsgrunnlagMapper: AvgiftsgrunnlagMapper,
     private val unleash: Unleash
 ) {
 
@@ -86,7 +87,8 @@ class InnvilgelseFtrlMapper(
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            avgiftsgrunnlag = mapAvgiftsgrunnlag(behandlingsresultat),
         )
     }
 
@@ -123,9 +125,16 @@ class InnvilgelseFtrlMapper(
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            avgiftsgrunnlag = mapAvgiftsgrunnlag(behandlingsresultat),
         )
     }
+
+    private fun mapAvgiftsgrunnlag(behandlingsresultat: Behandlingsresultat) =
+        avgiftsgrunnlagMapper.mapNårAvgiftBetalesTilNav(
+            behandlingsresultat.trygdeavgiftsperioder,
+            utledTrygdeavgiftsmottaker(behandlingsresultat)
+        )
 
     private fun utledTrygdeavgiftsmottaker(behandlingsresultat: Behandlingsresultat): Trygdeavgiftmottaker? {
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultat.trygdeavgiftsperioder.isEmpty()) {
@@ -174,7 +183,8 @@ class InnvilgelseFtrlMapper(
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            avgiftsgrunnlag = mapAvgiftsgrunnlag(behandlingsresultat),
         )
     }
 
@@ -293,7 +303,8 @@ class InnvilgelseFtrlMapper(
             minstebelopVerdi = minstebelop?.beloep,
             minstebelopAar = minstebelop?.aar,
             harMinstebelopPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.MINSTEBELØP),
-            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL)
+            har25ProsentRegelPeriode = behandlingsresultat.trygdeavgiftsperioder.harPeriodeMedBeregningsregel(Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL),
+            avgiftsgrunnlag = mapAvgiftsgrunnlag(behandlingsresultat),
         )
     }
 
