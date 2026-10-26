@@ -16,6 +16,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBas
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.skjema.types.felles.Ansettelsesform
 import no.nav.melosys.skjema.types.felles.LandKode
+import no.nav.melosys.skjema.types.felles.NorskeOgUtenlandskeVirksomheter
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.felles.UtenlandskVirksomhetBase
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
@@ -68,17 +69,22 @@ object DigitalSøknadMapper {
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
 
-        // Arbeidssted kommer kun fra arbeidsgivers del
-        mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
+        // Arbeidssted: AG vinner. Statsansatt som sender før arbeidsgiver oppgir det selv.
+        val arbeidssted = arbeidsgiversDel?.arbeidsstedIUtlandet ?: arbeidstakersDel?.arbeidsstedIUtlandet
+        mapArbeidssteder(søknad, arbeidssted, periodeOgLand?.utsendelseLand)
 
         // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
         søknad.juridiskArbeidsgiverNorge =
             mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
-        // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra både arbeidsgivers
-        // lønnsliste og arbeidstakers virksomhetsliste. Identiske oppføringer dedupliseres.
+        // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra lønnslistene og
+        // arbeidstakers virksomhetsliste. Statsansatt som sender før arbeidsgiver svarer på
+        // lønnsspørsmålet i skatteforholdet. Identiske oppføringer dedupliseres.
         søknad.foretakUtland = mapUtenlandskeVirksomheter(
-            arbeidsgiversDel?.arbeidstakerensLonn,
+            listOfNotNull(
+                arbeidsgiversDel?.arbeidstakerensLonn?.virksomheterSomUtbetalerLonnOgNaturalytelser,
+                arbeidstakersDel?.skatteforholdOgInntekt?.virksomheterSomUtbetalerLonnOgNaturalytelser
+            ),
             arbeidstakersDel?.arbeidssituasjon
         )
     }
@@ -88,22 +94,17 @@ object DigitalSøknadMapper {
 
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(
-                utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
-                arbeidssituasjon = data.arbeidssituasjon
-            )
+            is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(data)
 
             is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto -> ArbeidstakersDataLook(
                 utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
-                arbeidssituasjon = data.arbeidstakersData.arbeidssituasjon
+                arbeidsstedIUtlandet = null,
+                arbeidssituasjon = data.arbeidstakersData.arbeidssituasjon,
+                skatteforholdOgInntekt = data.arbeidstakersData.skatteforholdOgInntekt
             )
 
-            else -> (dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto)?.let {
-                ArbeidstakersDataLook(
-                    utsendingsperiodeOgLand = it.utsendingsperiodeOgLand,
-                    arbeidssituasjon = it.arbeidssituasjon
-                )
-            }
+            else -> (dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto)
+                ?.let(::ArbeidstakersDataLook)
         }
     }
 
@@ -136,8 +137,17 @@ object DigitalSøknadMapper {
 
     private data class ArbeidstakersDataLook(
         val utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto?,
-        val arbeidssituasjon: ArbeidssituasjonDto?
-    )
+        val arbeidsstedIUtlandet: ArbeidsstedIUtlandetDto?,
+        val arbeidssituasjon: ArbeidssituasjonDto?,
+        val skatteforholdOgInntekt: SkatteforholdOgInntektDto?
+    ) {
+        constructor(data: UtsendtArbeidstakerArbeidstakersSkjemaDataDto) : this(
+            utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
+            arbeidsstedIUtlandet = data.arbeidsstedIUtlandet,
+            arbeidssituasjon = data.arbeidssituasjon,
+            skatteforholdOgInntekt = data.skatteforholdOgInntekt
+        )
+    }
 
     private data class ArbeidsgiversDataLook(
         val utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto?,
@@ -176,21 +186,20 @@ object DigitalSøknadMapper {
     }
 
     private fun mapUtenlandskeVirksomheter(
-        agLonn: ArbeidstakerensLonnDto?,
+        lonnsvirksomheter: List<NorskeOgUtenlandskeVirksomheter>,
         atArbeidssituasjon: ArbeidssituasjonDto?
     ): List<ForetakUtland> {
-        val agUtenlandske = agLonn?.virksomheterSomUtbetalerLonnOgNaturalytelser
-            ?.utenlandskeVirksomheter.orEmpty()
+        val lonnUtenlandske = lonnsvirksomheter.flatMap { it.utenlandskeVirksomheter.orEmpty() }
         val atUtenlandske = atArbeidssituasjon?.virksomheterArbeidstakerJobberForIutsendelsesPeriode
             ?.utenlandskeVirksomheter.orEmpty()
 
-        // AT-versjonen tas først (har ansettelsesform-info). AG-versjon legges kun til hvis ikke
+        // AT-versjonen tas først (har ansettelsesform-info). Lønnsversjonen legges kun til hvis ikke
         // identisk på alle felles base-felter.
         val atKeys = atUtenlandske.map(::dedupNokkel).toSet()
-        val agUnike = agUtenlandske.filterNot { dedupNokkel(it) in atKeys }
+        val lonnUnike = lonnUtenlandske.distinctBy(::dedupNokkel).filterNot { dedupNokkel(it) in atKeys }
 
         return atUtenlandske.map { mapForetakUtland(it, selvstendig = it.ansettelsesform == Ansettelsesform.SELVSTENDIG_NAERINGSDRIVENDE) } +
-            agUnike.map { mapForetakUtland(it) }
+            lonnUnike.map { mapForetakUtland(it) }
     }
 
     private fun dedupNokkel(v: UtenlandskVirksomhetBase): List<Any?> = listOf(
