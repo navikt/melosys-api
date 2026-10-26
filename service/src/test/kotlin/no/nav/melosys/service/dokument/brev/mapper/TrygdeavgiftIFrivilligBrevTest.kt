@@ -181,6 +181,32 @@ class TrygdeavgiftIFrivilligBrevTest {
         }
     }
 
+    @Test
+    fun `harUlikBeregningsregelPerÅr er sann bare når årene beregnes etter ulik regel`() {
+        TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(
+            listOf(
+                periode(2026, TJUEFEM_PROSENT_REGEL, sats = null, beløp = 700, avgiftsdel = PENSJON),
+                periode(2026, ORDINÆR, sats = "6.8", beløp = 1000, avgiftsdel = HELSE),
+                periode(2027, TJUEFEM_PROSENT_REGEL, sats = null, beløp = 800, avgiftsdel = PENSJON),
+            )
+        ) shouldBe false
+        TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(
+            listOf(periode(2026, MINSTEBELØP, sats = null, beløp = 0), periode(2027, MINSTEBELØP, sats = null, beløp = 0))
+        ) shouldBe false
+        TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(
+            listOf(periode(2026, ORDINÆR, sats = "26.2", beløp = 3000), periode(2027, ORDINÆR, sats = "26.2", beløp = 3000))
+        ) shouldBe false
+        TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(
+            listOf(periode(2026, MINSTEBELØP, sats = null, beløp = 0), periode(2027, ORDINÆR, sats = "26.2", beløp = 3000))
+        ) shouldBe true
+        TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(
+            listOf(
+                periode(2026, TJUEFEM_PROSENT_REGEL, sats = null, beløp = 700, avgiftsdel = PENSJON),
+                periode(2027, ORDINÆR, sats = "26.2", beløp = 3000),
+            )
+        ) shouldBe true
+    }
+
     private fun periode(
         år: Int,
         beregningsregel: Avgiftsberegningsregel,

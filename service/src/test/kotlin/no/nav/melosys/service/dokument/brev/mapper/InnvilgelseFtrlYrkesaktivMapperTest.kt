@@ -37,6 +37,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -980,8 +982,9 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         }
     }
 
-    @Test
-    fun `mapYrkesaktivFrivillig tar bare med inneværende år når alle årene har ordinær sats`() {
+    @ParameterizedTest
+    @EnumSource(Avgiftsberegningsregel::class)
+    fun `mapYrkesaktivFrivillig tar bare med inneværende år når begge årene beregnes etter samme regel`(regel: Avgiftsberegningsregel) {
         unleash.enableAll()
         val iÅr = LocalDate.now().year
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -1002,8 +1005,9 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
                     trygdeavgiftsperiode {
                         periodeFra = LocalDate.of(år, 1, 1)
                         periodeTil = LocalDate.of(år, 12, 31)
-                        trygdesats = BigDecimal("26.2")
-                        trygdeavgiftsbeløpMd = BigDecimal(3000 + år)
+                        trygdesats = if (regel == Avgiftsberegningsregel.ORDINÆR) BigDecimal("26.2") else null
+                        trygdeavgiftsbeløpMd = if (regel == Avgiftsberegningsregel.MINSTEBELØP) BigDecimal.ZERO else BigDecimal(3000 + år)
+                        beregningsregel = regel
                     }
                 }
             }
@@ -1016,7 +1020,6 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.map { it.fom.year } shouldContainExactly listOf(iÅr)
-            visOrdinærBeregningstabell.shouldBeTrue()
             ordinærSatsPåfølgendeÅr.shouldBeNull()
         }
     }

@@ -362,11 +362,12 @@ class InnvilgelseFtrlMapper(
         trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 1).map { it.toAvgiftsperiodeDto() }.sortedByDescending { it.fom }
 
     /**
-     * Året etter tas bare med når 25 %-regelen eller minstebeløpet gjelder i inneværende år eller året etter.
+     * Året etter tas bare med når det beregnes etter en annen regel enn inneværende år (ordinær sats,
+     * 25 %-regelen eller minstebeløpet).
      */
     private fun trygdeavgiftsperioderIFrivilligBrev(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
         val inneværendeOgNesteÅr = trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 2)
-        return if (inneværendeOgNesteÅr.any { it.beregningsregel != Avgiftsberegningsregel.ORDINÆR }) inneværendeOgNesteÅr
+        return if (TrygdeavgiftIFrivilligBrev.harUlikBeregningsregelPerÅr(inneværendeOgNesteÅr)) inneværendeOgNesteÅr
         else trygdeavgiftsperioderIBrev(behandlingsresultat, antallÅr = 1)
     }
 

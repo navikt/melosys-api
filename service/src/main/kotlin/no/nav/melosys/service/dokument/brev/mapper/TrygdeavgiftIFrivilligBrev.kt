@@ -67,13 +67,6 @@ internal class TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder: List<Trygdeavgi
         OrdinærSatsPåfølgendeÅrDto(etterÅr = sisteÅrUtenOrdinærSats!!, år = år, avgiftssatser = avgiftssatser(år))
     }
 
-    private fun beregningsregelForÅr(perioder: List<Trygdeavgiftsperiode>): Avgiftsberegningsregel = when {
-        perioder.any { it.beregningsregel == TJUEFEM_PROSENT_REGEL } -> TJUEFEM_PROSENT_REGEL
-        perioder.any { it.beregningsregel == ORDINÆR && it.harAvgift() } -> ORDINÆR
-        perioder.any { it.beregningsregel == MINSTEBELØP } -> MINSTEBELØP
-        else -> ORDINÆR
-    }
-
     private fun avgiftssatser(år: Int): List<AvgiftssatsDto> =
         perioderPerÅr.getValue(år)
             .filter { it.beregningsregel == TJUEFEM_PROSENT_REGEL || (it.beregningsregel == ORDINÆR && it.harAvgift()) }
@@ -152,8 +145,18 @@ internal class TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder: List<Trygdeavgi
         }
     }
 
-    private companion object {
-        val INNTEKTSKILDETYPER_SOM_ALLTID_INNGÅR = setOf(
+    companion object {
+        fun harUlikBeregningsregelPerÅr(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Boolean =
+            trygdeavgiftsperioder.groupBy { it.periodeFra.year }.values.map(::beregningsregelForÅr).distinct().size > 1
+
+        private fun beregningsregelForÅr(perioder: List<Trygdeavgiftsperiode>): Avgiftsberegningsregel = when {
+            perioder.any { it.beregningsregel == TJUEFEM_PROSENT_REGEL } -> TJUEFEM_PROSENT_REGEL
+            perioder.any { it.beregningsregel == ORDINÆR && it.harAvgift() } -> ORDINÆR
+            perioder.any { it.beregningsregel == MINSTEBELØP } -> MINSTEBELØP
+            else -> ORDINÆR
+        }
+
+        private val INNTEKTSKILDETYPER_SOM_ALLTID_INNGÅR = setOf(
             Inntektskildetype.FN_SKATTEFRITAK,
             Inntektskildetype.PENSJON_UFØRETRYGD,
             Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT,
