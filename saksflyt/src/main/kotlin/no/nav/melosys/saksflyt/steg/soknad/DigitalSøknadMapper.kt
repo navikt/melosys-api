@@ -46,7 +46,6 @@ internal fun UtsendtArbeidstakerSkjemaM2MDto.erStatligArbeidsgiver(): Boolean {
  * Dekker seksjonene: Periode og land, Arbeidsgiver/virksomhet, Arbeidssted(er).
  * Fullmektig håndteres ikke her — se MELOSYS-8031 (aktør på Fagsak, ikke felt på Soeknad).
  *
- * Regel ved begge deler: arbeidstakers del har presedens over arbeidsgivers del.
  * Full skjemadata lagres som original_data (JSON) i skjema_sak_mapping.
  */
 object DigitalSøknadMapper {
@@ -64,22 +63,20 @@ object DigitalSøknadMapper {
         val arbeidstakersDel = hentArbeidstakersData(dto)
         val arbeidsgiversDel = hentArbeidsgiversData(dto)
 
-        // Periode og land: AT vinner, AG fallback
         val periodeOgLand = arbeidstakersDel?.utsendingsperiodeOgLand ?: arbeidsgiversDel?.utsendingsperiodeOgLand
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
 
-        // Arbeidssted: AG vinner. Statsansatt som sender før arbeidsgiver oppgir det selv.
+        // Statsansatte som sender før arbeidsgiver, oppgir arbeidsstedet selv.
+        // Hvis arbeidssted også finnes i arbeidsgivers del, brukes det derfra.
         val arbeidssted = arbeidsgiversDel?.arbeidsstedIUtlandet ?: arbeidstakersDel?.arbeidsstedIUtlandet
         mapArbeidssteder(søknad, arbeidssted, periodeOgLand?.utsendelseLand)
 
-        // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
         søknad.juridiskArbeidsgiverNorge =
             mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
-        // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra lønnslistene og
-        // arbeidstakers virksomhetsliste. Statsansatt som sender før arbeidsgiver svarer på
-        // lønnsspørsmålet i skatteforholdet. Identiske oppføringer dedupliseres.
+        // Statsansatte som sender før arbeidsgiver, oppgir lønnsutbetalende virksomheter i skatteforholdOgInntekt,
+        // ikke i arbeidsgivers del. Begge kildene må derfor tas med.
         søknad.foretakUtland = mapUtenlandskeVirksomheter(
             listOfNotNull(
                 arbeidsgiversDel?.arbeidstakerensLonn?.virksomheterSomUtbetalerLonnOgNaturalytelser,
@@ -193,8 +190,8 @@ object DigitalSøknadMapper {
         val atUtenlandske = atArbeidssituasjon?.virksomheterArbeidstakerJobberForIutsendelsesPeriode
             ?.utenlandskeVirksomheter.orEmpty()
 
-        // AT-versjonen tas først (har ansettelsesform-info). Lønnsversjonen legges kun til hvis ikke
-        // identisk på alle felles base-felter.
+        // Ved duplikater mellom listene brukes oppføringen fra arbeidssituasjonen for å bevare
+        // opplysningen om selvstendig næringsvirksomhet. Ved ulike virksomhetsopplysninger beholdes begge.
         val atKeys = atUtenlandske.map(::dedupNokkel).toSet()
         val lonnUnike = lonnUtenlandske.distinctBy(::dedupNokkel).filterNot { dedupNokkel(it) in atKeys }
 
