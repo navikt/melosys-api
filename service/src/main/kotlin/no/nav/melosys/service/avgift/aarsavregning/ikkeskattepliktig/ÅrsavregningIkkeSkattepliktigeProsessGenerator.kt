@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -87,12 +88,14 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                         }
                         return@forEach
                     }
-                    prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
-                        it.sak.saksnummer,
-                        år,
-                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
-                        true
-                    )
+                    Traceparent.iNyTrace("årsavregning prosessinstans") {
+                        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                            it.sak.saksnummer,
+                            år,
+                            Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE,
+                            true
+                        )
+                    }
                 }
             result = sakerFunnet
                 .associate { it.sak.saksnummer to it.behandlinger.size }

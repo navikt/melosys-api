@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift.aarsavregning.skattepliktig
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import mu.KotlinLogging
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.integrasjon.skattehendelser.SkattehendelserClient
 import no.nav.melosys.integrasjon.skattehendelser.ÅrFilter
@@ -288,10 +289,12 @@ class SkattepliktigeAarsavregningKjoering(
                                 var skarpFeilmelding: String? = null
                                 if (skarp && villeOpprettetProsessinstans) {
                                     try {
-                                        utfoerer.opprettProsessinstans(
-                                            fagsak.saksnummer,
-                                            år.toString(),
-                                        )
+                                        Traceparent.iNyTrace("årsavregning prosessinstans") {
+                                            utfoerer.opprettProsessinstans(
+                                                fagsak.saksnummer,
+                                                år.toString(),
+                                            )
+                                        }
                                         antallOpprettet++
                                         prosessinstansOpprettet = true
                                         log.info { "SKARP: opprettet årsavregning-prosessinstans for sak ${fagsak.saksnummer}, år $år" }

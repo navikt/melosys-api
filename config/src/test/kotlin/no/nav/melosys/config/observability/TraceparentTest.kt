@@ -1,7 +1,17 @@
 package no.nav.melosys.config.observability
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import io.opentelemetry.sdk.trace.export.SpanExporter
+import io.opentelemetry.sdk.common.CompletableResultCode
 import org.junit.jupiter.api.Test
 
 class TraceparentTest {
@@ -33,6 +43,75 @@ class TraceparentTest {
         Traceparent.traceIdFra(TRACEPARENT) shouldBe TRACE_ID
         Traceparent.traceIdFra(null).shouldBeNull()
         Traceparent.traceIdFra("ugyldig").shouldBeNull()
+    }
+
+    @Test
+    fun `iNyTrace gir ny traceId med lenke til jobbens trace`() {
+        val (tracer, eksporterte) = testTracer()
+
+        val traceparentIBlokk = Traceparent.aktiver(TRACEPARENT).use {
+            Traceparent.iNyTrace(tracer, "test") { Traceparent.nåværende() }
+        }
+
+        val nyTraceId = Traceparent.traceIdFra(traceparentIBlokk).shouldNotBeNull()
+        nyTraceId shouldNotBe TRACE_ID
+        val span = eksporterte.single()
+        span.traceId shouldBe nyTraceId
+        span.parentSpanContext.isValid shouldBe false
+        span.links shouldHaveSize 1
+        span.links.single().spanContext.traceId shouldBe TRACE_ID
+    }
+
+    @Test
+    fun `iNyTrace gjenoppretter jobbens trace etterpå`() {
+        val (tracer, _) = testTracer()
+
+        Traceparent.aktiver(TRACEPARENT).use {
+            Traceparent.iNyTrace(tracer, "test") { }
+            Traceparent.traceId() shouldBe TRACE_ID
+        }
+    }
+
+    @Test
+    fun `iNyTrace uten aktiv trace lager ingen lenke`() {
+        val (tracer, eksporterte) = testTracer()
+
+        Traceparent.iNyTrace(tracer, "test") { }
+
+        eksporterte.single().links shouldHaveSize 0
+    }
+
+    @Test
+    fun `iNyTrace markerer spanen som feilet og kaster videre`() {
+        val (tracer, eksporterte) = testTracer()
+
+        shouldThrow<IllegalStateException> {
+            Traceparent.iNyTrace(tracer, "test") { error("feil") }
+        }
+
+        eksporterte.single().status.statusCode shouldBe StatusCode.ERROR
+    }
+
+    @Test
+    fun `iNyTrace uten OpenTelemetry kjører blokken uten trace`() {
+        Traceparent.aktiver(TRACEPARENT).use {
+            Traceparent.iNyTrace("test") { Traceparent.nåværende() }.shouldBeNull()
+        }
+    }
+
+    private fun testTracer(): Pair<io.opentelemetry.api.trace.Tracer, List<SpanData>> {
+        val eksporterte = mutableListOf<SpanData>()
+        val exporter = object : SpanExporter {
+            override fun export(spans: Collection<SpanData>): CompletableResultCode {
+                eksporterte.addAll(spans)
+                return CompletableResultCode.ofSuccess()
+            }
+
+            override fun flush(): CompletableResultCode = CompletableResultCode.ofSuccess()
+            override fun shutdown(): CompletableResultCode = CompletableResultCode.ofSuccess()
+        }
+        val provider = SdkTracerProvider.builder().addSpanProcessor(SimpleSpanProcessor.create(exporter)).build()
+        return provider.get("test") to eksporterte
     }
 
     companion object {
