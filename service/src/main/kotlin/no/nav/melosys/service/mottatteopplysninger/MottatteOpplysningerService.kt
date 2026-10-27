@@ -85,17 +85,6 @@ class MottatteOpplysningerService(
         else opprettSøknad(behandling, periode, soeknadsland)
 
 
-    fun opprettSøknadUtsendteArbeidstakereEøs(
-        behandlingID: Long, orginalData: String?, soeknad: Soeknad, eksternReferanseID: String?
-    ): MottatteOpplysninger = opprettMottatteOpplysninger(
-        behandlingID,
-        orginalData,
-        soeknad,
-        Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
-        VERSJON_SOEKNAD_GRUNNLAG,
-        eksternReferanseID
-    )
-
     fun opprettSøknadDigital(
         behandlingID: Long, originalData: String?, soeknad: Soeknad, eksternReferanseID: String?
     ): MottatteOpplysninger = opprettMottatteOpplysninger(

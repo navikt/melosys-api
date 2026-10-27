@@ -20,7 +20,7 @@ Expert knowledge of Kafka event streaming patterns in melosys-api.
 | Topic | Direction | Message Type | Purpose |
 |-------|-----------|--------------|---------|
 | `teammelosys.eessi.v1` | Consumer | MelosysEessiMelding | EESSI SED messages from EUX |
-| `teammelosys.soknad-mottak.v1` | Consumer | SoknadMottatt | A1 applications from Altinn |
+| `teammelosys.skjema.innsendt.v1` | Consumer | SkjemaMottattMelding | Digital A1 applications from melosys-skjema-api |
 | `teammelosys.skattehendelser.v1` | Consumer | Skattehendelse | Tax events for årsavregning |
 | `teammelosys.manglende-fakturabetaling.v1` | Consumer | ManglendeFakturabetalingMelding | Missing payments from faktureringskomponenten |
 | `teammelosys.melosys-hendelser.v1` | Producer | MelosysHendelse | Events to faktureringskomponenten |
@@ -201,9 +201,9 @@ For local profiles (local, local-mock, test), security is disabled and connects 
 
 EESSI messages from EUX containing SED documents.
 
-### SoknadMottatt (Consumer)
+### SkjemaMottattMelding (Consumer)
 
-A1 applications from Altinn skjema-api.
+Digital A1 applications from melosys-skjema-api, consumed by `DigitalSøknadMottattConsumer`.
 
 ### Skattehendelse (Consumer)
 
@@ -285,7 +285,6 @@ kafkaOffsetChecker.waitForConsumerToCatchUp(topic, groupId, timeout)
 ## Related Skills
 
 - **eessi-eux**: EESSI message processing
-- **altinn-soknad**: Application message processing
 - **inntekt-skatt**: Tax event processing
 - **trygdeavgift**: Billing message handling
 - **statistikk**: A1 statistics publishing

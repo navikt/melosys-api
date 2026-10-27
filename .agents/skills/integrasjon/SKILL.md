@@ -64,7 +64,6 @@ Melosys-api integrates with numerous NAV internal services and external systems.
 
 | Service | Client/Service class | Purpose | Auth |
 |---------|---------------|---------|------|
-| **Altinn** | `SoknadMottakClient` | A1 application forms | Azure AD |
 | **Inngangsvilkår** | `InngangsvilkaarClient` | Entry requirements | None (in-cluster) |
 
 ## Kafka Topics
@@ -76,7 +75,6 @@ The Kafka consumer classes live in the `service` module (`service/src/main/.../n
 | Topic | Consumer Class | Module path | Purpose |
 |-------|---------------|-------------|---------|
 | `teammelosys.eessi.v1` | `EessiMeldingConsumer` | `service/eessi/kafka` | Received/sent SED + RINA events (single topic) |
-| `teammelosys.soknad-mottak.v1` | `SoknadMottattConsumer` | `service/soknad` | Altinn applications |
 | `teammelosys.skjema.innsendt.v1` | `DigitalSøknadMottattConsumer` | `service/soknad` | Digital A1 skjema (melosys-skjema-api) |
 | `teammelosys.skattehendelser.v1` | `SkattehendelserConsumer` | `service/avgift/aarsavregning` | Tax events |
 | `teammelosys.manglende-fakturabetaling.v1` | `ManglendeFakturabetalingConsumer` | `service/avgift` | Overdue invoices |
@@ -150,7 +148,6 @@ integrasjon/src/main/kotlin/no/nav/melosys/integrasjon/
 ├── melosysskjema/   # melosys-skjema-api client
 ├── popp/            # Pension (POPP) producer
 ├── sak/             # Case system
-├── soknadmottak/    # Altinn intake
 ├── tilgangsmaskinen/# Access control
 ├── trygdeavgift/    # Tax calculations
 └── utbetaling/      # Payment data

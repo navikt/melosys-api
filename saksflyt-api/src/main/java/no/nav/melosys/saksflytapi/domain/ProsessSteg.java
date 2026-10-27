@@ -39,12 +39,14 @@ public enum ProsessSteg {
     OPPRETT_MOTTATTEOPPLYSNINGER("OPPRETT_MOTTATTEOPPLYSNINGER", "Oppretter mottatteopplysninger"),
     OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
     OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK("OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK", "Oppretter journalposter tilbake i tid dersom de har tidligere har blitt markert som uidentifiserbare"),
+    /** Utgått: melosys-soknad-mottak er arkivert. Beholdes for prosessinstanser opprettet før flyten ble fjernet. */
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD", "Oppretter og ferdigstiller journalpost med sakstilknytning for søknad"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
     OPPRETT_OPPGAVE_DIGITAL_SØKNAD("OPPRETT_OPPGAVE_DIGITAL_SØKNAD", "Oppretter behandlingsoppgave hvis mottatt søknad ga ny sak"),
     OPPRETT_SAK_OG_BEH("OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     OPPRETT_NY_BEHANDLING("OPPRETT_NY_BEHANDLING", "Oppretter ny behandling i Melosys"),
+    /** Utgått: melosys-soknad-mottak er arkivert. Beholdes for prosessinstanser opprettet før flyten ble fjernet. */
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
     OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD", "Oppretter fagsak og behandling fra mottatt søknad"),
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),

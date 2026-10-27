@@ -75,7 +75,7 @@ Unntak (registered exception) is **not** a separate entity. It is stored as the
 ```
 ┌─────────────────┐
 │ Søknad mottas   │
-│ (søknad-altinn) │
+│ (melosys-skjema)│
 └────────┬────────┘
          │
          ▼

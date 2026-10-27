@@ -129,7 +129,7 @@ Full component test with all dependencies mocked.
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
-    topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", ...]
+    topics = ["teammelosys.eessi.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", ...]
 )
 @Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 @DirtiesContext
