@@ -170,10 +170,11 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
 
     @Test
     fun `maksAntallRader begrenser hvert kall, eldste først, og antallIgjen teller ned til 0`() {
-        // Nyeste legges inn først, så rekkefølgen på id og innsetting er motsatt av datoen
-        val nyest = seedFlytvedtak("MEL-52", "EU_EOS", "NY_VURDERING", "2025-01-01 10:00:00")
-        val mellom = seedFlytvedtak("MEL-51", "TRYGDEAVTALE", "FØRSTEGANG", "2024-01-01 10:00:00")
-        val eldst = seedFlytvedtak("MEL-50", "EU_EOS", "FØRSTEGANG", "2023-01-01 10:00:00")
+        // Bare endret_dato gir eldst og mellom først. Sortert på id (begge veier), saksnummer, behandlingstype,
+        // sakstype eller prosessinstans kommer nyest med i første porsjon.
+        val eldst = seedFlytvedtak("MEL-52", "EU_EOS", "NY_VURDERING", "2024-10-23 10:00:00")
+        val nyest = seedFlytvedtak("MEL-50", "EU_EOS", "FØRSTEGANG", "2024-10-23 12:00:00", prosessinstans = "2024-10-23 09:30:00")
+        val mellom = seedFlytvedtak("MEL-51", "TRYGDEAVTALE", "FØRSTEGANG", "2024-10-23 11:00:00")
 
         kall(fiksUrl, """{"skarp":true,"maksAntallRader":2}""")
             .andExpect(status().isOk)
