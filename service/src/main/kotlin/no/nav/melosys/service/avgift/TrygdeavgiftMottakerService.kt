@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.hibernate.Hibernate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,17 +31,28 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
 
     fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): Trygdeavgiftmottaker {
         return getTrygdeavgiftMottaker(
-            trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet(),
-            trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
+            trygdeavgiftsperioder.flatMap { it.alleSkatteforhold() }.toSet(),
+            trygdeavgiftsperioder.flatMap { it.alleInntektsperioder() }.toSet()
         )
     }
 
     @Deprecated("Behøver kun trygdeavgiftsperioder")
     fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =
-        getTrygdeavgiftMottaker(
-            behandlingsresultat.hentSkatteforholdTilNorge(),
-            behandlingsresultat.hentInntektsperioder()
-        )
+        getTrygdeavgiftMottaker(medInitialisertGrunnlag(behandlingsresultat).trygdeavgiftsperioder.toList())
+
+    // grunnlagListe er LAZY, og saksflytsteg sender inn frakoblede behandlingsresultater utenfor transaksjon
+    private fun medInitialisertGrunnlag(behandlingsresultat: Behandlingsresultat): Behandlingsresultat =
+        if (behandlingsresultat.trygdeavgiftsperioder.all { Hibernate.isInitialized(it.grunnlagListe) }) behandlingsresultat
+        else behandlingsresultatService.hentBehandlingsresultatMedTrygdeavgiftsperioder(behandlingsresultat.hentId())
+
+    // Når 25 %-regelen eller minstebeløpet slår sammen flere inntekter til én trygdeavgiftsperiode,
+    // ligger alle inntektene og skatteforholdene i grunnlagListe. Feltene grunnlagInntekstperiode og
+    // grunnlagSkatteforholdTilNorge peker da bare på det siste, og brukes kun for eldre perioder uten grunnlagListe.
+    private fun Trygdeavgiftsperiode.alleInntektsperioder(): List<Inntektsperiode> =
+        grunnlagListe.map { it.inntektsperiode }.ifEmpty { listOfNotNull(grunnlagInntekstperiode) }
+
+    private fun Trygdeavgiftsperiode.alleSkatteforhold(): List<SkatteforholdTilNorge> =
+        grunnlagListe.map { it.skatteforhold }.ifEmpty { listOfNotNull(grunnlagSkatteforholdTilNorge) }
 
     private fun getTrygdeavgiftMottaker(skatteforhold: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>) =
         when {

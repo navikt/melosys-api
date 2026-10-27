@@ -12,17 +12,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.jpa.PropertiesConverter
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.AnnenPersonMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMedFullmaktMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.ArbeidsgiverMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.DegSelvMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.RadgiverMedFullmaktMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerMetadata
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaData
-import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerSkjemaDto
-import no.nav.melosys.skjema.types.kafka.SkjemaMottattMelding
-import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.annotations.UuidGenerator
 import org.springframework.util.ObjectUtils.isEmpty
@@ -230,17 +219,6 @@ class Prosessinstans(
         val dataMapper: ObjectMapper = JsonMapper.builder()
             .addModule(kotlinModule())
             .addModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
-            .addMixIn(SkjemaMottattMelding::class.java, SkjemaMottattMeldingMixin::class.java)
-            .addMixIn(UtsendtArbeidstakerMetadata::class.java, UtsendtArbeidstakerMetadataMixin::class.java)
-            .addMixIn(DegSelvMetadata::class.java, DegSelvMetadataMixin::class.java)
-            .addMixIn(ArbeidsgiverMetadata::class.java, ArbeidsgiverMetadataMixin::class.java)
-            .addMixIn(AnnenPersonMetadata::class.java, AnnenPersonMetadataMixin::class.java)
-            .addMixIn(ArbeidsgiverMedFullmaktMetadata::class.java, ArbeidsgiverMedFullmaktMetadataMixin::class.java)
-            .addMixIn(RadgiverMetadata::class.java, RadgiverMetadataMixin::class.java)
-            .addMixIn(RadgiverMedFullmaktMetadata::class.java, RadgiverMedFullmaktMetadataMixin::class.java)
-            .addMixIn(UtsendtArbeidstakerSkjemaData::class.java, UtsendtArbeidstakerSkjemaDataMixin::class.java)
-            .addMixIn(UtsendtArbeidstakerSkjemaDto::class.java, UtsendtArbeidstakerSkjemaDtoMixin::class.java)
-            .addMixIn(UtsendtArbeidstakerSkjemaM2MDto::class.java, UtsendtArbeidstakerSkjemaM2MDtoMixin::class.java)
             .disable(tools.jackson.databind.DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .build()
 

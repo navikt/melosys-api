@@ -31,6 +31,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.LoggingProducerListener
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -78,7 +79,7 @@ class KafkaConfig(
         kafkaListenerContainerFactoryStopOnError<Skattehendelse>(objectMapper, kafkaProperties, groupId)
 
     @Bean
-    fun producerFactoryMelosysHendelse(objectMapper: ObjectMapper): ProducerFactory<String, MelosysHendelse> =
+    fun producerFactoryMelosysHendelse(): ProducerFactory<String, MelosysHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
                 CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-producer",
@@ -86,11 +87,11 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            ObjectMapperSerializer(objectMapper)
+            ObjectMapperSerializer(KafkaProdusentJsonMapper.jsonMapper)
         )
 
     @Bean
-    fun producerFactoryPensjonsopptjeningHendelse(objectMapper: ObjectMapper): ProducerFactory<String, PensjonsopptjeningHendelse> =
+    fun producerFactoryPensjonsopptjeningHendelse(): ProducerFactory<String, PensjonsopptjeningHendelse> =
         DefaultKafkaProducerFactory(
             mutableMapOf<String, Any>(
                 CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-popp-producer",
@@ -98,13 +99,15 @@ class KafkaConfig(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
             ) + securityConfig(),
             StringSerializer(),
-            ObjectMapperSerializer(objectMapper)
+            ObjectMapperSerializer(KafkaProdusentJsonMapper.jsonMapper)
         )
 
     @Bean
     @Qualifier("melosysHendelse")
     fun melosysHendelseKafkaTemplate(producerFactory: ProducerFactory<String, MelosysHendelse>): KafkaTemplate<String, MelosysHendelse> =
-        KafkaTemplate(producerFactory)
+        KafkaTemplate(producerFactory).apply {
+            setProducerListener(LoggingProducerListener<String, MelosysHendelse>().apply { setIncludeContents(false) })
+        }
 
     @Bean
     @Qualifier("melosysPoppHendelse")

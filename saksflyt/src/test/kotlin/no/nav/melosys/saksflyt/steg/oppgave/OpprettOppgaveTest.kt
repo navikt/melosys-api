@@ -9,6 +9,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.forTest
@@ -27,7 +28,7 @@ internal class OpprettOppgaveTest {
     @BeforeEach
     fun setUp() {
         opprettOppgave = OpprettOppgave(oppgaveService)
-        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any<String>(), any<String>(), any<String>(), any<String>())} returns Unit
+        every {oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any<Behandling>(), any(), any(), any(), any(), any())} returns Unit
     }
 
     @Test
@@ -52,7 +53,8 @@ internal class OpprettOppgaveTest {
                 journalpostID,
                 FagsakTestFactory.BRUKER_AKTØR_ID,
                 saksbehandler,
-                null
+                null,
+                false
             )
         }
     }
@@ -79,8 +81,26 @@ internal class OpprettOppgaveTest {
                 journalpostID,
                 null,
                 saksbehandler,
-                FagsakTestFactory.ORGNR
+                FagsakTestFactory.ORGNR,
+                false
             )
+        }
+    }
+
+    @Test
+    fun utfoerSteg_digitalSøknadMottak_leggTilNøkkelord() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.MOTTAK_DIGITAL_SØKNAD
+            behandling {
+                id = 243L
+                fagsak { medBruker() }
+            }
+        }
+
+        opprettOppgave.utfør(prosessinstans)
+
+        verify {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any(), true)
         }
     }
 }

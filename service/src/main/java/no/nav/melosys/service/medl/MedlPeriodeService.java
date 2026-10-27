@@ -6,8 +6,11 @@ import java.util.Optional;
 import jakarta.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
@@ -69,7 +72,7 @@ public class MedlPeriodeService {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID =
-            medlService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID));
+            medlService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID, periodeOmLovvalg));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
@@ -77,18 +80,18 @@ public class MedlPeriodeService {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID =
-            medlService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID));
+            medlService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID, periodeOmLovvalg));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
     public void oppdaterPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID) {
-        medlService.oppdaterPeriodeUnderAvklaring(periodeOmLovvalg, hentKildedokumenttype(behandlingID));
+        medlService.oppdaterPeriodeUnderAvklaring(periodeOmLovvalg, hentKildedokumenttype(behandlingID, periodeOmLovvalg));
     }
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID) {
         String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig lovvalgsperiode i MEDL for behandling {}", behandlingID);
-        Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(behandlingID));
+        Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(behandlingID, lovvalgsperiode));
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
@@ -119,7 +122,7 @@ public class MedlPeriodeService {
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) {
         log.info("Oppdaterer MEDL-periode {} for lovvalgsperiode", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode,
-            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
+            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId(), lovvalgsperiode));
     }
 
     public void oppdaterPeriodeEndelig(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
@@ -135,7 +138,7 @@ public class MedlPeriodeService {
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode) {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeForeløpig(lovvalgsperiode,
-            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
+            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId(), lovvalgsperiode));
     }
 
     public void avvisPeriode(Long medlPeriodeID) {
@@ -220,6 +223,10 @@ public class MedlPeriodeService {
     }
 
     private KildedokumenttypeMedl hentKildedokumenttype(Long behandlingID) {
+        return hentKildedokumenttype(behandlingID, null);
+    }
+
+    private KildedokumenttypeMedl hentKildedokumenttype(Long behandlingID, PeriodeOmLovvalg periodeOmLovvalg) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         boolean erSed = behandling.erBehandlingAvSed();
         var fagsaktype = behandling.getFagsak().getType();
@@ -227,7 +234,9 @@ public class MedlPeriodeService {
 
         if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
             if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
-                return KildedokumenttypeMedl.DOKUMENT;
+                return erUnntakEtterKonvensjonStorbritannia(behandling, periodeOmLovvalg)
+                    ? KildedokumenttypeMedl.A1
+                    : KildedokumenttypeMedl.DOKUMENT;
             } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
                 return KildedokumenttypeMedl.HENV_SOKNAD;
             }
@@ -237,5 +246,15 @@ public class MedlPeriodeService {
         }
 
         return erSed ? KildedokumenttypeMedl.SED : KildedokumenttypeMedl.HENV_SOKNAD;
+    }
+
+    // Unntak etter konvensjonen mellom EFTA og Storbritannia mottas som A1-attest
+    private static boolean erUnntakEtterKonvensjonStorbritannia(Behandling behandling, PeriodeOmLovvalg periodeOmLovvalg) {
+        if (periodeOmLovvalg == null || behandling.getFagsak().getTema() != Sakstemaer.UNNTAK) {
+            return false;
+        }
+        var bestemmelse = periodeOmLovvalg.getBestemmelse();
+        return bestemmelse instanceof Lovvalgbestemmelser_konv_efta_storbritannia
+            || bestemmelse instanceof Tilleggsbestemmelser_konv_efta_storbritannia;
     }
 }

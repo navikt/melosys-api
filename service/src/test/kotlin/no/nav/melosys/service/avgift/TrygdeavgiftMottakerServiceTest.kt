@@ -8,6 +8,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeGrunnlag
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -335,6 +336,37 @@ internal class TrygdeavgiftMottakerServiceTest {
 
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT når samlet beregnet periode har inntekt uten aga, selv om siste grunnlag har aga`() {
+        val skattepliktig = lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG)
+        val inntektFraUtlandet = lagInntektsperiode(false, INNTEKT_FRA_UTLANDET)
+        val arbeidsinntektFraNorge = lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+        val samletPeriode = lagTrygdeavgiftsperiode(skattepliktig, arbeidsinntektFraNorge).apply {
+            leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(trygdeavgiftsperiode = this, inntektsperiode = inntektFraUtlandet, skatteforhold = skattepliktig))
+            leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(trygdeavgiftsperiode = this, inntektsperiode = arbeidsinntektFraNorge, skatteforhold = skattepliktig))
+        }
+        val behandlingsresultat = lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT).get()
+        behandlingsresultat.medlemskapsperioder.add(
+            Medlemskapsperiode().apply { trygdeavgiftsperioder = mutableSetOf(samletPeriode) }
+        )
+
+        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(listOf(samletPeriode)).shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat).shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT når alle inntekter i samlet beregnet periode har aga og bruker er skattepliktig`() {
+        val skattepliktig = lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG)
+        val inntekt1 = lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+        val inntekt2 = lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
+        val samletPeriode = lagTrygdeavgiftsperiode(skattepliktig, inntekt2).apply {
+            leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(trygdeavgiftsperiode = this, inntektsperiode = inntekt1, skatteforhold = skattepliktig))
+            leggTilGrunnlag(TrygdeavgiftsperiodeGrunnlag(trygdeavgiftsperiode = this, inntektsperiode = inntekt2, skatteforhold = skattepliktig))
+        }
+
+        trygdeavgiftMottakerService.getTrygdeavgiftMottaker(listOf(samletPeriode)).shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
     }
 
     fun lagTrygdeavgiftsperiode(
