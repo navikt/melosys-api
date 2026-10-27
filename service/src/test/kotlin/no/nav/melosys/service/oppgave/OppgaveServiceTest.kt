@@ -484,6 +484,105 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Årsavregning 2024")) }
     }
 
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsUtsendtArbeidstaker_nøkkelordUtsendtArbeidstakerSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsTjenestepersonEllerFly_nøkkelordStatsansattSettes() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Statsansatt")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordEøsAnnetTema_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.ARBEID_FLERE_LAND)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_utenNøkkelordEøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordGjenbruktOppgave_nøkkelordSettesPåEksisterendeOppgave() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Utsendt arbeidstaker")) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordIkkeEøs_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER, Sakstyper.TRYGDEAVTALE)
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave)
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    @Test
+    fun opprettEllerGjenbrukBehandlingsoppgave_medNøkkelordKallFeiler_oppgaveBlirLikevelOpprettet() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", TILORDNET_RESSURS, null, leggTilNøkkelord = true)
+
+        verify { oppgaveFasade.opprettOppgave(any<Oppgave>()) }
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
+    }
+
+    @Test
+    fun oppdaterOppgave_eøsUtsendtArbeidstaker_nøkkelordSettesIkke() {
+        val behandling = lagSøknadsbehandlingMedMocker(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        oppgaveService.oppdaterOppgave(BEH_OPPG_ID, behandling)
+
+        verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
+        verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
+    }
+
+    private fun lagSøknadsbehandlingMedMocker(tema: Behandlingstema, sakstype: Sakstyper = Sakstyper.EU_EOS): Behandling {
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                type = sakstype
+                medBruker()
+            }
+            type = Behandlingstyper.FØRSTEGANG
+            this.tema = tema
+        }
+        every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+        every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
+        every { behandlingService.lagre(behandling) } returns Unit
+        every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
+        return behandling
+    }
+
     private fun lagÅrsavregningsbehandlingMedMocker(): Behandling {
         // FTRL/yrkesaktiv årsavregning gir en «Behandle årsavregning»-oppgave (BEH_ARSAVREG) som skal merkes med nøkkelord.
         val behandling = Behandling.forTest {

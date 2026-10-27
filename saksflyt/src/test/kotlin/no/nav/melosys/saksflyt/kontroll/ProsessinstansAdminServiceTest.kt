@@ -63,7 +63,8 @@ class ProsessinstansAdminServiceTest {
                 dto.prosessType(),
                 dto.feiletSteg(),
                 dto.sisteFeilmelding(),
-                dto.correlationId()
+                dto.correlationId(),
+                dto.traceId()
             )
         }.flatten().shouldContainExactly(
             prosessinstans.id,
@@ -74,7 +75,8 @@ class ProsessinstansAdminServiceTest {
             prosessinstans.type.kode,
             CURRENT_PROSESS_STEG.kode,
             sisteFeilmelding,
-            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT)
+            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT),
+            "0af7651916cd43dd8448eb211c80319c"
         )
     }
 
@@ -213,6 +215,7 @@ class ProsessinstansAdminServiceTest {
         }
         sistFullførtSteg = FORRIGE_PROSSESS_STEG
         medData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id")
+        medData(ProsessDataKey.TRACEPARENT, "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
         init()
     }
 

@@ -27,6 +27,7 @@ class ProsessinstansMetrikkerConfig(
     @Bean
     fun prosessinstansMetrikker(statusCache: ProsessinstansStatusCache): MeterBinder = MeterBinder { registry ->
         registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache)
+        registrerAntallProsessinstanserPåVentGruppertPåType(registry, statusCache)
         registrerAntallFeiledeProsessinstanserGruppertPåSteg(registry, statusCache)
         registrerKøstørrelsePerPrioritet(registry)
         registrerAntallAktiveTråder(registry)
@@ -64,6 +65,20 @@ class ProsessinstansMetrikkerConfig(
         ProsessType.values().forEach { prosessType ->
             Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_FEILET, statusCache) {
                 statusCache.antallProsessinstanserFeiletPåType(prosessType)
+            }
+                .tag(MetrikkerNavn.TAG_PROSESSINSTANSTYPE, prosessType.kode)
+                .register(meterRegistry)
+        }
+    }
+
+    /** PÅ_VENT venter på en annen prosessinstans med samme låsgruppe. Blir de stående lenge, henger køen. */
+    private fun registrerAntallProsessinstanserPåVentGruppertPåType(
+        meterRegistry: MeterRegistry,
+        statusCache: ProsessinstansStatusCache
+    ) {
+        ProsessType.values().forEach { prosessType ->
+            Gauge.builder(MetrikkerNavn.PROSESSINSTANSER_PÅ_VENT, statusCache) {
+                statusCache.antallProsessinstanserPåVentPåType(prosessType)
             }
                 .tag(MetrikkerNavn.TAG_PROSESSINSTANSTYPE, prosessType.kode)
                 .register(meterRegistry)

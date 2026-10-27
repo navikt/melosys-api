@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingSOAPInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutgoingSOAPInterceptor;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
 import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -37,7 +37,7 @@ public class DokumentproduksjonClientConfig {
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
-        factoryBean.getOutInterceptors().add(new CorrelationIdOutgoingSOAPInterceptor());
+        factoryBean.getOutInterceptors().add(new CallIdOutgoingSOAPInterceptor());
         return factoryBean.create(DokumentproduksjonV3.class);
     }
 

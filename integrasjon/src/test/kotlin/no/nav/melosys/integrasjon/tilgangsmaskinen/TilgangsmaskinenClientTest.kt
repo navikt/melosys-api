@@ -16,7 +16,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.AvvisningsKode
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.RegelType
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.TilgangsmaskinenProblemDetail
@@ -41,7 +40,6 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         GenericAuthFilterFactory::class,
         TilgangsmaskinenClientProducer::class,
         MetricsTestConfig::class,

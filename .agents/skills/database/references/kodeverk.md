@@ -184,9 +184,10 @@ REGISTRERING_UNNTAK_NY_SAK        - Register exception new case
 REGISTRERING_UNNTAK_GODKJENN      - Approve exception
 REGISTRERING_UNNTAK_AVVIS         - Reject exception
 
--- Digital søknad-mottak (V147, V152) — from melosys-skjema-api
-MELOSYS_MOTTAK_DIGITAL_SØKNAD               - Receive digital application (new sak)
-MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD  - Receive digital application (existing sak)
+-- Digital søknad-mottak (V147, V152, V172) — from melosys-skjema-api
+MOTTAK_DIGITAL_SØKNAD                       - Receive digital application (new or existing sak, V172)
+MELOSYS_MOTTAK_DIGITAL_SØKNAD               - Deprecated: receive digital application (new sak)
+MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD  - Deprecated: receive digital application (existing sak)
 
 -- Other
 OPPRETT_SAK                       - Create case
@@ -205,6 +206,9 @@ OPPRETT_SAK_OG_BEHANDLING_DIGITAL_SØKNAD              - Create sak + behandling
 OPPRETT_OG_FERDIGSTILL_JOURNALPOST_DIGITAL_SØKNAD     - Create + finalize journalpost
 HÅNDTER_EKSISTERENDE_SAK_DIGITAL_SØKNAD               - Attach to existing sak (V152)
 SEND_SAKSNUMMER_TIL_MELOSYS_SKJEMA_API                - Echo saksnummer back (V152)
+AVKLAR_SAK_OG_BEHANDLING_DIGITAL_SØKNAD               - New or existing sak (V172)
+OPPRETT_ARKIVSAK_DIGITAL_SØKNAD                       - Arkivsak, only for new sak (V172)
+OPPRETT_OPPGAVE_DIGITAL_SØKNAD                        - Oppgave, only for new sak (V172)
 
 -- Personopplysninger / saksopplysninger
 LAGRE_PERSONOPPLYSNINGER                              - Save person data as saksopplysning (V144)

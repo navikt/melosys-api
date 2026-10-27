@@ -16,7 +16,8 @@ class OpprettOppgave(private val oppgaveService: OppgaveService) : StegBehandler
             prosessinstans.hentJournalpostID(),
             prosessinstans.hentBehandling.fagsak.finnBrukersAktørID(),
             prosessinstans.hentSaksbehandlerHvisTilordnes(),
-            prosessinstans.hentBehandling.fagsak.finnVirksomhetsOrgnr()
+            prosessinstans.hentBehandling.fagsak.finnVirksomhetsOrgnr(),
+            prosessinstans.type.erDigitalSøknadMottak()
         )
     }
 }

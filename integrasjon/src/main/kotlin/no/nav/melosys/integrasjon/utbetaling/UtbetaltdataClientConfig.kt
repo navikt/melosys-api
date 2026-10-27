@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.utbetaling
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.errorFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,13 +18,12 @@ class UtbetaltdataClientConfig(
 ) : CallIdAware {
     @Bean
     fun utbetaltdataClient(
-        webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
+        webClientBuilder: WebClient.Builder
     ) = UtbetaltdataClient(
         webClientBuilder
             .baseUrl(url)
             .filter(headerFilter())
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-            .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Utbetalinger feilet."))
             .build()
     )

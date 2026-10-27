@@ -214,8 +214,8 @@ CREATE INDEX idx_skjema_sak_mapping_saksnr  ON skjema_sak_mapping(saksnummer);
 CREATE INDEX idx_skjema_sak_mapping_mottopp ON skjema_sak_mapping(mottatte_opplysninger_id);
 ```
 
-**Owning prosess types:** `MELOSYS_MOTTAK_DIGITAL_SØKNAD` (new sak),
-`MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` (existing sak).
+**Owning prosess types:** `MOTTAK_DIGITAL_SØKNAD` (new or existing sak, V172).
+Deprecated: `MELOSYS_MOTTAK_DIGITAL_SØKNAD` (new sak), `MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD` (existing sak).
 
 ## AARSAVREGNING
 

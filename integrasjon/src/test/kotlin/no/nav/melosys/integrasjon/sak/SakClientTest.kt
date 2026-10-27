@@ -12,7 +12,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -35,7 +34,6 @@ import java.util.UUID
     classes = [
         OAuthMockServer::class,
         GenericAuthFilterFactory::class,
-        CorrelationIdOutgoingFilter::class,
         SakClientConfig::class,
     ]
 )
@@ -107,6 +105,7 @@ class SakClientTest(
             postRequestedFor(urlEqualTo("/api/v1/saker"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, containing(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(SakClient.CORRELATION_ID_HEADER, matching("[0-9a-f-]{36}"))
                 .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .+"))
                 .withRequestBody(
                     equalToJson(

@@ -7,7 +7,7 @@
 **Symptom**: VedtakMetadata saved but no Kafka message published
 
 **Possible Causes**:
-- `a1Produseres()` returns false for behandlingsresultat
+- `UtstedtA1Service.a1Produseres(behandlingsresultat)` returns false
 - No lovvalgsperiode found
 - Event listener failed silently
 

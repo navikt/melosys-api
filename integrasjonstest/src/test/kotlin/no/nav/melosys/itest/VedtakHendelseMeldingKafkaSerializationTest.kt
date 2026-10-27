@@ -1,6 +1,8 @@
 package no.nav.melosys.itest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -12,6 +14,9 @@ import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
 import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.tjenester.gui.config.AdminTilgangInterceptor
+import no.nav.melosys.tjenester.gui.config.WebConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -27,6 +32,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
 import java.time.LocalDate
 import java.util.UUID
@@ -48,22 +54,33 @@ import java.util.UUID
         KafkaAutoConfiguration::class,
         KafkaConfig::class,
         SkippableKafkaErrorHandler::class,
-        KafkaMelosysHendelseProducer::class
+        KafkaMelosysHendelseProducer::class,
+        WebConfig::class
     ]
 )
 class VedtakHendelseMeldingKafkaSerializationTest(
     @Autowired private val producer: KafkaMelosysHendelseProducer,
+    @Autowired private val jsonMapper: JsonMapper,
     @Autowired private val kafkaProperties: KafkaProperties,
     @Value("\${kafka.aiven.melosys-hendelser.topic}") private val topic: String
 ) {
 
+    @MockkBean(relaxed = true)
+    private lateinit var kodeverkService: KodeverkService
+
+    @MockkBean(relaxed = true)
+    private lateinit var adminTilgangInterceptor: AdminTilgangInterceptor
+
     @Test
     @DirtiesContext
-    fun `VedtakHendelseMelding serialiseres korrekt av Kafka-producer`() {
+    fun `VedtakHendelseMelding sendes med kodeverk som tekst når appens Jackson-oppsett er lastet`() {
+        // WebConfig legger MelosysModule på den felles mapperen. Kafka-produsenten skal ikke bruke den.
+        jsonMapper.writeValueAsString(Sakstyper.FTRL) shouldContain "\"kode\""
+
         val hendelse = MelosysHendelse(
             VedtakHendelseMelding(
                 folkeregisterIdent = "12345678901",
-                sakstype = Sakstyper.TRYGDEAVTALE,
+                sakstype = Sakstyper.FTRL,
                 sakstema = Sakstemaer.TRYGDEAVGIFT,
                 behandligsresultatType = Behandlingsresultattyper.FERDIGBEHANDLET,
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK,
@@ -86,7 +103,7 @@ class VedtakHendelseMeldingKafkaSerializationTest(
                 "melding": {
                     "type": "VedtakHendelseMelding",
                     "folkeregisterIdent": "12345678901",
-                    "sakstype": "TRYGDEAVTALE",
+                    "sakstype": "FTRL",
                     "sakstema": "TRYGDEAVGIFT",
                     "behandligsresultatType": "FERDIGBEHANDLET",
                     "vedtakstype": "FØRSTEGANGSVEDTAK",

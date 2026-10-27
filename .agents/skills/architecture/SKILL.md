@@ -6,7 +6,7 @@ description: |
 
 # Melosys-API Architecture
 
-Modular monolith with 12 core modules plus the `soknad-altinn` types module (JAXB-generated classes from an Altinn XSD; depends on nothing internal, used by `integrasjon`). Understanding the dependency graph is essential for:
+Modular monolith with 12 core modules. Understanding the dependency graph is essential for:
 - Knowing where to place new code
 - Understanding what tests to run after changes
 - Avoiding circular dependencies
@@ -64,7 +64,6 @@ Modular monolith with 12 core modules plus the `soknad-altinn` types module (JAX
 | **config** | Cross-cutting config | MDC, Unleash, ShedLock, metrics |
 | **statistikk** | DVH reporting | Event listeners, statistics producers |
 | **feil** | Exception hierarchy | TekniskException, FunksjonellException |
-| **soknad-altinn** | Altinn A1 form types | JAXB classes generated from `NAV_MedlemskapArbeidEOS` XSD (no internal deps; used by integrasjon) |
 
 ## Dependency Rules
 
@@ -76,7 +75,7 @@ saksflyt → service, saksflyt-api, domain, config, feil
 service → repository, integrasjon, saksflyt-api, domain, config, feil
 statistikk → service, domain
 repository → domain
-integrasjon → domain, sikkerhet, config, feil, soknad-altinn
+integrasjon → domain, sikkerhet, config, feil
 saksflyt-api → domain, config
 domain → feil
 sikkerhet → feil

@@ -20,7 +20,6 @@ import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.exception.IntegrasjonException
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.pdl.dto.Endring
 import no.nav.melosys.integrasjon.pdl.dto.Endringstype
 import no.nav.melosys.integrasjon.pdl.dto.Metadata
@@ -63,7 +62,6 @@ import java.util.UUID
 @ContextConfiguration(
     classes = [
         OAuthMockServer::class,
-        CorrelationIdOutgoingFilter::class,
         PDLClientProducer::class,
         PDLAuthFilterAzure::class,
         MetricsTestConfig::class,

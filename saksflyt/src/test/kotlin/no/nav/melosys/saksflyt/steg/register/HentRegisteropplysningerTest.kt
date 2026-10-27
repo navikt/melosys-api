@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -307,6 +308,32 @@ class HentRegisteropplysningerTest {
 
         val prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling { id = behandling.id }
+            this.behandling = behandling
+        }
+
+
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
+    }
+
+    @Test
+    fun `utfør skal ikke hente noe når det er Årsavregning for EØS medlemskap og lovvalg utsendt arbeidstaker`() {
+        val behandling = lagBehandling {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.ÅRSAVREGNING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                medBruker()
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.JFR_ANDREGANG_NY_BEHANDLING
             status = ProsessStatus.KLAR
             behandling { id = behandling.id }
             this.behandling = behandling

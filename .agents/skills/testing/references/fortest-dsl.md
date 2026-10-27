@@ -182,17 +182,15 @@ Create reusable helper functions in test base classes:
 ```kotlin
 abstract class ÅrsavregningServiceTestBase {
 
-    // Factory method with customizable defaults
     fun lagTidligereBehandlingsresultat(
         init: BehandlingsresultatTestFactory.Builder.() -> Unit = {}
     ) = Behandlingsresultat.forTest {
         id = 1L
         type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         vedtakMetadata { vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK }
-        init()  // Allow caller to customize
+        init()
     }
 
-    // Convenience extension for string dates
     protected fun BehandlingsresultatTestFactory.Builder.medlemskapsperiode(
         start: String,
         slutt: String,
@@ -214,7 +212,6 @@ abstract class ÅrsavregningServiceTestBase {
         })
     }
 
-    // Nested helper for trygdeavgiftsperiode
     protected fun MedlemskapsperiodeTestFactory.Builder.trygdeavgiftsperiode(
         start: String,
         slutt: String,

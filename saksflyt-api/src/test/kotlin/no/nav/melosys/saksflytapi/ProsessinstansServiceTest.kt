@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldContainValue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -14,6 +15,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
@@ -41,6 +43,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
@@ -85,6 +88,31 @@ class ProsessinstansServiceTest {
         prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
 
         verify { applicationEventPublisher.publishEvent(any<ProsessinstansOpprettetEvent>()) }
+    }
+
+    @Test
+    fun `lagre prosessinstans lagrer gjeldende traceparent`() {
+        val traceparent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.ANMODNING_OM_UNNTAK }
+
+
+        Traceparent.aktiver(traceparent).use {
+            prosessinstansService.lagre(prosessinstans, "Z123456", null)
+        }
+
+
+        piListCaptor.single().getData(ProsessDataKey.TRACEPARENT) shouldBe traceparent
+    }
+
+    @Test
+    fun `lagre prosessinstans uten aktiv trace lagrer ikke traceparent`() {
+        val prosessinstans = Prosessinstans.forTest { type = ProsessType.ANMODNING_OM_UNNTAK }
+
+
+        prosessinstansService.lagre(prosessinstans, "Z123456", null)
+
+
+        piListCaptor.single().getData(ProsessDataKey.TRACEPARENT).shouldBeNull()
     }
 
     @Test
@@ -699,38 +727,6 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `opprett prosessinstans for søknad mottatt skal opprette prosessinstans når den ikke finnes fra før`() {
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, false)
-
-        val prosessinstans = piListCaptor.last()
-        prosessinstans.run {
-            type shouldBe ProsessType.MOTTAK_SOKNAD_ALTINN
-            getData(ProsessDataKey.MOTTATT_SOKNAD_ID) shouldBe "søknadID"
-            hentData<ForvaltningsmeldingMottaker>(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER) shouldBe ForvaltningsmeldingMottaker.BRUKER
-        }
-    }
-
-    @Test
-    fun `opprett prosessinstans for søknad mottatt skal ikke opprette prosessinstans når den finnes fra før`() {
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", true, false)
-
-        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
-    }
-
-    @Test
-    fun `opprett prosessinstans for søknad mottatt med mottak eldre enn noen dager skal sette forvaltningsmelding mottaker ingen`() {
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true)
-
-
-        val prosessinstans = piListCaptor.last()
-        prosessinstans.hentData<ForvaltningsmeldingMottaker>(
-            ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER
-        ) shouldBe ForvaltningsmeldingMottaker.INGEN
-    }
-
-    @Test
     fun `opprett prosessinstans for send brev skal opprette ny prosessinstans`() {
         val behandling = Behandling.forTest { }
         val doksysbrevbestilling = DoksysBrevbestilling.Builder()
@@ -827,77 +823,101 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `opprett prosessinstans for melosys skjema mottatt skal opprette prosessinstans med korrekt type og låsReferanse`() {
+    fun `digital søknad uten relaterte prosesser skal starte egen låsgruppe`() {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
         val typeSlot = slot<Collection<ProsessType>>()
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns false
+        every { prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(capture(typeSlot), skjemaId.toString()) } returns false
 
-        prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
 
-        // Dedupen skal sjekke på tvers av nøyaktig begge digital-søknad-typene, også på NY-flyten
+        // Dedupen skal sjekke på tvers av alle digital-søknad-typene, også de utgåtte
         typeSlot.captured shouldContainExactlyInAnyOrder listOf(
+            ProsessType.MOTTAK_DIGITAL_SØKNAD,
             ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
             ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
         )
 
-        val lagretInstans = piListCaptor.last()
-        lagretInstans.run {
-            type shouldBe ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD
-            låsReferanse shouldBe skjemaId.toString()
+        piListCaptor.last().run {
+            type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
+            låsReferanse shouldBe "${skjemaId}_$skjemaId"
             hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
         }
     }
 
     @Test
-    fun `opprett prosessinstans for melosys skjema mottatt skal ikke opprette duplikat når prosessinstans finnes fra før`() {
+    fun `digital søknad skal arve låsgruppe fra prosess for relatert skjema`() {
+        val gruppe = UUID.randomUUID()
+        val relatertSkjemaId = UUID.randomUUID()
         val skjemaId = UUID.randomUUID()
-        val melding = SkjemaMottattMelding(skjemaId)
+        val melding = SkjemaMottattMelding(skjemaId, relaterteSkjemaIder = listOf(relatertSkjemaId, UUID.randomUUID()))
 
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns true
+        every { prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(any(), skjemaId.toString()) } returns false
+        every { prosessinstansRepo.findAllByTypeInAndLåsReferanseEndingWith(any(), any()) } returns emptyList()
+        every { prosessinstansRepo.findAllByTypeInAndLåsReferanseEndingWith(any(), relatertSkjemaId.toString()) } returns
+            listOf(digitalSøknadProsess("${gruppe}_$relatertSkjemaId", LocalDateTime.now()))
 
-        prosessinstansService.opprettProsessinstansMelosysDigitalSøknadMottatt(melding)
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
 
-        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
-    }
-
-    @Test
-    fun `opprett prosessinstans for eksisterende digital søknad skal opprette med korrekt type og relaterte skjemaIder`() {
-        val skjemaId = UUID.randomUUID()
-        val melding = SkjemaMottattMelding(skjemaId, relaterteSkjemaIder = listOf(UUID.randomUUID(), UUID.randomUUID()))
-
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), any()) } returns false
-
-        prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding)
-
-        val lagretInstans = piListCaptor.last()
-        lagretInstans.run {
-            type shouldBe ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
-            låsReferanse shouldBe skjemaId.toString()
-            hentData<UUID>(ProsessDataKey.DIGITAL_SØKNAD_SKJEMA_ID) shouldBe skjemaId
+        piListCaptor.last().run {
+            type shouldBe ProsessType.MOTTAK_DIGITAL_SØKNAD
+            låsReferanse shouldBe "${gruppe}_$skjemaId"
             hentData<List<UUID>>(ProsessDataKey.DIGITAL_SØKNAD_RELATERTE_SKJEMA_IDER) shouldContainExactlyInAnyOrder melding.relaterteSkjemaIder
         }
     }
 
     @Test
-    fun `eksisterende digital søknad skal ikke opprette duplikat — dedup på tvers av digital-søknad-typene`() {
+    fun `digital søknad skal arve skjemaId som gruppe fra prosess med gammelt låsformat`() {
+        val relatertSkjemaId = UUID.randomUUID()
+        val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId, relaterteSkjemaIder = listOf(relatertSkjemaId))
+
+        every { prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(any(), skjemaId.toString()) } returns false
+        every { prosessinstansRepo.findAllByTypeInAndLåsReferanseEndingWith(any(), relatertSkjemaId.toString()) } returns
+            listOf(digitalSøknadProsess(relatertSkjemaId.toString(), LocalDateTime.now()))
+
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
+
+        piListCaptor.last().låsReferanse shouldBe "${relatertSkjemaId}_$skjemaId"
+    }
+
+    @Test
+    fun `digital søknad med relaterte i flere låsgrupper skal bruke eldste gruppe`() {
+        val eldsteGruppe = UUID.randomUUID()
+        val nyesteGruppe = UUID.randomUUID()
+        val relatert1 = UUID.randomUUID()
+        val relatert2 = UUID.randomUUID()
+        val skjemaId = UUID.randomUUID()
+        val melding = SkjemaMottattMelding(skjemaId, relaterteSkjemaIder = listOf(relatert1, relatert2))
+
+        every { prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(any(), skjemaId.toString()) } returns false
+        every { prosessinstansRepo.findAllByTypeInAndLåsReferanseEndingWith(any(), relatert1.toString()) } returns
+            listOf(digitalSøknadProsess("${nyesteGruppe}_$relatert1", LocalDateTime.now()))
+        every { prosessinstansRepo.findAllByTypeInAndLåsReferanseEndingWith(any(), relatert2.toString()) } returns
+            listOf(digitalSøknadProsess("${eldsteGruppe}_$relatert2", LocalDateTime.now().minusMinutes(5)))
+
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
+
+        piListCaptor.last().låsReferanse shouldBe "${eldsteGruppe}_$skjemaId"
+    }
+
+    @Test
+    fun `digital søknad skal ikke opprette duplikat når prosessinstans for skjemaet finnes fra før`() {
         val skjemaId = UUID.randomUUID()
         val melding = SkjemaMottattMelding(skjemaId)
-        val typeSlot = slot<Collection<ProsessType>>()
 
-        // Skjemaet er alt behandlet (typisk som NY); en redelivery rutes til EKSISTERENDE.
-        // Dedupen skal sjekke på tvers av begge digital-søknad-typene, så duplikat ikke opprettes.
-        every { prosessinstansRepo.existsByLåsReferanseAndTypeIn(skjemaId.toString(), capture(typeSlot)) } returns true
+        every { prosessinstansRepo.existsByTypeInAndLåsReferanseEndingWith(any(), skjemaId.toString()) } returns true
 
-        // "MEL-42"
-        prosessinstansService.opprettProsessinstansEksisterendeDigitalSøknad(melding)
+        prosessinstansService.opprettProsessinstansDigitalSøknadMottatt(melding)
 
-        typeSlot.captured shouldContainExactlyInAnyOrder listOf(
-            ProsessType.MELOSYS_MOTTAK_DIGITAL_SØKNAD,
-            ProsessType.MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD
-        )
         verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
+    }
+
+    private fun digitalSøknadProsess(låsReferanse: String, registrertDato: LocalDateTime) = Prosessinstans.forTest {
+        type = ProsessType.MOTTAK_DIGITAL_SØKNAD
+        this.låsReferanse = låsReferanse
+        this.registrertDato = registrertDato
     }
 
     @Test

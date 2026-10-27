@@ -6,7 +6,9 @@ import java.util.*;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.opentelemetry.context.Scope;
 import jakarta.validation.constraints.NotNull;
+import no.nav.melosys.config.observability.Traceparent;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
@@ -30,14 +32,13 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.config.MDCOperations.CORRELATION_ID;
-import static no.nav.melosys.config.MDCOperations.putToMDC;
 import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 
 @Component
 public class ProsessinstansBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansBehandler.class);
+    static final String LEGACY_CORRELATION_ID = "correlation-id";
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
@@ -121,9 +122,10 @@ public class ProsessinstansBehandler {
         ProsessSteg nesteSteg = null;
 
         long start = System.nanoTime();
+        Scope traceScope = Traceparent.aktiver(prosessinstans.getData(ProsessDataKey.TRACEPARENT));
         try {
             MDC.put("pid", prosessinstans.getId().toString());
-            putToMDC(CORRELATION_ID, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
+            settLegacyCorrelationId(prosessinstans);
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
                 prosessinstans = utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
@@ -134,8 +136,9 @@ public class ProsessinstansBehandler {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
             MDC.remove("pid");
-            MDC.remove(CORRELATION_ID);
+            MDC.remove(LEGACY_CORRELATION_ID);
             SaksflytSubjektHolder.reset();
+            traceScope.close();
 
             // Metrikk sist: en feil i Micrometer skal ikke hindre opprydding av trådlokal kontekst.
             io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_TID_BRUKT)
@@ -145,6 +148,17 @@ public class ProsessinstansBehandler {
 
             tellBehandlet(prosessinstans);
         }
+    }
+
+    /**
+     * Prosessinstanser opprettet før overgangen til traceparent har bare correlationId. Den legges i MDC
+     * slik at loggene fortsatt kan søkes opp med ID-en som admin-API-et (console) viser.
+     * Fjernes sammen med {@link ProsessDataKey#CORRELATION_ID_SAKSFLYT}.
+     */
+    private static void settLegacyCorrelationId(Prosessinstans prosessinstans) {
+        if (prosessinstans.getData(ProsessDataKey.TRACEPARENT) != null) return;
+        String correlationId = prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT);
+        if (correlationId != null) MDC.put(LEGACY_CORRELATION_ID, correlationId);
     }
 
     private void behandleFlytIkkeFunnet(Prosessinstans prosessinstans) {

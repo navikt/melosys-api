@@ -197,7 +197,7 @@ INFO  ProsessinstansBehandler - Prosessinstans {} behandlet ferdig
 ERROR LagreMedlemsperiodeMedl - Feil ved lagring til MEDL: {}
 ERROR OpprettFakturaserie - Kunne ikke opprette fakturaserie: {}
 ERROR ProsessinstansBehandler - Steg {} feilet for prosessinstans {}: {}
-WARN  SendMeldingOmVedtak - Feature toggle MELOSYS_SEND_MELDING_OM_VEDTAK er av
+WARN  SendMeldingOmVedtak - Fant ikke folkeregisterident for sak: {} med behandling: {}
 ```
 
 ### Search in Kibana/Logs

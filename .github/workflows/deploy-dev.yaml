@@ -190,10 +190,19 @@ jobs:
             uses: actions/checkout@v7.0.1
         -   name: Get commit message
             run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
+        -   name: Get Melosys CI token
+            id: app-token
+            uses: actions/create-github-app-token@v3.2.0
+            with:
+                client-id: ${{ vars.MELOSYS_CI_CLIENT_ID }}
+                private-key: ${{ secrets.MELOSYS_CI_PRIVATE_KEY }}
+                owner: ${{ github.repository_owner }}
+                repositories: melosys-e2e-tests
+                permission-contents: write
         -   name: Trigger E2E tests in melosys-e2e-tests
             uses: peter-evans/repository-dispatch@v4
             with:
-                token: ${{ secrets.E2E_TRIGGER_PAT }}
+                token: ${{ steps.app-token.outputs.token }}
                 repository: navikt/melosys-e2e-tests
                 event-type: melosys-api-published
                 client-payload: |

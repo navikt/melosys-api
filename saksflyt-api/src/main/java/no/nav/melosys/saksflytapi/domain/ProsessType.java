@@ -31,10 +31,14 @@ public enum ProsessType {
     JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker", ProsessPrioritet.HØY),
     JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet", ProsessPrioritet.HØY),
     MANGLENDE_INNBETALING_VARSELBREV("MANGLENDE_INNBETALING_VARSELBREV","Send brev om manglende innbetaling"),
+    MOTTAK_DIGITAL_SØKNAD("MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad (ny eller eksisterende sak)"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
+    /** Utgått: melosys-soknad-mottak er arkivert. Beholdes for prosessinstanser opprettet før flyten ble fjernet. */
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
+    /** Utgått: erstattet av MOTTAK_DIGITAL_SØKNAD. Beholdes for prosessinstanser opprettet før sammenslåingen. */
     MELOSYS_MOTTAK_DIGITAL_SØKNAD("MELOSYS_MOTTAK_DIGITAL_SØKNAD", "Mottak av digital søknad"),
+    /** Utgått: erstattet av MOTTAK_DIGITAL_SØKNAD. Beholdes for prosessinstanser opprettet før sammenslåingen. */
     MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD("MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD", "Mottak av digital søknad for eksisterende sak"),
     OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker i faktureringskomponent"),
     OPPRETT_NY_BEHANDLING_AARSAVREGNING("OPPRETT_NY_BEHANDLING_ARSAVREGNING", "Oppretter årsavregningbehandling på aktuell bruker", ProsessPrioritet.LAV),
@@ -62,11 +66,11 @@ public enum ProsessType {
     private final ProsessPrioritet prioritet;
 
     /**
-     * Digital-søknad-mottak: ny sak og eksisterende sak. Samme skjema (skjemaId) skal kun gi
-     * én prosess på tvers av disse to typene — brukes til redelivery-dedup og mottakerutleding.
+     * Digital-søknad-mottak, inkludert utgåtte typer. Samme skjema (skjemaId) skal kun gi
+     * én prosess på tvers av disse typene — brukes til redelivery-dedup, låsgruppe og mottakerutleding.
      */
     private static final Set<ProsessType> DIGITALE_SØKNAD_TYPER =
-        EnumSet.of(MELOSYS_MOTTAK_DIGITAL_SØKNAD, MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
+        EnumSet.of(MOTTAK_DIGITAL_SØKNAD, MELOSYS_MOTTAK_DIGITAL_SØKNAD, MELOSYS_MOTTAK_EKSISTERENDE_DIGITAL_SØKNAD);
 
     ProsessType(String kode, String beskrivelse) {
         this(kode, beskrivelse, ProsessPrioritet.NORMAL);

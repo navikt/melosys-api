@@ -40,20 +40,28 @@ public class UtstedtA1Service {
     @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.a1Produseres()) {
-            var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
-            var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
-
-            if (erStorbritannia) {
-                log.info("Produserer melding om utstedt A1(GB-bestemmelser) for behandling {}, med bestemmelse {}", behandlingID, lovvalgsbestemmelse);
-                sendMeldingOmUtstedtA1(behandlingsresultat);
-            }
-
-            log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
-            sendMeldingOmUtstedtA1(behandlingsresultat);
-        } else {
+        if (!a1Produseres(behandlingsresultat)) {
             log.info("Melding om utstedt A1 blir ikke sendt for behandling {}", behandlingID);
+            return;
         }
+
+        var lovvalgsbestemmelse = behandlingsresultat.finnLovvalgsperiode().map(Lovvalgsperiode::getBestemmelse).orElse(null);
+        var erStorbritannia = Arrays.stream(Lovvalgbestemmelser_konv_efta_storbritannia.values()).anyMatch(bestemmelse -> bestemmelse == lovvalgsbestemmelse);
+
+        if (erStorbritannia) {
+            log.info("Produserer melding om utstedt A1(GB-bestemmelser) for behandling {}, med bestemmelse {}", behandlingID, lovvalgsbestemmelse);
+            sendMeldingOmUtstedtA1(behandlingsresultat);
+        }
+
+        log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
+        sendMeldingOmUtstedtA1(behandlingsresultat);
+    }
+
+    private static boolean a1Produseres(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.harVedtak()
+            && behandlingsresultat.erInnvilgelse()
+            && !behandlingsresultat.erUtpeking()
+            && !behandlingsresultat.hentBehandling().erIkkeYrkesaktivLovvalg();
     }
 
     private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) {

@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.dokgen
 import no.nav.melosys.integrasjon.felles.errorFilter
 import no.nav.melosys.exception.IkkeRetrybarIntegrasjonException
 import no.nav.melosys.integrasjon.felles.lagException
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import tools.jackson.databind.json.JsonMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -18,7 +17,6 @@ class DokgenClientProducer(
     @Bean
     fun dokgenClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): DokgenClient {
         // Egen JsonMapper uten MelosysModule. MelosysModule serialiserer kodeverk-enums som objekter.
         val dokgenJsonMapper = JsonMapper.builder().build()
@@ -39,7 +37,6 @@ class DokgenClientProducer(
                         }
                     }
                 )
-                .filter(correlationIdOutgoingFilter)
                 .build()
         )
     }

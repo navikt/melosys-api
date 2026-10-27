@@ -129,7 +129,7 @@ Full component test with all dependencies mocked.
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka(
-    topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", ...]
+    topics = ["teammelosys.eessi.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", ...]
 )
 @Import(KafkaTestConfig::class, KodeverkTestConfig::class)
 @DirtiesContext
@@ -241,6 +241,8 @@ class MelosysHendelseKafkaConsumer {
 
 ## Unit Test Patterns
 
+Tests follow given/when/then: setup, the call under test, then assertions. Separate the three phases with a blank line, not with `// Given` / `// When` / `// Then` or `// Arrange` / `// Act` / `// Assert` comments.
+
 ### JUnit 5 Pattern
 
 ```kotlin
@@ -255,13 +257,10 @@ class MyServiceTest {
 
     @Test
     fun `should do something`() {
-        // Given
         whenever(repository.findById(any())).thenReturn(Optional.of(entity))
 
-        // When
         val result = service.doSomething(id)
 
-        // Then
         assertThat(result).isNotNull()
         verify(repository).findById(id)
     }
@@ -277,13 +276,10 @@ class MyServiceTest : FunSpec({
     val service = MyService(repository)
 
     test("should do something") {
-        // Given
         every { repository.findById(any()) } returns Optional.of(entity)
 
-        // When
         val result = service.doSomething(id)
 
-        // Then
         result shouldNotBe null
         verify { repository.findById(id) }
     }
@@ -302,13 +298,10 @@ class MyServiceIT : MockServerTestBaseWithProsessManager() {
 
     @Test
     fun `should integrate with database`() {
-        // Given — DB is already empty (truncateAllTables ran in @BeforeEach)
         val fagsak = createTestFagsak()
 
-        // When
         val result = service.process(fagsak.id)
 
-        // Then
         assertThat(result).isNotNull()
     }
 }

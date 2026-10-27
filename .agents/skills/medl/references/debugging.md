@@ -182,8 +182,8 @@ grep "MedlemskapClient" application.log | grep -i "error\|exception\|feilet"
 # MEDL saga steps
 grep "LagreMedlemsperiodeMedl\|LagreLovvalgsperiodeMedl\|LagreAnmodningsperiodeIMedl" application.log
 
-# With correlation ID
-grep "<correlationId>" application.log | grep -i "medl"
+# With trace ID
+grep "<traceId>" application.log | grep -i "medl"
 ```
 
 ### Request/Response

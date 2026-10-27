@@ -64,7 +64,6 @@ Melosys-api integrates with numerous NAV internal services and external systems.
 
 | Service | Client/Service class | Purpose | Auth |
 |---------|---------------|---------|------|
-| **Altinn** | `SoknadMottakClient` | A1 application forms | Azure AD |
 | **Inngangsvilkår** | `InngangsvilkaarClient` | Entry requirements | None (in-cluster) |
 
 ## Kafka Topics
@@ -76,7 +75,6 @@ The Kafka consumer classes live in the `service` module (`service/src/main/.../n
 | Topic | Consumer Class | Module path | Purpose |
 |-------|---------------|-------------|---------|
 | `teammelosys.eessi.v1` | `EessiMeldingConsumer` | `service/eessi/kafka` | Received/sent SED + RINA events (single topic) |
-| `teammelosys.soknad-mottak.v1` | `SoknadMottattConsumer` | `service/soknad` | Altinn applications |
 | `teammelosys.skjema.innsendt.v1` | `DigitalSøknadMottattConsumer` | `service/soknad` | Digital A1 skjema (melosys-skjema-api) |
 | `teammelosys.skattehendelser.v1` | `SkattehendelserConsumer` | `service/avgift/aarsavregning` | Tax events |
 | `teammelosys.manglende-fakturabetaling.v1` | `ManglendeFakturabetalingConsumer` | `service/avgift` | Overdue invoices |
@@ -108,12 +106,10 @@ Service-to-service auth is Azure AD (on-behalf-of / client-credentials), attache
 fun myServiceClient(
     webClientBuilder: WebClient.Builder,
     genericAuthFilterFactory: GenericAuthFilterFactory,
-    correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
 ) = MyServiceClient(
     webClientBuilder
         .baseUrl(url)
         .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
-        .filter(correlationIdOutgoingFilter)
         .filter(errorFilter("Kall mot MyService feilet."))
         .build()
 )
@@ -126,7 +122,7 @@ securityTokenServiceClient.getResponseForSamlToken()
 ```
 
 ### No auth (in-cluster)
-Some in-cluster sidecar/team-internal calls (e.g. `InngangsvilkaarClient`, `TrygdeavgiftClient`) attach no auth filter at all — only the correlation-id and error filters.
+Some in-cluster sidecar/team-internal calls (e.g. `InngangsvilkaarClient`, `TrygdeavgiftClient`) attach no auth filter at all — only the error filter. Trace context (`traceparent`) is propagated automatically by the NAIS OpenTelemetry agent.
 
 ## Module Structure
 
@@ -152,7 +148,6 @@ integrasjon/src/main/kotlin/no/nav/melosys/integrasjon/
 ├── melosysskjema/   # melosys-skjema-api client
 ├── popp/            # Pension (POPP) producer
 ├── sak/             # Case system
-├── soknadmottak/    # Altinn intake
 ├── tilgangsmaskinen/# Access control
 ├── trygdeavgift/    # Tax calculations
 └── utbetaling/      # Payment data
@@ -193,12 +188,10 @@ class MyServiceClientConfig(
     @Bean
     fun myServiceClient(
         webClientBuilder: WebClient.Builder,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
     ) = MyServiceClient(
         webClientBuilder
             .baseUrl(url)
             .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME)) // omit if in-cluster/no auth
-            .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot MyService feilet."))
             .build()
     )

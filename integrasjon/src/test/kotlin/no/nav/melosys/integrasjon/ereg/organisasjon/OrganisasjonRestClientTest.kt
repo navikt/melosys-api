@@ -12,7 +12,6 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse.*
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +32,6 @@ import java.util.*
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        CorrelationIdOutgoingFilter::class,
         OrganisasjonRestClientConfig::class,
     ]
 )

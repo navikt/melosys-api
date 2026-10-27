@@ -131,8 +131,9 @@ jobs:
       service: melosys-api
       image: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
       tag: ${{ github.sha }}
+      melosys_ci_client_id: ${{ vars.MELOSYS_CI_CLIENT_ID }}
     secrets:
-      E2E_TRIGGER_PAT: ${{ secrets.E2E_TRIGGER_PAT }}
+      MELOSYS_CI_PRIVATE_KEY: ${{ secrets.MELOSYS_CI_PRIVATE_KEY }}
 
   # Checken fra denne kjøringen henger på PR-headen da labelen ble satt. Kommer det
   # en ny commit underveis, viser ikke PR-en checken lenger, så resultatet skrives
