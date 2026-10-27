@@ -148,7 +148,6 @@ class IkkeYrkesaktivVedtaksmetadataFiksService {
 
     companion object {
         const val PATCH_MARKØR = "MELOSYS-8351-PATCH"
-        const val STANDARD_MAKS_ANTALL_RADER = 500
         const val MAKS_ANTALL_RADER = 500
 
         /**

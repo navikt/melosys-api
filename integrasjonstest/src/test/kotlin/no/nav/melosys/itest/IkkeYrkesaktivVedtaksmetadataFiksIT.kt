@@ -170,9 +170,10 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
 
     @Test
     fun `maksAntallRader begrenser hvert kall, eldste først, og antallIgjen teller ned til 0`() {
-        val eldst = seedFlytvedtak("MEL-50", "EU_EOS", "FØRSTEGANG", "2023-01-01 10:00:00")
-        val mellom = seedFlytvedtak("MEL-51", "TRYGDEAVTALE", "FØRSTEGANG", "2024-01-01 10:00:00")
+        // Nyeste legges inn først, så rekkefølgen på id og innsetting er motsatt av datoen
         val nyest = seedFlytvedtak("MEL-52", "EU_EOS", "NY_VURDERING", "2025-01-01 10:00:00")
+        val mellom = seedFlytvedtak("MEL-51", "TRYGDEAVTALE", "FØRSTEGANG", "2024-01-01 10:00:00")
+        val eldst = seedFlytvedtak("MEL-50", "EU_EOS", "FØRSTEGANG", "2023-01-01 10:00:00")
 
         kall(fiksUrl, """{"skarp":true,"maksAntallRader":2}""")
             .andExpect(status().isOk)
@@ -180,13 +181,13 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
             .andExpect(jsonPath("$.antallInnsatt").value(2))
             .andExpect(jsonPath("$.antallIgjen").value(1))
             .andExpect(jsonPath("$.avvik").value(false))
-        patchedeIder() shouldContainExactly listOf(eldst, mellom)
+        patchedeIder() shouldContainExactly listOf(eldst, mellom).sorted()
 
         kall(fiksUrl, """{"skarp":true,"maksAntallRader":2}""")
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.antallInnsatt").value(1))
             .andExpect(jsonPath("$.antallIgjen").value(0))
-        patchedeIder() shouldContainExactly listOf(eldst, mellom, nyest)
+        patchedeIder() shouldContainExactly listOf(eldst, mellom, nyest).sorted()
     }
 
     @Test
@@ -237,6 +238,19 @@ class IkkeYrkesaktivVedtaksmetadataFiksIT(
         harRad(endretEtterpå) shouldBe true
         harRad(tømtEndretAv) shouldBe true
         harRad(annenDatafiks) shouldBe true
+    }
+
+    @Test
+    fun `fiks uten body er en forhåndsvisning`() {
+        seedFlytvedtak("MEL-75", "EU_EOS", "FØRSTEGANG", "2024-10-23 09:54:00")
+
+        mockMvc.perform(post(fiksUrl).header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.skarp").value(false))
+            .andExpect(jsonPath("$.antallFunnet").value(1))
+            .andExpect(jsonPath("$.antallInnsatt").value(0))
+
+        antallMetadata() shouldBe 0
     }
 
     @Test
