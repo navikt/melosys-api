@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.steg.melding
 
-import io.getunleash.Unleash
 import mu.KotlinLogging
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -20,8 +18,7 @@ private val log = KotlinLogging.logger { }
 class SendMeldingOmVedtak(
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
     private val persondataService: PersondataService,
-    private val vedtakHendelseMeldingBygger: VedtakHendelseMeldingBygger,
-    private val unleash: Unleash
+    private val vedtakHendelseMeldingBygger: VedtakHendelseMeldingBygger
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -29,9 +26,6 @@ class SendMeldingOmVedtak(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)) {
-            return
-        }
         val behandling = prosessinstans.hentBehandling
 
         val fagsak = behandling.fagsak
