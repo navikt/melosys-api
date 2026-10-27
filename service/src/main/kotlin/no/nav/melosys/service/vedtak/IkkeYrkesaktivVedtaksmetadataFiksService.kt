@@ -17,9 +17,6 @@ private val log = KotlinLogging.logger { }
  * enn 3 timer fra den datoen, og vedtak med annen behandlingstype enn førstegang og ny vurdering, holdes
  * utenfor og listes i svaret.
  *
- * Kjør ikke skarpt før melosys-api#3551 (MELOSYS-8337) er i prod. Først da ser årsavregningen, faktureringen og
- * A1-statistikken bort fra ikke-yrkesaktive vedtak som har vedtaksmetadata.
- *
  * Native SQL fordi `registrert_av` og `endret_av` skal være [PATCH_MARKØR]; JPA-auditing ville satt
  * innlogget bruker. Native SQL publiserer heller ingen `VedtakMetadataLagretEvent`. Eneste lytter er
  * A1-statistikken, og ikke-yrkesaktive skal ikke ha A1.
@@ -143,7 +140,6 @@ class IkkeYrkesaktivVedtaksmetadataFiksService {
     private fun tell(sql: String): Int =
         (entityManager.createNativeQuery(sql).setParameter("markoer", PATCH_MARKØR).singleResult as Number).toInt()
 
-    /** Gruppene i svaret. Samme navn som i Q-1 på planen for MELOSYS-8351, så tallene kan sammenlignes direkte. */
     enum class Gruppe { FIKSES, UTEN_PROSESSINSTANS, AVVIK_OVER_3_TIMER, ANNEN_BEHANDLINGSTYPE }
 
     companion object {

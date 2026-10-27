@@ -22,7 +22,7 @@ class IkkeYrkesaktivVedtaksmetadataFiksController(
     @Operation(
         summary = "Legg inn manglende vedtaksmetadata for ikke-yrkesaktive vedtak (datafiks MELOSYS-8351)",
         description = "Vedtak fattet i flyten for ikke-yrkesaktive i EØS og trygdeavtale før MELOSYS-8337 mangler " +
-            "rad i vedtak_metadata. Kjør ikke skarpt før melosys-api#3551 (MELOSYS-8337) er i prod, og kjør ett kall om gangen. " +
+            "rad i vedtak_metadata. Kjør ett kall om gangen. " +
             "Med skarp=false (standard) endres ingenting: svaret viser antall per gruppe, " +
             "sakstype og behandlingstype, og vedtakene som holdes utenfor. Med skarp=true legges høyst " +
             "maksAntallRader rader inn (standard og høyst $MAKS_ANTALL_RADER), eldste " +
