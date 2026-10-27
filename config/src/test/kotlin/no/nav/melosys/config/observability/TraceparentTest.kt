@@ -6,6 +6,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.opentelemetry.api.GlobalOpenTelemetry
+import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.data.SpanData
@@ -89,13 +91,30 @@ class TraceparentTest {
             Traceparent.iNyTrace(tracer, "test") { error("feil") }
         }
 
-        eksporterte.single().status.statusCode shouldBe StatusCode.ERROR
+        val span = eksporterte.single()
+        span.status.statusCode shouldBe StatusCode.ERROR
+        span.events.single().name shouldBe "exception"
     }
 
     @Test
-    fun `iNyTrace uten OpenTelemetry kjører blokken uten trace`() {
-        Traceparent.aktiver(TRACEPARENT).use {
-            Traceparent.iNyTrace("test") { Traceparent.nåværende() }.shouldBeNull()
+    fun `iNyTrace setter attributter på spanen`() {
+        val (tracer, eksporterte) = testTracer()
+
+        Traceparent.iNyTrace(tracer, "test", mapOf("saksnummer" to "MEL-1")) { }
+
+        eksporterte.single().attributes.get(AttributeKey.stringKey("saksnummer")) shouldBe "MEL-1"
+    }
+
+    @Test
+    fun `iNyTrace uten OpenTelemetry kjører blokken uten trace og låser ikke global instans`() {
+        GlobalOpenTelemetry.resetForTest()
+        try {
+            Traceparent.aktiver(TRACEPARENT).use {
+                Traceparent.iNyTrace("test") { Traceparent.nåværende() }.shouldBeNull()
+            }
+            GlobalOpenTelemetry.isSet() shouldBe false
+        } finally {
+            GlobalOpenTelemetry.resetForTest()
         }
     }
 

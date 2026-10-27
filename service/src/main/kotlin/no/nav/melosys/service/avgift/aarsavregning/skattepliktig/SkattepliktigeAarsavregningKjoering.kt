@@ -289,7 +289,7 @@ class SkattepliktigeAarsavregningKjoering(
                                 var skarpFeilmelding: String? = null
                                 if (skarp && villeOpprettetProsessinstans) {
                                     try {
-                                        Traceparent.iNyTrace("årsavregning prosessinstans") {
+                                        Traceparent.iNyTrace("årsavregning prosessinstans", mapOf("saksnummer" to fagsak.saksnummer)) {
                                             utfoerer.opprettProsessinstans(
                                                 fagsak.saksnummer,
                                                 år.toString(),

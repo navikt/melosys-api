@@ -88,7 +88,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                         }
                         return@forEach
                     }
-                    Traceparent.iNyTrace("årsavregning prosessinstans") {
+                    Traceparent.iNyTrace("årsavregning prosessinstans", mapOf("saksnummer" to it.sak.saksnummer)) {
                         prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
                             it.sak.saksnummer,
                             år,

@@ -48,16 +48,23 @@ object Traceparent {
      * Brukes rundt opprettelsen av hver prosessinstans i batchjobber. OTel-agenten tar med
      * trace-konteksten inn i `@Async`-tråder, så uten dette deler alle prosessinstansene i en jobb
      * traceId med admin-kallet som startet den. Lenken gjør at man fortsatt finner jobben i Tempo.
+     * [attributter] (f.eks. saksnummer) settes på spanen, slik at man ser hvilken sak tracen gjelder.
      */
     @JvmStatic
-    fun <T> iNyTrace(navn: String, blokk: () -> T): T =
-        iNyTrace(GlobalOpenTelemetry.getTracer(INSTRUMENTASJON), navn, blokk)
+    fun <T> iNyTrace(navn: String, attributter: Map<String, String> = emptyMap(), blokk: () -> T): T =
+        // getOrNoop låser ikke den globale instansen til noop når agenten mangler (lokalt, tester)
+        iNyTrace(GlobalOpenTelemetry.getOrNoop().getTracer(INSTRUMENTASJON), navn, attributter, blokk)
 
-    internal fun <T> iNyTrace(tracer: Tracer, navn: String, blokk: () -> T): T {
-        val opphav = Span.current().spanContext
+    internal fun <T> iNyTrace(
+        tracer: Tracer,
+        navn: String,
+        attributter: Map<String, String> = emptyMap(),
+        blokk: () -> T,
+    ): T {
         val span = tracer.spanBuilder(navn)
             .setNoParent()
-            .apply { if (opphav.isValid) addLink(opphav) }
+            .addLink(Span.current().spanContext)
+            .apply { attributter.forEach { (nøkkel, verdi) -> setAttribute(nøkkel, verdi) } }
             .startSpan()
         return try {
             span.makeCurrent().use { blokk() }

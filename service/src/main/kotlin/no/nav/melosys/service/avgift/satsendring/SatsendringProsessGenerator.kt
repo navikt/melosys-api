@@ -82,7 +82,10 @@ class SatsendringProsessGenerator(
                     ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
             } else {
-                val uuid = Traceparent.iNyTrace("satsendring prosessinstans") {
+                val uuid = Traceparent.iNyTrace(
+                    "satsendring prosessinstans",
+                    mapOf("saksnummer" to behandlingInfo.saksnummer, "behandlingId" to behandlingInfo.behandlingID.toString()),
+                ) {
                     prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
                 }
                 log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
@@ -111,7 +114,10 @@ class SatsendringProsessGenerator(
                     ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
             } else {
-                val uuid = Traceparent.iNyTrace("satsendring prosessinstans") {
+                val uuid = Traceparent.iNyTrace(
+                    "satsendring prosessinstans",
+                    mapOf("saksnummer" to behandlingInfo.saksnummer, "behandlingId" to behandlingInfo.behandlingID.toString()),
+                ) {
                     prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, år)
                 }
                 log.info("Opprettet satsendring med tilbakestilling av avgift: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
