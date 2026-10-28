@@ -1,23 +1,15 @@
 package no.nav.melosys.domain.arkiv;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
-import com.google.common.collect.MoreCollectors;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
 public class OpprettJournalpost extends Journalpost {
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
-    private static final String MEDLEMSKAP = "MED";
-    private static final String ALTINN = "ALTINN";
     private static final String NAV_NO = "NAV_NO";
 
     public enum KorrespondansepartIdType {
@@ -69,45 +61,6 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setEksternReferanseId(eksternReferanseIdForJournalpost);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
-
-        return opprettJournalpost;
-    }
-
-    public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
-                                                                         Collection<AltinnDokument> dokumenter,
-                                                                         String brukerFnr,
-                                                                         String avsenderNavn) {
-        AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
-            .collect(MoreCollectors.onlyElement());
-        dokumenter.remove(hovedDokument);
-
-        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        final var mottatteOpplysninger = fagsak.hentSistAktivBehandlingIkkeÅrsavregning().getMottatteOpplysninger();
-        opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, mottatteOpplysninger));
-        opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
-        opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).toList());
-        opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());
-        opprettJournalpost.setMottaksKanal(ALTINN);
-        opprettJournalpost.setEksternReferanseId(hovedDokument.getSoknadID());
-        opprettJournalpost.setJournalposttype(Journalposttype.INN);
-        opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
-        opprettJournalpost.setTema(MEDLEMSKAP);
-        opprettJournalpost.setBrukerId(brukerFnr);
-        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
-        opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
-
-        Optional.ofNullable(fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)).ifPresentOrElse(
-            fullmektig -> {
-                opprettJournalpost.setKorrespondansepartId(fullmektig.getOrgnr());
-                opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
-                opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.ORGNR);
-            },
-            () -> {
-                opprettJournalpost.setKorrespondansepartId(brukerFnr);
-                opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
-                opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.FNR);
-            }
-        );
 
         return opprettJournalpost;
     }

@@ -18,7 +18,6 @@
 
     <modules>
         <module>app</module>
-        <module>soknad-altinn</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
@@ -143,11 +142,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>app</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>soknad-altinn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

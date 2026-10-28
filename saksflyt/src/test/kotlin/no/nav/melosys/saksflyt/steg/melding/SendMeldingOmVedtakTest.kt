@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.melding
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -24,13 +23,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.lovvalgsperiode
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.vedtakMetadata
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.behandling as prosessinstansBehandling
 import no.nav.melosys.saksflytapi.domain.forTest as prosessinstansForTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -45,20 +42,17 @@ class SendMeldingOmVedtakTest {
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer = mockk()
     private val persondataService: PersondataService = mockk()
     private val behandlingsresultatService: BehandlingsresultatService = mockk()
-    private val unleash = FakeUnleash()
 
     private val sendMeldingOmVedtak = SendMeldingOmVedtak(
         kafkaMelosysHendelseProducer,
         persondataService,
-        VedtakHendelseMeldingBygger(behandlingsresultatService),
-        unleash
+        VedtakHendelseMeldingBygger(behandlingsresultatService)
     )
 
     private val sendtHendelse = slot<MelosysHendelse>()
 
     @BeforeEach
     fun setup() {
-        unleash.enable(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)
         every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(sendtHendelse)) } just Runs
     }
 
@@ -138,16 +132,6 @@ class SendMeldingOmVedtakTest {
         sendMeldingOmVedtak.utfør(Prosessinstans.prosessinstansForTest { behandling = behandlingsresultat.hentBehandling() })
 
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
-        verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
-    }
-
-    @Test
-    fun `sender ikke når toggelen er av`() {
-        unleash.disable(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)
-
-        sendMeldingOmVedtak.utfør(Prosessinstans.prosessinstansForTest { prosessinstansBehandling { } })
-
-        verify(exactly = 0) { persondataService.finnFolkeregisterident(any()) }
         verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
     }
 

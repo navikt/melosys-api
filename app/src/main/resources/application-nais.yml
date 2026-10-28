@@ -14,8 +14,6 @@ Melosys-admin:
   driftsgruppe: ${GROUP_MELOSYS_INNLOGGING_VAKT}
 MelosysEessi:
   url: ${MELOSYS_EESSI_URL}
-MelosysSoknadMottak:
-  url: ${MELOSYS_SOKNAD_MOTTAK_URL}
 OppgaveAPI_v1:
   url: ${OPPGAVE_OPPGAVER_URL}
 PDL:
@@ -67,9 +65,6 @@ kafka:
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer
       topic: ${KAFKA_AIVEN_SKATTEHENDELSER:teammelosys.skattehendelser.v1}
-    soknad-mottak:
-      groupid: teammelosys-soknad-mottak-consumer
-      topic: ${KAFKA_AIVEN_SOKNADMOTTATT_TOPIC:teammelosys.soknad-mottak.v1}
     skjema-mottatt:
       groupid: teammelosys-skjema-mottatt-consumer
       topic: ${KAFKA_SKJEMA_MOTTAK_TOPIC:teammelosys.skjema.innsendt.v1}

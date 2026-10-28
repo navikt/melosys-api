@@ -144,7 +144,6 @@ The authoritative list lives in the `registration:` block of `app/src/main/resou
 | `saf` | jwt-bearer | SAF |
 | `sokos-utbetaldata` | jwt-bearer | Utbetalingsdata |
 | `tilgangsmaskinen` | jwt-bearer | Tilgangsmaskinen |
-| `melosys-soknad-mottak` | jwt-bearer | Søknad mottak |
 | `melosys-skjema` | jwt-bearer | Skjema API |
 | `dokarkiv` | jwt-bearer | Joark |
 | `dokdistfordeling` | jwt-bearer | Document distribution |

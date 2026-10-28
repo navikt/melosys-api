@@ -599,22 +599,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    @Transactional
-    public void opprettProsessinstansSøknadMottatt(String søknadID, boolean erSøknadMottatTidligere, boolean erSøknadForGammelTilForvaltningsmelding) {
-        if (erSøknadMottatTidligere) {
-            logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadID);
-        } else {
-            Prosessinstans prosessinstans = new ProsessinstansBuilder()
-                .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
-                .build();
-            prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
-            prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, erSøknadForGammelTilForvaltningsmelding ?
-                ForvaltningsmeldingMottaker.INGEN : ForvaltningsmeldingMottaker.BRUKER);
-
-            lagre(prosessinstans);
-        }
-    }
-
     /**
      * Oppretter prosessinstans for mottatt digital søknad. Om søknaden gir ny sak eller festes på en
      * eksisterende sak avgjøres i sagaen, ikke her.
