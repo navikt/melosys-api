@@ -64,7 +64,7 @@ class SendInnhentingAvInntektsopplysningerBrev(
         )
         val årsakIkkeSendt = finnÅrsakTilAtBrevIkkeKanSendes(brevmottaker)
         if (årsakIkkeSendt != null) {
-            log.warn { "Sender ikke innhentingsbrev for sak ${behandling.fagsak.saksnummer}, behandling ${behandling.id}: $årsakIkkeSendt" }
+            log.info { "Sender ikke innhentingsbrev for sak ${behandling.fagsak.saksnummer}, behandling ${behandling.id}: $årsakIkkeSendt" }
             oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(behandling.id, årsakIkkeSendt)
             return
         }
