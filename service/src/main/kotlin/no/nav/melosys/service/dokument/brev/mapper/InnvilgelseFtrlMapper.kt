@@ -193,6 +193,8 @@ class InnvilgelseFtrlMapper(
             tjuefemProsentRegel = trygdeavgift.tjuefemProsentRegel,
             årsinntektUnderMinstebeløp = trygdeavgift.årsinntektUnderMinstebeløp,
             ordinærSatsPåfølgendeÅr = trygdeavgift.ordinærSatsPåfølgendeÅr,
+            beregningsregelIÅr = trygdeavgift.beregningsregelIÅr,
+            beregningsregelNesteÅr = trygdeavgift.beregningsregelNesteÅr,
             avgiftsgrunnlag = mapAvgiftsgrunnlag(behandlingsresultat),
         )
     }

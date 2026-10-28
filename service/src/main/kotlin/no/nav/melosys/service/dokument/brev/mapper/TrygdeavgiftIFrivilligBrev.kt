@@ -32,6 +32,10 @@ internal class TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder: List<Trygdeavgi
     private val beregningsregelPerÅr: Map<Int, Avgiftsberegningsregel> =
         perioderPerÅr.mapValues { (_, perioder) -> beregningsregelForÅr(perioder) }
 
+    val beregningsregelIÅr: Avgiftsberegningsregel? = beregningsregelPerÅr.values.firstOrNull()
+
+    val beregningsregelNesteÅr: Avgiftsberegningsregel? = beregningsregelPerÅr.values.drop(1).firstOrNull()
+
     private val sisteÅrUtenOrdinærSats: Int? =
         beregningsregelPerÅr.filterValues { it != ORDINÆR }.keys.maxOrNull()
 

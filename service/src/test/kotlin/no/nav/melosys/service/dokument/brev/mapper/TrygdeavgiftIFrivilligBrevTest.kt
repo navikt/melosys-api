@@ -128,11 +128,24 @@ class TrygdeavgiftIFrivilligBrevTest {
 
         trygdeavgift.visOrdinærBeregningstabell shouldBe false
         trygdeavgift.tjuefemProsentRegel.shouldBeNull()
+        trygdeavgift.beregningsregelIÅr shouldBe MINSTEBELØP
+        trygdeavgift.beregningsregelNesteÅr shouldBe ORDINÆR
         trygdeavgift.årsinntektUnderMinstebeløp.shouldContainExactly(ÅrsinntektDto(2026, BigDecimal(60000)))
         trygdeavgift.ordinærSatsPåfølgendeÅr.shouldNotBeNull().run {
             etterÅr shouldBe 2026
             år shouldBe 2027
         }
+    }
+
+    @Test
+    fun `bare inntekt under minstebeløpet i år gir ingen regel for neste år`() {
+        val trygdeavgift = TrygdeavgiftIFrivilligBrev(listOf(periode(2026, MINSTEBELØP, sats = null, beløp = 0)))
+
+        trygdeavgift.beregningsregelIÅr shouldBe MINSTEBELØP
+        trygdeavgift.beregningsregelNesteÅr.shouldBeNull()
+        trygdeavgift.visOrdinærBeregningstabell shouldBe false
+        trygdeavgift.tjuefemProsentRegel.shouldBeNull()
+        trygdeavgift.ordinærSatsPåfølgendeÅr.shouldBeNull()
     }
 
     @Test

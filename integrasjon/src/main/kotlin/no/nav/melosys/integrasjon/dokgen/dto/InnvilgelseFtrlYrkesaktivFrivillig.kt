@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer
+import no.nav.melosys.domain.avgift.Avgiftsberegningsregel
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -58,6 +59,8 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
     @JsonProperty("årsinntektUnderMinstebeløp")
     val årsinntektUnderMinstebeløp: List<ÅrsinntektDto> = emptyList(),
     val ordinærSatsPåfølgendeÅr: OrdinærSatsPåfølgendeÅrDto? = null,
+    val beregningsregelIÅr: Avgiftsberegningsregel? = null,
+    val beregningsregelNesteÅr: Avgiftsberegningsregel? = null,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -94,6 +97,8 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         tjuefemProsentRegel: TjuefemProsentRegelDto? = null,
         årsinntektUnderMinstebeløp: List<ÅrsinntektDto> = emptyList(),
         ordinærSatsPåfølgendeÅr: OrdinærSatsPåfølgendeÅrDto? = null,
+        beregningsregelIÅr: Avgiftsberegningsregel? = null,
+        beregningsregelNesteÅr: Avgiftsberegningsregel? = null,
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -129,5 +134,7 @@ class InnvilgelseFtrlYrkesaktivFrivillig(
         tjuefemProsentRegel,
         årsinntektUnderMinstebeløp,
         ordinærSatsPåfølgendeÅr,
+        beregningsregelIÅr,
+        beregningsregelNesteÅr,
     )
 }
