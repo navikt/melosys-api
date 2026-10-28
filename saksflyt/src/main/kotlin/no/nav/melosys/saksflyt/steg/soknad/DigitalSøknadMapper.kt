@@ -246,7 +246,7 @@ object DigitalSøknadMapper {
                     region = null,
                     landkode = utsendelseLand?.name
                 )
-            } ?: StrukturertAdresse()
+            } ?: StrukturertAdresse(landkode = utsendelseLand?.name)
 
             fysiskeArbeidssteder = listOf(
                 FysiskArbeidssted(virksomhetNavn = paLand.navnPaVirksomhet, adresse = adresse)
