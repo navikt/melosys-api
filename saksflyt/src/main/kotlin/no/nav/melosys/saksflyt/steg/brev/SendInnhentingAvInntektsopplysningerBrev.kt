@@ -80,8 +80,9 @@ class SendInnhentingAvInntektsopplysningerBrev(
     }
 
     private fun finnÅrsakTilAtBrevIkkeKanSendes(mottaker: Mottaker): ÅrsakIkkeSendtInnhentingsbrev? = when {
-        mottaker.erOrganisasjon() ->
-            ÅrsakIkkeSendtInnhentingsbrev.VIRKSOMHET_SLETTET.takeIf { erVirksomhetSlettet(mottaker.orgnrNonNull()) }
+        mottaker.erOrganisasjon() -> mottaker.orgnrNonNull().let { orgnr ->
+            ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet(orgnr).takeIf { erVirksomhetSlettet(orgnr) }
+        }
         else -> finnÅrsakForPerson(mottaker)
     }
 
@@ -96,8 +97,8 @@ class SendInnhentingAvInntektsopplysningerBrev(
         val persondata = persondataFasade.hentPerson(ident)
         return when {
             !persondata.manglerGyldigRegistrertAdresse() -> null
-            persondata.erPersonDød() -> ÅrsakIkkeSendtInnhentingsbrev.PERSON_DØD_UTEN_ADRESSE
-            else -> ÅrsakIkkeSendtInnhentingsbrev.PERSON_UTEN_ADRESSE
+            persondata.erPersonDød() -> ÅrsakIkkeSendtInnhentingsbrev.PersonDødUtenAdresse
+            else -> ÅrsakIkkeSendtInnhentingsbrev.PersonUtenAdresse
         }
     }
 }

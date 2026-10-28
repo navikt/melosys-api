@@ -425,10 +425,10 @@ internal class OppgaveServiceTest {
         every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } returns Unit
 
-        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VIRKSOMHET_SLETTET)
+        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet("980515877"))
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, capture(oppgaveOppdateringSlot)) }
-        oppgaveOppdateringSlot.captured.beskrivelse shouldBe "virksomheten er slettet"
+        oppgaveOppdateringSlot.captured.beskrivelse shouldBe "Innhentingsbrev er ikke sendt: virksomheten 980515877 er slettet"
         oppgaveOppdateringSlot.captured.saksnummer shouldBe FagsakTestFactory.SAKSNUMMER
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Innhent inntektsopplysninger")) }
     }
@@ -437,10 +437,10 @@ internal class OppgaveServiceTest {
     fun oppdaterOppgaveVedIkkeSendtInnhentingsbrev_utenNøkkelordToggle_nøkkelordSettesIkke() {
         every { behandlingService.hentBehandling(1L) } returns lagBehandling(oppgaveId = BEH_OPPG_ID)
 
-        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.PERSON_DØD_UTEN_ADRESSE)
+        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.PersonDødUtenAdresse)
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, capture(oppgaveOppdateringSlot)) }
-        oppgaveOppdateringSlot.captured.beskrivelse shouldBe "personen er registrert som død og mangler mottakeradresse"
+        oppgaveOppdateringSlot.captured.beskrivelse shouldBe "Innhentingsbrev er ikke sendt: personen er registrert som død og mangler mottakeradresse"
         verify(exactly = 0) { oppgaveFasade.leggTilNøkkelord(any(), any()) }
     }
 
@@ -450,7 +450,7 @@ internal class OppgaveServiceTest {
         every { unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD) } returns true
         every { oppgaveFasade.leggTilNøkkelord(any(), any()) } throws TekniskException("Kall mot Oppgave v2 feilet.")
 
-        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VIRKSOMHET_SLETTET)
+        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet("980515877"))
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, any()) }
     }
@@ -460,7 +460,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(1L) } returns lagBehandling(oppgaveId = null)
 
         shouldThrow<TekniskException> {
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VIRKSOMHET_SLETTET)
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(1L, ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet("980515877"))
         }
         verify(exactly = 0) { oppgaveFasade.oppdaterOppgave(any(), any()) }
     }

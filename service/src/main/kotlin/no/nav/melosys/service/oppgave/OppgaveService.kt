@@ -233,13 +233,14 @@ class OppgaveService(
     }
 
     // Beskrivelsen legges over eksisterende beskrivelse i oppgaven, så år-teksten beholdes (MELOSYS-8378).
+    // Prefikset gjør at teksten gir mening alene i «Mine oppgaver», som bare viser nyeste blokk.
     fun oppdaterOppgaveVedIkkeSendtInnhentingsbrev(behandlingID: Long, årsak: ÅrsakIkkeSendtInnhentingsbrev) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         val saksnummer = behandling.fagsak.saksnummer
         val oppgaveID = behandling.oppgaveId
             ?: throw TekniskException("Behandling $behandlingID i sak $saksnummer mangler oppgave, kan ikke oppdatere med at innhentingsbrev ikke er sendt")
 
-        oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().beskrivelse(årsak.beskrivelse).saksnummer(saksnummer).build())
+        oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().beskrivelse("$BESKRIVELSE_PREFIKS_IKKE_SENDT_INNHENTINGSBREV${årsak.beskrivelse}").saksnummer(saksnummer).build())
         log.info { "Oppgave $oppgaveID for sak $saksnummer, behandling $behandlingID oppdatert med at innhentingsbrev ikke er sendt ($årsak)" }
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD)) return
@@ -515,6 +516,7 @@ class OppgaveService(
         private const val NØKKELORD_UTSENDT_ARBEIDSTAKER = "Utsendt arbeidstaker"
         private const val NØKKELORD_STATSANSATT = "Statsansatt"
         private const val NØKKELORD_INNHENT_INNTEKTSOPPLYSNINGER = "Innhent inntektsopplysninger"
+        private const val BESKRIVELSE_PREFIKS_IKKE_SENDT_INNHENTINGSBREV = "Innhentingsbrev er ikke sendt: "
         private fun mapPeriode(mottatteOpplysningerData: MottatteOpplysningerData): PeriodeDto {
             val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(
                 null,

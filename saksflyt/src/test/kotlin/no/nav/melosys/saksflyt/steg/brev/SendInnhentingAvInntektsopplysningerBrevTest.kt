@@ -104,7 +104,7 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
 
         verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PERSON_DØD_UTEN_ADRESSE)
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PersonDødUtenAdresse)
         }
     }
 
@@ -126,7 +126,7 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
 
         verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PERSON_UTEN_ADRESSE)
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PersonUtenAdresse)
         }
     }
 
@@ -138,7 +138,7 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
 
         verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.VIRKSOMHET_SLETTET)
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet(ORGNR))
         }
     }
 
