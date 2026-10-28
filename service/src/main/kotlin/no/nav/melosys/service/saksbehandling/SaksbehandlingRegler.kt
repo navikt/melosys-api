@@ -164,7 +164,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             Behandlingsresultattyper.FERDIGBEHANDLET,
             Behandlingsresultattyper.HENLEGGELSE_BORTFALT,
             Behandlingsresultattyper.ANNULLERT,
-            Behandlingsresultattyper.OPPHØRT
+            Behandlingsresultattyper.OPPHØRT,
+            Behandlingsresultattyper.AVSLAG_SØKNAD
         )
     }
 }
