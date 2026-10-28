@@ -511,7 +511,7 @@ internal class DigitalSøknadMapperTest {
             søknad.arbeidPaaLand.erFastArbeidssted.shouldBeFalse()
             søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
             søknad.arbeidPaaLand.fysiskeArbeidssteder.first().virksomhetNavn shouldBe "Reise AS"
-            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode.shouldBeNull()
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.first().adresse.landkode shouldBe "SE"
         }
 
         @Test
