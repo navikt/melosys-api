@@ -5,6 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.brev.Mottaker
@@ -43,7 +45,10 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
     )
 
     private val prosessinstans = Prosessinstans.forTest {
-        behandling { id = BEHANDLING_ID }
+        behandling {
+            id = BEHANDLING_ID
+            fagsak { medBruker() }
+        }
         medData(ProsessDataKey.SEND_INNHENTINGSBREV, true)
     }
 
@@ -69,6 +74,7 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
         verify(exactly = 1) { dokumentServiceFasade.produserDokument(BEHANDLING_ID, capture(capturedDto)) }
         capturedDto.captured.produserbardokument shouldBe Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER
         capturedDto.captured.mottaker shouldBe Mottakerroller.BRUKER
+        capturedDto.captured.annenPersonMottakerIdent shouldBe null
         verify(exactly = 0) { oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(any(), any()) }
     }
 
@@ -131,14 +137,31 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
     }
 
     @Test
-    fun `utfør skal ikke sende brev men oppdatere oppgave når fullmektig virksomhet er slettet`() {
+    fun `utfør skal sende brev til bruker når fullmektig virksomhet er slettet`() {
         mottakerErFullmektigVirksomhet(opphoersdato = LocalDate.now().minusYears(1))
+        every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns persondata
+        every { persondataFasade.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns BRUKER_FNR
+        val capturedDto = slot<BrevbestillingDto>()
+
+        sendInnhentingAvInntektsopplysningerBrev.utfør(prosessinstans)
+
+        verify(exactly = 1) { dokumentServiceFasade.produserDokument(BEHANDLING_ID, capture(capturedDto)) }
+        capturedDto.captured.mottaker shouldBe Mottakerroller.BRUKER
+        capturedDto.captured.annenPersonMottakerIdent shouldBe BRUKER_FNR
+        verify(exactly = 0) { oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(any(), any()) }
+    }
+
+    @Test
+    fun `utfør skal ikke sende brev men oppdatere oppgave når fullmektig virksomhet er slettet og bruker mangler adresse`() {
+        mottakerErFullmektigVirksomhet(opphoersdato = LocalDate.now().minusYears(1))
+        every { persondataFasade.hentPerson(FagsakTestFactory.BRUKER_AKTØR_ID) } returns persondata
+        every { persondata.manglerGyldigRegistrertAdresse() } returns true
 
         sendInnhentingAvInntektsopplysningerBrev.utfør(prosessinstans)
 
         verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet(ORGNR))
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PersonUtenAdresse)
         }
     }
 
@@ -176,5 +199,6 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
         private const val BEHANDLING_ID = 123L
         private const val AKTØR_ID = "1234567890123"
         private const val ORGNR = "980515877"
+        private const val BRUKER_FNR = "12345678910"
     }
 }

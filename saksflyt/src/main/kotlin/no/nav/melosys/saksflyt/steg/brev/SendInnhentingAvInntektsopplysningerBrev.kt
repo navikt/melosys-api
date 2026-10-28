@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -40,6 +41,7 @@ private val log = KotlinLogging.logger { }
  * Brevet sendes ikke dersom mottakeren er en person som mangler adresse (dokgen kan ikke lage brevet),
  * eller en virksomhet som er slettet i Enhetsregisteret (dokdist avviser utsendingen).
  * Da oppdateres oppgaven i stedet, slik at saksbehandler følger opp manuelt (MELOSYS-8378).
+ * Er det fullmektig-virksomheten som er slettet, sendes brevet til bruker i stedet hvis bruker har adresse.
  */
 @Component
 class SendInnhentingAvInntektsopplysningerBrev(
@@ -63,17 +65,38 @@ class SendInnhentingAvInntektsopplysningerBrev(
             Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER, Mottaker.medRolle(Mottakerroller.BRUKER), behandling
         )
         val årsakIkkeSendt = finnÅrsakTilAtBrevIkkeKanSendes(brevmottaker)
-        if (årsakIkkeSendt != null) {
-            log.info { "Sender ikke innhentingsbrev for sak ${behandling.fagsak.saksnummer}, behandling ${behandling.id}: $årsakIkkeSendt" }
-            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(behandling.id, årsakIkkeSendt)
+        when {
+            årsakIkkeSendt == null -> sendBrev(behandling)
+            årsakIkkeSendt is ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet && brevmottaker.rolle == Mottakerroller.FULLMEKTIG ->
+                sendBrevTilBrukerIStedetForFullmektig(behandling, årsakIkkeSendt)
+            else -> oppdaterOppgaveIStedetForBrev(behandling, årsakIkkeSendt)
+        }
+    }
+
+    private fun sendBrevTilBrukerIStedetForFullmektig(behandling: Behandling, årsakFullmektig: ÅrsakIkkeSendtInnhentingsbrev.VirksomhetSlettet) {
+        val brukersAktørId = behandling.fagsak.hentBrukersAktørID()
+        val årsakBruker = finnÅrsakForPerson(Mottaker(rolle = Mottakerroller.BRUKER, aktørId = brukersAktørId))
+        if (årsakBruker != null) {
+            oppdaterOppgaveIStedetForBrev(behandling, årsakBruker)
             return
         }
+        log.info { "Fullmektig ${årsakFullmektig.orgnr} er slettet, sender innhentingsbrev til bruker for sak ${behandling.fagsak.saksnummer}, behandling ${behandling.id}" }
+        sendBrev(behandling, brukersFnr = persondataFasade.hentFolkeregisterident(brukersAktørId))
+    }
 
+    private fun oppdaterOppgaveIStedetForBrev(behandling: Behandling, årsak: ÅrsakIkkeSendtInnhentingsbrev) {
+        log.info { "Sender ikke innhentingsbrev for sak ${behandling.fagsak.saksnummer}, behandling ${behandling.id}: $årsak" }
+        oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(behandling.id, årsak)
+    }
+
+    // brukersFnr overstyrer avklaring av mottaker nedstrøms, som ellers ville valgt fullmektig.
+    private fun sendBrev(behandling: Behandling, brukersFnr: String? = null) {
         log.info { "Sender innhentingsbrev (innhenting_av_inntektsopplysninger) for årsavregningsbehandling ${behandling.id}" }
 
         val brevbestillingDto = BrevbestillingDto().apply {
             produserbardokument = Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER
             mottaker = Mottakerroller.BRUKER
+            annenPersonMottakerIdent = brukersFnr
         }
 
         dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)
