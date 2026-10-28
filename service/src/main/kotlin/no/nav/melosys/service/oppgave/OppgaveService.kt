@@ -232,6 +232,24 @@ class OppgaveService(
         }
     }
 
+    // Beskrivelsen legges over eksisterende beskrivelse i oppgaven, så år-teksten beholdes (MELOSYS-8378).
+    fun oppdaterOppgaveVedIkkeSendtInnhentingsbrev(behandlingID: Long, årsak: ÅrsakIkkeSendtInnhentingsbrev) {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val saksnummer = behandling.fagsak.saksnummer
+        val oppgaveID = behandling.oppgaveId
+            ?: throw TekniskException("Behandling $behandlingID i sak $saksnummer mangler oppgave, kan ikke oppdatere med at innhentingsbrev ikke er sendt")
+
+        oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().beskrivelse(årsak.beskrivelse).build())
+        log.info { "Oppgave $oppgaveID for sak $saksnummer, behandling $behandlingID oppdatert med at innhentingsbrev ikke er sendt ($årsak)" }
+
+        if (!unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD)) return
+        try {
+            oppgaveFasade.leggTilNøkkelord(oppgaveID, setOf(NØKKELORD_INNHENT_INNTEKTSOPPLYSNINGER))
+        } catch (e: Exception) {
+            log.warn(e) { "Kunne ikke sette nøkkelord på oppgave $oppgaveID for sak $saksnummer, behandling $behandlingID" }
+        }
+    }
+
     fun oppdaterOppgaveMedSaksnummer(fagSaksnummer: String, oppgaveOppdatering: OppgaveOppdatering) =
         finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse({ oppg: Oppgave ->
             oppdaterOppgave(
@@ -496,6 +514,7 @@ class OppgaveService(
         private const val UKJENT = "UKJENT"
         private const val NØKKELORD_UTSENDT_ARBEIDSTAKER = "Utsendt arbeidstaker"
         private const val NØKKELORD_STATSANSATT = "Statsansatt"
+        private const val NØKKELORD_INNHENT_INNTEKTSOPPLYSNINGER = "Innhent inntektsopplysninger"
         private fun mapPeriode(mottatteOpplysningerData: MottatteOpplysningerData): PeriodeDto {
             val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData) ?: return PeriodeDto(
                 null,
