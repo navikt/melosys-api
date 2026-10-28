@@ -140,29 +140,9 @@ class MottatteOpplysningerService(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
         val behandlingID = behandling.id
-        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
+        val (type, data) = utledSøknadstypeOgTomData(behandling) ?: run {
             log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
             return null
-        }
-
-        val type: Mottatteopplysningertyper?
-        val data: MottatteOpplysningerData?
-
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
-            type = Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
-            data = SøknadIkkeYrkesaktiv()
-        } else {
-            when (behandling.fagsak.type) {
-                Sakstyper.EU_EOS -> {
-                    type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-                    data = Soeknad()
-                }
-                Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE -> {
-                    type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
-                    data = SøknadNorgeEllerUtenforEØS()
-                }
-                else -> throw FunksjonellException("Ukjent sakstype ${behandling.fagsak.type} for behandling $behandlingID")
-            }
         }
 
         data.apply {
@@ -179,6 +159,53 @@ class MottatteOpplysningerService(
 
         log.info("Opprettet søknad for behandling {}.", behandlingID)
         return mottatteOpplysninger
+    }
+
+    /**
+     * Ved temaskifte kan søknadsflyten endres (yrkesaktiv ↔ ikke-yrkesaktiv). Da må typen på
+     * mottatteopplysningene følge den nye flyten, ellers caster vedtaksbrevet feil datatype
+     * (ClassCastException). Periode og søknadsland bevares; øvrige felt er ikke relevante på tvers
+     * av flytene og settes til standardverdier.
+     */
+    @Transactional
+    fun synkroniserMottatteOpplysningerMedFlyt(behandling: Behandling) {
+        val mottatteOpplysninger = behandling.mottatteOpplysninger ?: return
+        val (ønsketType, nyData) = utledSøknadstypeOgTomData(behandling) ?: return
+        if (mottatteOpplysninger.type == ønsketType) {
+            return
+        }
+
+        mottatteOpplysninger.mottatteOpplysningerData?.let {
+            nyData.periode = it.periode
+            nyData.soeknadsland = it.soeknadsland
+        }
+
+        log.info(
+            "Konverterer mottatteopplysninger for behandling {} fra type {} til {} etter temaskifte",
+            behandling.id, mottatteOpplysninger.type, ønsketType
+        )
+
+        mottatteOpplysninger.type = ønsketType
+        mottatteOpplysninger.mottatteOpplysningerData = nyData
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
+    private fun utledSøknadstypeOgTomData(
+        behandling: Behandling
+    ): Pair<Mottatteopplysningertyper, MottatteOpplysningerData>? {
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
+            return null
+        }
+        return if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
+            Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV to SøknadIkkeYrkesaktiv()
+        } else when (behandling.fagsak.type) {
+            Sakstyper.EU_EOS ->
+                Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS to Soeknad()
+            Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE ->
+                Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS to SøknadNorgeEllerUtenforEØS()
+            else -> throw FunksjonellException("Ukjent sakstype ${behandling.fagsak.type} for behandling ${behandling.id}")
+        }
     }
 
     private fun opprettMottatteOpplysninger(

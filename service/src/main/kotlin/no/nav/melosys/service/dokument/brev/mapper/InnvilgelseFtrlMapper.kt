@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.TILLEGGSAVTA
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
@@ -45,8 +46,13 @@ class InnvilgelseFtrlMapper(
     internal fun mapPensjonistFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlPensjonistFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val søknadsland = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData.soeknadsland
-        val søknadNorgeEllerUtenforEØS =
-            behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val mottatteOpplysninger = behandlingsresultat.hentBehandling().hentMottatteOpplysninger()
+        val søknadNorgeEllerUtenforEØS = mottatteOpplysninger.mottatteOpplysningerData as? SøknadNorgeEllerUtenforEØS
+            ?: throw FunksjonellException(
+                "Mottatteopplysningene (type ${mottatteOpplysninger.type}) for behandling " +
+                    "${behandlingsresultat.hentBehandling().id} kan ikke brukes i dette vedtaksbrevet; " +
+                    "forventet SøknadNorgeEllerUtenforEØS. Opplysningene er trolig ikke konvertert ved temaskifte."
+            )
         val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)

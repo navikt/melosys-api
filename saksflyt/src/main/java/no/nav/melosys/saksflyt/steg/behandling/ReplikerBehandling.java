@@ -15,6 +15,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
@@ -33,11 +34,14 @@ public class ReplikerBehandling implements StegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler,
+                              MottatteOpplysningerService mottatteOpplysningerService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @Override
@@ -61,6 +65,7 @@ public class ReplikerBehandling implements StegBehandler {
         }
         if (behandlingstema != null) {
             nyBehandling.setTema(behandlingstema);
+            mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(nyBehandling);
         }
 
         settBehandlingsårsakOgFrist(nyBehandling, prosessinstans);

@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,8 @@ class ReplikerBehandlingTest {
     private lateinit var behandlingService: BehandlingService
     @MockK
     private lateinit var behandlingReplikeringsRegler: SaksbehandlingRegler
+    @MockK(relaxed = true)
+    private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     private lateinit var replikerBehandling: ReplikerBehandling
     private lateinit var fagsak: Fagsak
@@ -43,7 +46,7 @@ class ReplikerBehandlingTest {
 
     @BeforeEach
     fun setUp() {
-        replikerBehandling = ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler)
+        replikerBehandling = ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler, mottatteOpplysningerService)
 
         prosessinstans = Prosessinstans.forTest {
             type = ProsessType.OPPRETT_SAK
@@ -166,6 +169,43 @@ class ReplikerBehandlingTest {
         verify { fagsakService.lagre(fagsak) }
         prosessinstans.behandling shouldBe replikertBehandling
         verify { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE) }
+    }
+
+    @Test
+    fun `utfør skal sette nytt tema og synkronisere mottatteopplysninger med flyt`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.AVSLUTTET
+        }
+
+        val replikertBehandling = Behandling.forTest {
+            id = 2L
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.NY_VURDERING
+            fagsak = this@ReplikerBehandlingTest.fagsak
+        }
+
+        fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            medData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.NY_VURDERING)
+            medData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.IKKE_YRKESAKTIV)
+            medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+        }
+
+        every { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.NY_VURDERING) } returns replikertBehandling
+        every { behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak) } returns behandling
+
+
+        replikerBehandling.utfør(prosessinstans)
+
+
+        replikertBehandling.tema shouldBe Behandlingstema.IKKE_YRKESAKTIV
+        verify { mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(replikertBehandling) }
     }
 
     @Test

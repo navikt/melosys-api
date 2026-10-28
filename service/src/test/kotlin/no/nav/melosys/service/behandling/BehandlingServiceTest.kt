@@ -28,6 +28,7 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -70,6 +71,9 @@ class BehandlingServiceTest {
     @RelaxedMockK
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
+    @RelaxedMockK
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
+
     private lateinit var behandlingService: BehandlingService
 
     @BeforeEach
@@ -83,7 +87,8 @@ class BehandlingServiceTest {
             utkastBrevService,
             applicationEventPublisher,
             utledMottaksdato,
-            replikerBehandlingsresultatService
+            replikerBehandlingsresultatService,
+            mottatteOpplysningerService
         )
     }
 

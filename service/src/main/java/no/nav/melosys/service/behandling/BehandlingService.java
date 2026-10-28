@@ -19,6 +19,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ public class BehandlingService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
     private final ReplikerBehandlingsresultatService replikerBehandlingsresultatService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
 
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -64,7 +66,8 @@ public class BehandlingService {
                              UtkastBrevService utkastBrevService,
                              ApplicationEventPublisher applicationEventPublisher,
                              UtledMottaksdato utledMottaksdato,
-                             ReplikerBehandlingsresultatService replikerBehandlingsresultatService) {
+                             ReplikerBehandlingsresultatService replikerBehandlingsresultatService,
+                             @Lazy MottatteOpplysningerService mottatteOpplysningerService) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -74,6 +77,7 @@ public class BehandlingService {
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
         this.replikerBehandlingsresultatService = replikerBehandlingsresultatService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -220,6 +224,7 @@ public class BehandlingService {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
         behandling.setTema(tema);
         behandlingRepository.save(behandling);
+        mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(behandling);
     }
 
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
