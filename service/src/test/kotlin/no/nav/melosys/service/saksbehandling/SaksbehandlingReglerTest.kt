@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -374,6 +375,38 @@ class SaksbehandlingReglerTest {
             }
         ),
     )
+
+    @Test
+    fun `finnBehandlingSomKanReplikeres gir null når eneste behandling har AVSLAG_SØKNAD`() {
+        val behandlingHolder = BehandlingHolder().apply {
+            add(Behandlingstyper.FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsresultattyper.AVSLAG_SØKNAD)
+        }
+        val saksbehandlingRegler = behandlingHolder.setup(behandlingsresultatRepository, unleash)
+        val fagsak = behandlingHolder.lagFagsak(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG)
+
+
+        val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+
+
+        behandling.shouldBe(null)
+    }
+
+    @Test
+    fun `finnBehandlingSomKanReplikeres hopper over AVSLAG_SØKNAD og gir eldre innvilget behandling`() {
+        val behandlingHolder = BehandlingHolder().apply {
+            add(Behandlingstyper.FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            add(Behandlingstyper.NY_VURDERING, Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsresultattyper.AVSLAG_SØKNAD)
+        }
+        val saksbehandlingRegler = behandlingHolder.setup(behandlingsresultatRepository, unleash)
+        val fagsak = behandlingHolder.lagFagsak(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG)
+
+
+        val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+
+
+        behandling?.id.shouldBe(0L)
+        behandling?.type.shouldBe(Behandlingstyper.FØRSTEGANG)
+    }
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
