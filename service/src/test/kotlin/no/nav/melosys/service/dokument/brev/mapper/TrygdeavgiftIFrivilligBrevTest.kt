@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype.INNTEKT_FRA_UTLANDET
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftPerAvgiftsdelDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftssatsDto
@@ -158,6 +159,61 @@ class TrygdeavgiftIFrivilligBrevTest {
 
         TrygdeavgiftIFrivilligBrev(listOf(minstebeløpsperiode)).årsinntektUnderMinstebeløp
             .shouldContainExactly(ÅrsinntektDto(2026, BigDecimal(120000)))
+    }
+
+    @Test
+    fun `årsinntekt under minstebeløpet teller inntekt bare én gang når helse- og pensjonsdelen har ulik periode`() {
+        val kunPensjon = medlemskapsperiodeForTest {
+            fom = LocalDate.of(2026, 6, 1)
+            tom = LocalDate.of(2026, 10, 20)
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+        }
+        val helseOgPensjon = medlemskapsperiodeForTest {
+            fom = LocalDate.of(2026, 10, 21)
+            tom = LocalDate.of(2026, 12, 31)
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        }
+        val skatteforhold = skatteforholdForTest {
+            fomDato = LocalDate.of(2026, 6, 1)
+            tomDato = LocalDate.of(2026, 12, 31)
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+        }
+        val inntekter = listOf(ARBEIDSINNTEKT_FRA_NORGE to 10000.0, INNTEKT_FRA_UTLANDET to 1000.0).map { (type, beløp) ->
+            inntektForTest {
+                fomDato = LocalDate.of(2026, 6, 1)
+                tomDato = LocalDate.of(2026, 12, 31)
+                this.type = type
+                avgiftspliktigMndInntekt = Penger(beløp)
+                arbeidsgiversavgiftBetalesTilSkatt = type == ARBEIDSINNTEKT_FRA_NORGE
+            }
+        }
+        fun minstebeløpsperiode(avgiftsdel: Avgiftsdel, fom: LocalDate, medlemskapsperioder: List<Medlemskapsperiode>) =
+            periode(2026, MINSTEBELØP, sats = null, beløp = 0, avgiftsdel = avgiftsdel, fom = fom).apply {
+                medlemskapsperioder.forEach { medlemskapsperiode ->
+                    inntekter.forEach { inntekt ->
+                        leggTilGrunnlag(
+                            TrygdeavgiftsperiodeGrunnlag(
+                                trygdeavgiftsperiode = this,
+                                medlemskapsperiode = medlemskapsperiode,
+                                inntektsperiode = inntekt,
+                                skatteforhold = skatteforhold,
+                            )
+                        )
+                    }
+                }
+            }
+
+        val trygdeavgift = TrygdeavgiftIFrivilligBrev(
+            listOf(
+                minstebeløpsperiode(PENSJON, LocalDate.of(2026, 6, 1), listOf(kunPensjon, helseOgPensjon)),
+                minstebeløpsperiode(HELSE, LocalDate.of(2026, 10, 21), listOf(helseOgPensjon)),
+            )
+        )
+
+        // 11 000 kr/mnd i 7 måneder. Inntekten 21.10–31.12 ligger i grunnlaget til begge delene.
+        trygdeavgift.årsinntektUnderMinstebeløp.shouldContainExactly(ÅrsinntektDto(2026, BigDecimal(77000)))
     }
 
     @Test

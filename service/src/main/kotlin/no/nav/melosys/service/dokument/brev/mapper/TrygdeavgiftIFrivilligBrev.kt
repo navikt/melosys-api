@@ -64,7 +64,7 @@ internal class TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder: List<Trygdeavgi
     val årsinntektUnderMinstebeløp: List<ÅrsinntektDto> = perioderPerÅr.mapNotNull { (år, perioder) ->
         perioder.filter { it.beregningsregel == MINSTEBELØP }
             .takeIf { it.isNotEmpty() }
-            ?.let { ÅrsinntektDto(år, it.sumOf { periode -> periode.avgiftspliktigÅrsinntekt() }.setScale(0, RoundingMode.HALF_UP)) }
+            ?.let { ÅrsinntektDto(år, avgiftspliktigÅrsinntekt(it).setScale(0, RoundingMode.HALF_UP)) }
     }
 
     val ordinærSatsPåfølgendeÅr: OrdinærSatsPåfølgendeÅrDto? = påfølgendeÅrMedOrdinærSats?.let { år ->
@@ -115,23 +115,32 @@ internal class TrygdeavgiftIFrivilligBrev(trygdeavgiftsperioder: List<Trygdeavgi
         ).setScale(0, RoundingMode.DOWN)
     }
 
-    private fun Trygdeavgiftsperiode.avgiftspliktigÅrsinntekt(): BigDecimal {
-        if (grunnlagListe.isEmpty()) return TotalbeløpBeregner.hentTotalinntekt(listOf(this))
+    /**
+     * Når helse- og pensjonsdelen har ulik periode i året, får hver del sin egen minstebeløpsperiode, og samme
+     * inntekt ligger i grunnlaget til begge. Hvert grunnlag telles derfor bare én gang.
+     */
+    private fun avgiftspliktigÅrsinntekt(perioder: List<Trygdeavgiftsperiode>): BigDecimal {
+        val (medGrunnlag, utenGrunnlag) = perioder.partition { it.grunnlagListe.isNotEmpty() }
 
-        return grunnlagListe
-            .distinctBy { Triple(it.inntektsperiode, it.skatteforhold, it.hentAvgiftspliktigperiode()) }
-            .filter { it.inngårIAvgiftspliktigÅrsinntekt() }
-            .sumOf { grunnlag ->
-                val fom = maxOf(periodeFra, grunnlag.inntektsperiode.fom, grunnlag.skatteforhold.fom, grunnlag.hentAvgiftspliktigperiode().fom)
-                val tom = minOf(
-                    periodeTil,
-                    grunnlag.inntektsperiode.tom ?: LocalDate.MAX,
-                    grunnlag.skatteforhold.tom ?: LocalDate.MAX,
-                    grunnlag.hentAvgiftspliktigperiode().tom ?: LocalDate.MAX
-                )
-                if (fom.isAfter(tom)) BigDecimal.ZERO
-                else with(TotalbeløpBeregner) { totalbeløpForPeriode(fom, tom, grunnlag.inntektsperiode.kalkulertMndInntekt()) }
-            }
+        val inntektFraGrunnlag = medGrunnlag
+            .flatMap { periode -> periode.grunnlagListe.map { grunnlag -> periode to grunnlag } }
+            .distinctBy { (_, grunnlag) -> Triple(grunnlag.inntektsperiode, grunnlag.skatteforhold, grunnlag.hentAvgiftspliktigperiode()) }
+            .filter { (_, grunnlag) -> grunnlag.inngårIAvgiftspliktigÅrsinntekt() }
+            .sumOf { (periode, grunnlag) -> periode.inntektI(grunnlag) }
+
+        return inntektFraGrunnlag + utenGrunnlag.sumOf { TotalbeløpBeregner.hentTotalinntekt(listOf(it)) }
+    }
+
+    private fun Trygdeavgiftsperiode.inntektI(grunnlag: TrygdeavgiftsperiodeGrunnlag): BigDecimal {
+        val fom = maxOf(periodeFra, grunnlag.inntektsperiode.fom, grunnlag.skatteforhold.fom, grunnlag.hentAvgiftspliktigperiode().fom)
+        val tom = minOf(
+            periodeTil,
+            grunnlag.inntektsperiode.tom ?: LocalDate.MAX,
+            grunnlag.skatteforhold.tom ?: LocalDate.MAX,
+            grunnlag.hentAvgiftspliktigperiode().tom ?: LocalDate.MAX
+        )
+        return if (fom.isAfter(tom)) BigDecimal.ZERO
+        else with(TotalbeløpBeregner) { totalbeløpForPeriode(fom, tom, grunnlag.inntektsperiode.kalkulertMndInntekt()) }
     }
 
     /**
