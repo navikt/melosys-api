@@ -107,11 +107,6 @@ mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
 
 // For SED-based
 mottatteOpplysningerService.opprettSedGrunnlag(behandlingId, sedGrunnlag)
-
-// For Altinn søknad
-mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
-    behandlingID, originalData, soeknad, eksternReferanseID
-)
 ```
 
 ### Accessing Data

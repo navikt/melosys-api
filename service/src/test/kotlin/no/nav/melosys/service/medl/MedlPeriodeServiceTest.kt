@@ -8,9 +8,13 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl
 import no.nav.melosys.integrasjon.medl.MedlService
@@ -208,6 +212,68 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
+    fun `opprettPeriodeEndelig bruker KildedokumenttypeMedl A1 ved registrering av unntak etter konvensjonen med Storbritannia`() {
+        setupTrygdeavtaleBehandling(Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK)
+        val lovvalgsperiode = lovvalgsperiodeForTest {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1
+        }
+
+        medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, 1L)
+
+        verify { medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.A1) }
+    }
+
+    @Test
+    fun `opprettPeriodeEndelig bruker KildedokumenttypeMedl A1 ved registrering av unntak med tilleggsbestemmelse i konvensjonen`() {
+        setupTrygdeavtaleBehandling(Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK)
+        val lovvalgsperiode = lovvalgsperiodeForTest {
+            bestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_5
+        }
+
+        medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, 1L)
+
+        verify { medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.A1) }
+    }
+
+    @Test
+    fun `opprettPeriodeEndelig bruker KildedokumenttypeMedl DOKUMENT ved registrering av unntak etter trygdeavtalen med Storbritannia`() {
+        setupTrygdeavtaleBehandling(Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK)
+        val lovvalgsperiode = lovvalgsperiodeForTest {
+            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
+        }
+
+        medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, 1L)
+
+        verify { medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.DOKUMENT) }
+    }
+
+    @Test
+    fun `opprettPeriodeEndelig bruker KildedokumenttypeMedl HENV_SOKNAD ved anmodning om unntak etter konvensjonen med Storbritannia`() {
+        setupTrygdeavtaleBehandling(Sakstemaer.UNNTAK, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+        val lovvalgsperiode = lovvalgsperiodeForTest {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        }
+
+        medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, 1L)
+
+        verify { medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun `oppdaterPeriodeEndelig bruker KildedokumenttypeMedl A1 ved registrering av unntak etter konvensjonen med Storbritannia`() {
+        setupTrygdeavtaleBehandling(Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK)
+        val lovvalgsperiode = lovvalgsperiodeForTest {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1
+        }
+
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
+
+        verify { medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.A1) }
+    }
+
+    @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.REGISTRERING_UNNTAK
@@ -325,6 +391,26 @@ class MedlPeriodeServiceTest {
 
         verify { behandlingsresultatService.hentBehandlingsresultat(1L) }
         verify(exactly = 0) { medlService.avvisPeriode(any(), any()) }
+    }
+
+    private fun setupTrygdeavtaleBehandling(sakstema: Sakstemaer, behandlingstema: Behandlingstema) {
+        val behandling = Behandling.forTest {
+            id = 1L
+            tema = behandlingstema
+            fagsak {
+                type = Sakstyper.TRYGDEAVTALE
+                tema = sakstema
+                medBruker()
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns Behandlingsresultat.forTest {
+            id = 1L
+            this.behandling = behandling
+        }
+        every { persondataFasade.hentFolkeregisterident(any()) } returns FNR
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { medlService.opprettPeriodeEndelig(any(), any(), any()) } returns MEDL_PERIODE_ID
+        every { lovvalgsperiodeRepository.save(any()) } answers { firstArg() }
     }
 
     private fun setupHappyPathBehandling(

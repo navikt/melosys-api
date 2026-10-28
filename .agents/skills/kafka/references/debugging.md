@@ -267,6 +267,5 @@ topics:
 ## Related Skills
 
 - **eessi-eux**: EESSI message details
-- **altinn-soknad**: Application processing
 - **inntekt-skatt**: Tax event handling
 - **trygdeavgift**: Billing integration

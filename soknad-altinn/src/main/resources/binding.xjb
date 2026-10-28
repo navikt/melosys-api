@@ -1,3 +1,0 @@
-<jaxb:bindings version="3.0" xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb">
-    <jaxb:globalBindings generateElementProperty="false" />
-</jaxb:bindings>

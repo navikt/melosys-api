@@ -727,38 +727,6 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    fun `opprett prosessinstans for søknad mottatt skal opprette prosessinstans når den ikke finnes fra før`() {
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, false)
-
-        val prosessinstans = piListCaptor.last()
-        prosessinstans.run {
-            type shouldBe ProsessType.MOTTAK_SOKNAD_ALTINN
-            getData(ProsessDataKey.MOTTATT_SOKNAD_ID) shouldBe "søknadID"
-            hentData<ForvaltningsmeldingMottaker>(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER) shouldBe ForvaltningsmeldingMottaker.BRUKER
-        }
-    }
-
-    @Test
-    fun `opprett prosessinstans for søknad mottatt skal ikke opprette prosessinstans når den finnes fra før`() {
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", true, false)
-
-        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
-    }
-
-    @Test
-    fun `opprett prosessinstans for søknad mottatt med mottak eldre enn noen dager skal sette forvaltningsmelding mottaker ingen`() {
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true)
-
-
-        val prosessinstans = piListCaptor.last()
-        prosessinstans.hentData<ForvaltningsmeldingMottaker>(
-            ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER
-        ) shouldBe ForvaltningsmeldingMottaker.INGEN
-    }
-
-    @Test
     fun `opprett prosessinstans for send brev skal opprette ny prosessinstans`() {
         val behandling = Behandling.forTest { }
         val doksysbrevbestilling = DoksysBrevbestilling.Builder()

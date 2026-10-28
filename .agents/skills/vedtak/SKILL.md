@@ -117,7 +117,7 @@ AVSLUTT_SAK_OG_BEHANDLING → SEND_MELDING_OM_VEDTAK
 | `SEND_VEDTAKSBREV_INNLAND` | Sends verdict letter via Dokgen/Joark | Letter generation failure |
 | `SEND_VEDTAK_UTLAND` | Sends SED to foreign authority via RINA | RINA connection issues |
 | `AVSLUTT_SAK_OG_BEHANDLING` | Closes case and treatment | Status already closed |
-| `SEND_MELDING_OM_VEDTAK` | Publishes Kafka event about verdict | Behind feature toggle |
+| `SEND_MELDING_OM_VEDTAK` | Publishes Kafka event about verdict (registers the person in melosys-skattehendelser) | Missing folkeregisterident (logs a warning and skips) |
 
 ## Debugging Vedtak Issues
 
