@@ -37,6 +37,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -73,6 +75,7 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
     fun setup() {
         unleash.resetAll()
         every { minstebeløpService.finnMinstebeløp(any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
+        every { minstebeløpService.finnMinstebeløpForÅr(any(), any()) } returns MinstebeløpResponse(2024, BigDecimal(7000))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
@@ -920,6 +923,104 @@ internal class InnvilgelseFtrlYrkesaktivMapperTest {
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
             avgiftsperioder.map { it.avgiftsdel }.shouldContainExactlyInAnyOrder(Avgiftsdel.HELSE, Avgiftsdel.PENSJON)
             avgiftsperioder.map { it.trygdedekning }.shouldContainOnly(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.name)
+        }
+    }
+
+    @Test
+    fun `mapYrkesaktivFrivillig tar med inneværende år og året etter, og minstebeløpet for inneværende år`() {
+        unleash.enableAll()
+        val iÅr = LocalDate.now().year
+        every { minstebeløpService.finnMinstebeløpForÅr(any(), iÅr) } returns MinstebeløpResponse(iÅr, BigDecimal(99650))
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(iÅr, 10, 1)
+                tom = LocalDate.of(iÅr + 2, 12, 31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(iÅr, 10, 1)
+                    periodeTil = LocalDate.of(iÅr, 12, 31)
+                    trygdesats = null
+                    trygdeavgiftsbeløpMd = BigDecimal(700)
+                    beregningsregel = Avgiftsberegningsregel.TJUEFEM_PROSENT_REGEL
+                }
+                listOf(iÅr + 1, iÅr + 2).forEach { år ->
+                    trygdeavgiftsperiode {
+                        periodeFra = LocalDate.of(år, 1, 1)
+                        periodeTil = LocalDate.of(år, 12, 31)
+                        trygdesats = BigDecimal("26.2")
+                        trygdeavgiftsbeløpMd = BigDecimal(3000 + år)
+                    }
+                }
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.map { it.fom.year } shouldContainExactly listOf(iÅr, iÅr + 1)
+            minstebelopVerdi shouldBe BigDecimal(99650)
+            minstebelopAar shouldBe iÅr
+            har25ProsentRegelPeriode.shouldBeTrue()
+            visOrdinærBeregningstabell.shouldBeFalse()
+            tjuefemProsentRegel.shouldNotBeNull().avgiftPerAvgiftsdel.map { it.år } shouldContainExactly listOf(iÅr)
+            ordinærSatsPåfølgendeÅr.shouldNotBeNull().run {
+                etterÅr shouldBe iÅr
+                år shouldBe iÅr + 1
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Avgiftsberegningsregel::class)
+    fun `mapYrkesaktivFrivillig tar bare med inneværende år når begge årene beregnes etter samme regel`(regel: Avgiftsberegningsregel) {
+        unleash.enableAll()
+        val iÅr = LocalDate.now().year
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
+            behandling {
+                fagsak = DokgenTestData.lagFagsak()
+                mottatteOpplysninger { soeknad { landkoder("AT") } }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(iÅr, 1, 1)
+                tom = LocalDate.of(iÅr + 1, 12, 31)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                listOf(iÅr, iÅr + 1).forEach { år ->
+                    trygdeavgiftsperiode {
+                        periodeFra = LocalDate.of(år, 1, 1)
+                        periodeTil = LocalDate.of(år, 12, 31)
+                        trygdesats = if (regel == Avgiftsberegningsregel.ORDINÆR) BigDecimal("26.2") else null
+                        trygdeavgiftsbeløpMd = if (regel == Avgiftsberegningsregel.MINSTEBELØP) BigDecimal.ZERO else BigDecimal(3000 + år)
+                        beregningsregel = regel
+                    }
+                }
+            }
+            vilkaarsresultat {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode)
+            }
+        }
+        mockHappyCase(Case.paragraf_2_8, behandlingsresultat)
+
+        innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
+            avgiftsperioder.map { it.fom.year } shouldContainExactly listOf(iÅr)
+            ordinærSatsPåfølgendeÅr.shouldBeNull()
         }
     }
 
