@@ -429,6 +429,7 @@ internal class OppgaveServiceTest {
 
         verify { oppgaveFasade.oppdaterOppgave(BEH_OPPG_ID, capture(oppgaveOppdateringSlot)) }
         oppgaveOppdateringSlot.captured.beskrivelse shouldBe "virksomheten er slettet"
+        oppgaveOppdateringSlot.captured.saksnummer shouldBe FagsakTestFactory.SAKSNUMMER
         verify { oppgaveFasade.leggTilNøkkelord(BEH_OPPG_ID, setOf("Innhent inntektsopplysninger")) }
     }
 

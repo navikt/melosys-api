@@ -119,6 +119,18 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
     }
 
     @Test
+    fun `utfør skal ikke sende brev men oppdatere oppgave når levende mottaker mangler adresse`() {
+        every { persondata.manglerGyldigRegistrertAdresse() } returns true
+
+        sendInnhentingAvInntektsopplysningerBrev.utfør(prosessinstans)
+
+        verify(exactly = 0) { dokumentServiceFasade.produserDokument(any(), any()) }
+        verify(exactly = 1) {
+            oppgaveService.oppdaterOppgaveVedIkkeSendtInnhentingsbrev(BEHANDLING_ID, ÅrsakIkkeSendtInnhentingsbrev.PERSON_UTEN_ADRESSE)
+        }
+    }
+
+    @Test
     fun `utfør skal ikke sende brev men oppdatere oppgave når fullmektig virksomhet er slettet`() {
         mottakerErFullmektigVirksomhet(opphoersdato = LocalDate.now().minusYears(1))
 
@@ -141,8 +153,8 @@ class SendInnhentingAvInntektsopplysningerBrevTest {
     }
 
     @Test
-    fun `utfør skal sende brev når fullmektig virksomhet har opphørsdato fram i tid`() {
-        mottakerErFullmektigVirksomhet(opphoersdato = LocalDate.now().plusDays(1))
+    fun `utfør skal sende brev når fullmektig virksomhet har opphørsdato i dag`() {
+        mottakerErFullmektigVirksomhet(opphoersdato = LocalDate.now())
 
         sendInnhentingAvInntektsopplysningerBrev.utfør(prosessinstans)
 

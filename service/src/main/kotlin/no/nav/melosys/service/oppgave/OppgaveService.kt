@@ -239,7 +239,7 @@ class OppgaveService(
         val oppgaveID = behandling.oppgaveId
             ?: throw TekniskException("Behandling $behandlingID i sak $saksnummer mangler oppgave, kan ikke oppdatere med at innhentingsbrev ikke er sendt")
 
-        oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().beskrivelse(årsak.beskrivelse).build())
+        oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().beskrivelse(årsak.beskrivelse).saksnummer(saksnummer).build())
         log.info { "Oppgave $oppgaveID for sak $saksnummer, behandling $behandlingID oppdatert med at innhentingsbrev ikke er sendt ($årsak)" }
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_OPPGAVE_NØKKELORD)) return
