@@ -17,7 +17,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -28,7 +27,6 @@ class OppretteÅrsavregningVedEndring(
     private val årsavregningService: ÅrsavregningService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val prosessInstansService: ProsessinstansService,
-    private val saksbehandlingRegler: SaksbehandlingRegler,
     private val unleash: Unleash
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg? {
@@ -92,7 +90,7 @@ class OppretteÅrsavregningVedEndring(
         if (behandling.erFørstegangsvurdering()) {
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
         } else if (behandling.erNyVurdering()) {
-            val sammenligningsgrunnlag = finnSammenligningsgrunnlag(behandling)
+            val sammenligningsgrunnlag = finnSisteBehandlingsresultatMedVedtak(behandling)
             if (sammenligningsgrunnlag == null) {
                 opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
                 return
@@ -107,18 +105,12 @@ class OppretteÅrsavregningVedEndring(
         }
     }
 
-    /**
-     * MELOSYS-8353: en behandling avsluttet fra behandlingsmenyen er behandlet utenfor Melosys og skal ikke
-     * være grunnlag for årsavregning (MELOSYS-8308). Har den opprinnelige behandlingen vedtak, brukes den som før.
-     */
-    private fun finnSammenligningsgrunnlag(behandling: Behandling): Behandlingsresultat? {
-        val opprinneligBehandlingsresultat = behandling.opprinneligBehandling
-            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-        if (opprinneligBehandlingsresultat?.harVedtak() == true) {
-            return opprinneligBehandlingsresultat
-        }
-        return null
-    }
+    private fun finnSisteBehandlingsresultatMedVedtak(behandling: Behandling): Behandlingsresultat? =
+        behandling.fagsak.behandlinger
+            .filter { it.id != behandling.id && !it.erÅrsavregning() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.harVedtak() }
+            .maxWithOrNull(compareBy({ it.hentVedtakMetadata().vedtaksdato }, { it.registrertDato }))
 
     private fun finnÅrMedEndringer(
         behandlingsresultat: Behandlingsresultat,
