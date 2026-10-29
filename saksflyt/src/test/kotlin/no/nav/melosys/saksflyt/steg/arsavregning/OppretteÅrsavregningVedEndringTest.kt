@@ -68,62 +68,7 @@ class OppretteÅrsavregningVedEndringTest {
     }
 
     @Test
-    fun `ny vurdering - oppretter ikke årsavregning for år bare en behandling uten vedtak hadde`() {
-        val fagsak = lagFtrlFagsak()
-        val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak) {
-            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
-        }
-        val nyVurdering = lagFtrlBehandlingsresultat(
-            id = 2L,
-            type = Behandlingstyper.NY_VURDERING,
-            fagsak = fagsak,
-            vedtaksdato = VEDTAKSDATO.plus(1, ChronoUnit.DAYS),
-            opprinneligBehandling = menybehandling.hentBehandling()
-        ) {
-            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
-        }
-        stubBehandlingsresultater(menybehandling, nyVurdering)
-        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
-
-        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
-
-        verify {
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
-        }
-        confirmVerified(prosessInstansService)
-    }
-
-    @Test
-    fun `ny vurdering - opprinnelig behandling uten vedtak - sammenligner med siste vedtak`() {
-        val fagsak = lagFtrlFagsak()
-        val sisteVedtak = lagFtrlBehandlingsresultat(id = 3L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
-            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
-        }
-        val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.NY_VURDERING, fagsak = fagsak) {
-            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
-        }
-        val nyVurdering = lagFtrlBehandlingsresultat(
-            id = 2L,
-            type = Behandlingstyper.NY_VURDERING,
-            fagsak = fagsak,
-            vedtaksdato = VEDTAKSDATO.plus(1, ChronoUnit.DAYS),
-            opprinneligBehandling = menybehandling.hentBehandling()
-        ) {
-            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
-        }
-        stubBehandlingsresultater(sisteVedtak, menybehandling, nyVurdering)
-        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
-
-        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
-
-        verify {
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
-        }
-        confirmVerified(prosessInstansService)
-    }
-
-    @Test
-    fun `ny vurdering - sammenligner med siste vedtak selv om opprinnelig behandling har vedtak`() {
+    fun `ny vurdering - sammenligner med siste vedtak når saken har flere vedtak`() {
         val fagsak = lagFtrlFagsak()
         val opprinneligVedtak = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
@@ -185,7 +130,7 @@ class OppretteÅrsavregningVedEndringTest {
     }
 
     @Test
-    fun `ny vurdering - ingen tidligere vedtak i saken - behandles som førstegangsvurdering`() {
+    fun `ny vurdering - ingen tidligere vedtak i saken å sammenligne med - behandles som førstegangsvurdering`() {
         val fagsak = lagFtrlFagsak()
         val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
@@ -197,7 +142,7 @@ class OppretteÅrsavregningVedEndringTest {
             vedtaksdato = VEDTAKSDATO,
             opprinneligBehandling = menybehandling.hentBehandling()
         ) {
-            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 6, 30))
+            medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
         }
         stubBehandlingsresultater(menybehandling, nyVurdering)
         every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
@@ -205,14 +150,13 @@ class OppretteÅrsavregningVedEndringTest {
         oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
 
         verify {
-            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
             prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
         }
         confirmVerified(prosessInstansService)
     }
 
     @Test
-    fun `ny vurdering - uten opprinnelig behandling - behandles som førstegangsvurdering`() {
+    fun `ny vurdering - eneste behandling i saken - behandles som førstegangsvurdering`() {
         val nyVurdering = lagFtrlBehandlingsresultat(
             id = 2L,
             type = Behandlingstyper.NY_VURDERING,
