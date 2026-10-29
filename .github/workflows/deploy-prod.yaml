@@ -37,6 +37,7 @@ jobs:
           RESOURCE: nais/nais.yml
           IMAGE: ${{ env.IMAGE }}
           VARS: nais/vars-prod.json
+          TIMEOUT: 20m
       - name: post-production
         uses: navikt/digihot-deploy/actions/post-production@v3
         env:
