@@ -125,7 +125,7 @@ class OppretteÅrsavregningVedEndringTest {
     @Test
     fun `ny vurdering - sammenligner med siste vedtak selv om opprinnelig behandling har vedtak`() {
         val fagsak = lagFtrlFagsak()
-        val opprinnelig = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
+        val opprinneligVedtak = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
         }
         val sisteVedtak = lagFtrlBehandlingsresultat(
@@ -141,11 +141,11 @@ class OppretteÅrsavregningVedEndringTest {
             type = Behandlingstyper.NY_VURDERING,
             fagsak = fagsak,
             vedtaksdato = VEDTAKSDATO.plus(2, ChronoUnit.DAYS),
-            opprinneligBehandling = opprinnelig.hentBehandling()
+            opprinneligBehandling = opprinneligVedtak.hentBehandling()
         ) {
             medlemskapsperiode(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))
         }
-        stubBehandlingsresultater(opprinnelig, sisteVedtak, nyVurdering)
+        stubBehandlingsresultater(opprinneligVedtak, sisteVedtak, nyVurdering)
         every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
@@ -156,7 +156,7 @@ class OppretteÅrsavregningVedEndringTest {
     @Test
     fun `ny vurdering - sammenligner ikke med årsavregning`() {
         val fagsak = lagFtrlFagsak()
-        val vedtak = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
+        val tidligereVedtak = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, fagsak = fagsak, vedtaksdato = VEDTAKSDATO) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
         }
         val årsavregning = lagFtrlBehandlingsresultat(
@@ -172,11 +172,11 @@ class OppretteÅrsavregningVedEndringTest {
             type = Behandlingstyper.NY_VURDERING,
             fagsak = fagsak,
             vedtaksdato = VEDTAKSDATO.plus(2, ChronoUnit.DAYS),
-            opprinneligBehandling = vedtak.hentBehandling()
+            opprinneligBehandling = tidligereVedtak.hentBehandling()
         ) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
         }
-        stubBehandlingsresultater(vedtak, årsavregning, nyVurdering)
+        stubBehandlingsresultater(tidligereVedtak, årsavregning, nyVurdering)
         every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
