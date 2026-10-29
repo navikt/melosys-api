@@ -40,7 +40,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.359</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.361</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
         <melosys-skjema-api-types.version>2026.10.23-8d0d600fb1f9</melosys-skjema-api-types.version>
 
@@ -76,7 +76,7 @@
         <micrometer-jvm-extras.version>0.3.0</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>3.0.8</networknt.json-schema-validator.version>
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
-        <okhttp.version>5.5.0</okhttp.version>
+        <okhttp.version>5.5.1</okhttp.version>
         <oracle.version>18</oracle.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <papertrailapp-syslog.version>1.0.0</papertrailapp-syslog.version> <!-- Fra august 2014, men er den som brukes hos NAV -->
@@ -85,7 +85,7 @@
         <shedlock.version>7.10.1</shedlock.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-retry.version>2.0.13</spring-retry.version>
-        <unleash.version>12.3.0</unleash.version>
+        <unleash.version>12.3.1</unleash.version>
         <bcpkix-jdk15on.version>1.86</bcpkix-jdk15on.version>
         <bouncycastle-jdk18on.version>1.86</bouncycastle-jdk18on.version>
         <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
@@ -93,7 +93,7 @@
         <jaxws-rt.version>4.0.5</jaxws-rt.version>
         <jakarta.jaxb.version>4.0.5</jakarta.jaxb.version>
         <javaparser.version>1.0.11</javaparser.version>
-        <google.errorprone.version>2.50.0</google.errorprone.version>
+        <google.errorprone.version>2.51.0</google.errorprone.version>
         <checkerframework.version>4.3.1</checkerframework.version>
         <threeten.version>1.11.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
@@ -117,7 +117,7 @@
         <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
 
         <!-- Transitive avhengigheter -->
-        <asm.version>9.11</asm.version>
+        <asm.version>9.11.1</asm.version>
         <joda-time.version>2.15.0</joda-time.version>
         <woodstox.version>7.3.0</woodstox.version>
         <woodstox.stax2.version>4.3.2</woodstox.stax2.version>
