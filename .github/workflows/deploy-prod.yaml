@@ -37,7 +37,6 @@ jobs:
           RESOURCE: nais/nais.yml
           IMAGE: ${{ env.IMAGE }}
           VARS: nais/vars-prod.json
-          # Over startup-probens ca. 10,5 min, slik at tunge migreringer ikke markerer deployen som feilet
           TIMEOUT: 20m
       - name: post-production
         uses: navikt/digihot-deploy/actions/post-production@v3

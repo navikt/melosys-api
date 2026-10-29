@@ -12,8 +12,6 @@ spec:
     min: 2
     max: 2
     cpuThresholdPercentage: 80
-  # Flyway kjører før internal/health svarer. Uten startup-probe dreper liveness poden etter ca. 100 s,
-  # midt i tunge migreringer (MELOSYS-8136). Gir inntil ca. 10,5 min til oppstart.
   startup:
     path: internal/health
     initialDelay: 30
