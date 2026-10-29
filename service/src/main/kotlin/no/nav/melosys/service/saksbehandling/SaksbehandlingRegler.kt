@@ -2,7 +2,6 @@ package no.nav.melosys.service.saksbehandling
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -40,36 +39,19 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         finnBehandlingSomKanReplikeres(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
 
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
-        behandlinger.firstOrNull { hentBehandlingsresultatHvisKanReplikeres(it) != null }
-
-    /**
-     * Siste vedtak blant behandlingene som kan replikeres, sortert som oppslaget i årsavregningen:
-     * nyeste vedtaksdato, deretter registreringsdato. En behandling avsluttet fra behandlingsmenyen
-     * har ikke vedtak og regnes ikke med (MELOSYS-8308).
-     */
-    fun finnSisteBehandlingMedVedtakSomKanReplikeres(fagsak: Fagsak, unntattBehandlingID: Long): Behandling? =
-        fagsak.behandlinger
-            .filter { it.id != unntattBehandlingID }
-            .mapNotNull { behandling ->
-                hentBehandlingsresultatHvisKanReplikeres(behandling)
-                    ?.takeIf { it.harVedtak() }
-                    ?.let { behandling to it }
+        behandlinger
+            .filter { !harIngenFlyt(it) }
+            .filterNot { it.erÅrsavregning() }
+            .filter { BEHANDLINGSTYPER_SOM_KAN_REPLIKERES.contains(it.type) }
+            .firstOrNull { behandling ->
+                val resultat = behandlingsresultatRepository.findById(behandling.id).orElse(null)
+                    ?: return@firstOrNull false
+                when {
+                    behandling.erInaktiv() -> !BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES.contains(resultat.type)
+                    behandling.erAktiv() && resultat.type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK -> true
+                    else -> false
+                }
             }
-            .maxWithOrNull(compareBy({ it.second.hentVedtakMetadata().vedtaksdato }, { it.second.registrertDato }))
-            ?.first
-
-    private fun hentBehandlingsresultatHvisKanReplikeres(behandling: Behandling): Behandlingsresultat? {
-        if (harIngenFlyt(behandling) || behandling.erÅrsavregning() || behandling.type !in BEHANDLINGSTYPER_SOM_KAN_REPLIKERES) {
-            return null
-        }
-        val resultat = behandlingsresultatRepository.findById(behandling.id).orElse(null) ?: return null
-        val kanReplikeres = when {
-            behandling.erInaktiv() -> resultat.type !in BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES
-            behandling.erAktiv() && resultat.type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK -> true
-            else -> false
-        }
-        return resultat.takeIf { kanReplikeres }
-    }
 
     fun harIngenFlyt(behandling: Behandling): Boolean =
         harIngenFlyt(

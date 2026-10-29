@@ -127,7 +127,7 @@ class OppretteÅrsavregningVedEndringTest {
     }
 
     @Test
-    fun `ny vurdering - ingen tidligere vedtak i saken - oppretter ikke årsavregning`() {
+    fun `ny vurdering - ingen tidligere vedtak i saken - behandles som førstegangsvurdering`() {
         val menybehandling = lagFtrlBehandlingsresultat(id = 1L, type = Behandlingstyper.FØRSTEGANG, medVedtak = false) {
             medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 12, 31))
         }
@@ -142,10 +142,32 @@ class OppretteÅrsavregningVedEndringTest {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns menybehandling
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns nyVurdering
         every { saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(any(), 2L) } returns null
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
 
         oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
 
-        verify { prosessInstansService wasNot Called }
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2025", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
+        }
+        confirmVerified(prosessInstansService)
+    }
+
+    @Test
+    fun `ny vurdering - uten opprinnelig behandling - behandles som førstegangsvurdering`() {
+        val nyVurdering = lagFtrlBehandlingsresultat(id = 2L, type = Behandlingstyper.NY_VURDERING, medVedtak = true) {
+            medlemskapsperiode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns nyVurdering
+        every { saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(any(), 2L) } returns null
+        every { årsavregningService.harAktivÅrsavregningForÅr(any(), any()) } returns false
+
+        oppretteÅrsavregningVedEndring.utfør(Prosessinstans.forTest { behandling = nyVurdering.behandling })
+
+        verify {
+            prosessInstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, "2024", Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE, true)
+        }
+        confirmVerified(prosessInstansService)
     }
 
     private fun lagFtrlBehandlingsresultat(

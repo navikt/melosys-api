@@ -94,7 +94,7 @@ class OppretteÅrsavregningVedEndring(
         } else if (behandling.erNyVurdering()) {
             val sammenligningsgrunnlag = finnSammenligningsgrunnlag(behandling)
             if (sammenligningsgrunnlag == null) {
-                log.info("Ingen tidligere vedtak å sammenligne med for behandling ${behandling.id}, oppretter ikke årsavregning")
+                opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
                 return
             }
 
@@ -112,13 +112,12 @@ class OppretteÅrsavregningVedEndring(
      * være grunnlag for årsavregning (MELOSYS-8308). Har den opprinnelige behandlingen vedtak, brukes den som før.
      */
     private fun finnSammenligningsgrunnlag(behandling: Behandling): Behandlingsresultat? {
-        val opprinneligBehandlingsresultat =
-            behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id)
-        if (opprinneligBehandlingsresultat.harVedtak()) {
+        val opprinneligBehandlingsresultat = behandling.opprinneligBehandling
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+        if (opprinneligBehandlingsresultat?.harVedtak() == true) {
             return opprinneligBehandlingsresultat
         }
-        return saksbehandlingRegler.finnSisteBehandlingMedVedtakSomKanReplikeres(behandling.fagsak, behandling.id)
-            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+        return null
     }
 
     private fun finnÅrMedEndringer(
