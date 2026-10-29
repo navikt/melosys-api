@@ -65,11 +65,11 @@ internal class HentDigitalSøknadsdataTest {
     fun `lagrer søknadsdata uten å validere registerklassifisering`(versjon: String, harKobletSkjema: Boolean) {
         val søknadsdata = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemaDefinisjonVersjon = versjon
-            erOffentligArbeidsgiver = null
+            erStatligArbeidsgiver = null
             if (harKobletSkjema) {
                 medKobletArbeidsgiverSkjema {
                     skjemaDefinisjonVersjon = versjon
-                    erOffentligArbeidsgiver = null
+                    erStatligArbeidsgiver = null
                 }
             }
         }

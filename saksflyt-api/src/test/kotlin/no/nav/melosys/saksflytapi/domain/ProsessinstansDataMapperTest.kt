@@ -44,7 +44,7 @@ class ProsessinstansDataMapperTest {
                 juridiskEnhetOrgnr = "987654321",
                 fullmektigFnr = "11223344556",
                 arbeidstakerNavn = "Test Arbeidstaker",
-                erOffentligArbeidsgiver = true,
+                erStatligArbeidsgiver = true,
                 antallAnsatte = 7,
                 kobletSkjemaId = UUID.randomUUID(),
                 radgiverfirma = RadgiverfirmaInfo(orgnr = "999888777", navn = "Rådgiver AS")
@@ -82,21 +82,41 @@ class ProsessinstansDataMapperTest {
             arbeidsgiverNavn = "Arbeidsgiver AS",
             juridiskEnhetOrgnr = "987654321",
             arbeidstakerNavn = "Test Arbeidstaker",
-            erOffentligArbeidsgiver = true,
+            erStatligArbeidsgiver = true,
             antallAnsatte = 42
         )
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto { this.metadata = metadata }
         val json = mapper.valueToTree<JsonNode>(dto)
-        fjernFelterRekursivt(json, "skjemaDefinisjonVersjon", "erOffentligArbeidsgiver")
+        fjernFelterRekursivt(json, "skjemaDefinisjonVersjon", "erStatligArbeidsgiver")
 
         val hentet = mapper.treeToValue(json, UtsendtArbeidstakerSkjemaM2MDto::class.java)
 
         hentet shouldBe dto.copy(
             skjema = dto.skjema.copy(
                 skjemaDefinisjonVersjon = "1",
-                metadata = metadata.copy(erOffentligArbeidsgiver = null)
+                metadata = metadata.copy(erStatligArbeidsgiver = null)
             )
         )
+    }
+
+    @Test
+    fun `eldre lagrede feltnavn for statlig arbeidsgiver og statsansatt kan fortsatt leses`() {
+        val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+            metadata = DegSelvMetadata(
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL,
+                arbeidsgiverNavn = "Statlig arbeidsgiver",
+                juridiskEnhetOrgnr = "987654321",
+                arbeidstakerNavn = "Test Arbeidstaker",
+                erStatligArbeidsgiver = true,
+                erStatsansatt = true,
+            )
+            medKobletArbeidsgiverSkjema { erStatligArbeidsgiver = true }
+        }
+        val eldreJson = mapper.writeValueAsString(dto)
+            .replace("\"erStatligArbeidsgiver\"", "\"erOffentligArbeidsgiver\"")
+            .replace("\"erStatsansatt\"", "\"erOffentligTjenesteperson\"")
+
+        mapper.readValue(eldreJson, UtsendtArbeidstakerSkjemaM2MDto::class.java) shouldBe dto
     }
 
     private fun fjernFelterRekursivt(node: JsonNode, vararg feltnavn: String) {

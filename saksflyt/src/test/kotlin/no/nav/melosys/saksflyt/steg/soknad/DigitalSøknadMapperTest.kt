@@ -207,7 +207,7 @@ internal class DigitalSøknadMapperTest {
         fun `erOffentligVirksomhet mappes fra arbeidsgiver-delens registermetadata`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVERS_DEL
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
                 data = arbeidsgiverData()
             }
 
@@ -220,7 +220,7 @@ internal class DigitalSøknadMapperTest {
         fun `erOffentligVirksomhet hentes fra arbeidstakers metadata når arbeidsgiver-del mangler`() {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
                 data = arbeidstakerData()
             }
 
@@ -438,6 +438,41 @@ internal class DigitalSøknadMapperTest {
             søknad.foretakUtland shouldHaveSize 1
             søknad.foretakUtland.first().navn shouldBe "AG-virksomhet"
             søknad.foretakUtland.first().tilhorerSammeKonsern shouldBe false
+        }
+
+        @Test
+        fun `mapper utenlandske virksomheter fra lønnsspørsmålet i arbeidstaker-delens skatteforhold`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    skatteforholdOgInntekt = skatteforholdMedLonnsvirksomheter(
+                        utenlandske = listOf(utenlandskBase("Lønnsutbetaler GmbH", "DE-7", "DE"))
+                    )
+                )
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.foretakUtland shouldHaveSize 1
+            søknad.foretakUtland.first().navn shouldBe "Lønnsutbetaler GmbH"
+            søknad.foretakUtland.first().selvstendigNæringsvirksomhet shouldBe false
+        }
+
+        @Test
+        fun `dedupliserer identiske lønnsvirksomheter fra arbeidstakers skatteforhold og arbeidsgivers lønnsliste`() {
+            val felles = utenlandskBase("Sammeselskap GmbH", "DE-100", "DE")
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = arbeidstakerData(
+                    skatteforholdOgInntekt = skatteforholdMedLonnsvirksomheter(utenlandske = listOf(felles))
+                )
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(lonn = lonnMedVirksomheter(utenlandske = listOf(felles)))
+                }
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.foretakUtland shouldHaveSize 1
         }
 
         @Test
@@ -742,7 +777,7 @@ internal class DigitalSøknadMapperTest {
             val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
                 skjemadel = Skjemadel.ARBEIDSGIVER_OG_ARBEIDSTAKERS_DEL
                 orgnr = "KOMBI-123"
-                erOffentligArbeidsgiver = false
+                erStatligArbeidsgiver = false
                 data = kombinertData(
                     utsendingsperiodeOgLand = landOgPeriode(LandKode.DE, fom, tom),
                     arbeidsgiversData = UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto.ArbeidsgiversData(
@@ -786,6 +821,40 @@ internal class DigitalSøknadMapperTest {
             søknad.arbeidPaaLand.fysiskeArbeidssteder.shouldBeEmpty()
             søknad.maritimtArbeid.shouldBeEmpty()
             søknad.luftfartBaser.shouldBeEmpty()
+        }
+
+        @Test
+        fun `arbeidstaker-del uten arbeidsgiver-del gir arbeidssted fra arbeidstaker-delen`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
+                data = arbeidstakerData(
+                    utsendingsperiodeOgLand = landOgPeriode(LandKode.SE, LocalDate.of(2025, 3, 1), LocalDate.of(2025, 8, 31)),
+                    arbeidssted = arbeidsstedPaaLandUtenHjemmekontor("Ambassaden i Stockholm")
+                )
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.arbeidPaaLand.erFastArbeidssted shouldBe true
+            søknad.arbeidPaaLand.erHjemmekontor.shouldBeNull()
+            søknad.arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
+            val sted = søknad.arbeidPaaLand.fysiskeArbeidssteder.first()
+            sted.virksomhetNavn shouldBe "Ambassaden i Stockholm"
+            sted.adresse.landkode shouldBe "SE"
+        }
+
+        @Test
+        fun `arbeidsgiver-delens arbeidssted har presedens over arbeidstaker-delens`() {
+            val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
+                data = arbeidstakerData(arbeidssted = arbeidsstedPaaLandUtenHjemmekontor("Fra arbeidstaker"))
+                medKobletArbeidsgiverSkjema {
+                    data = arbeidsgiverData(arbeidssted = arbeidsstedPaaLandUtenHjemmekontor("Fra arbeidsgiver"))
+                }
+            }
+
+            val søknad = DigitalSøknadMapper.tilSoeknad(dto)
+
+            søknad.arbeidPaaLand.fysiskeArbeidssteder.single().virksomhetNavn shouldBe "Fra arbeidsgiver"
         }
 
         @Test
@@ -909,11 +978,33 @@ internal class DigitalSøknadMapperTest {
     private fun arbeidstakerData(
         utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto? = null,
         arbeidssituasjon: ArbeidssituasjonDto? = null,
-        skatteforholdOgInntekt: SkatteforholdOgInntektDto? = null
+        skatteforholdOgInntekt: SkatteforholdOgInntektDto? = null,
+        arbeidssted: ArbeidsstedIUtlandetDto? = null
     ) = UtsendtArbeidstakerArbeidstakersSkjemaDataDto(
         utsendingsperiodeOgLand = utsendingsperiodeOgLand,
+        arbeidsstedIUtlandet = arbeidssted,
         arbeidssituasjon = arbeidssituasjon,
         skatteforholdOgInntekt = skatteforholdOgInntekt
+    )
+
+    private fun arbeidsstedPaaLandUtenHjemmekontor(navnPaVirksomhet: String) = ArbeidsstedIUtlandetDto(
+        arbeidsstedType = ArbeidsstedType.PA_LAND,
+        paLand = PaLandDto(
+            navnPaVirksomhet = navnPaVirksomhet,
+            fastEllerVekslendeArbeidssted = FastEllerVekslendeArbeidssted.FAST,
+            fastArbeidssted = PaLandFastArbeidsstedDto("Strandvägen", "1", "11456", "Stockholm"),
+            erHjemmekontor = null
+        )
+    )
+
+    private fun skatteforholdMedLonnsvirksomheter(utenlandske: List<UtenlandskVirksomhet>) = SkatteforholdOgInntektDto(
+        erSkattepliktigTilNorgeIHeleutsendingsperioden = true,
+        mottarPengestotteFraAnnetEosLandEllerSveits = false,
+        landSomUtbetalerPengestotte = null,
+        pengestotteSomMottasFraAndreLandBelop = null,
+        pengestotteSomMottasFraAndreLandBeskrivelse = null,
+        arbeidsgiverBetalerAllLonnOgNaturaytelserIUtsendingsperioden = false,
+        virksomheterSomUtbetalerLonnOgNaturalytelser = NorskeOgUtenlandskeVirksomheter(emptyList(), utenlandske)
     )
 
     private fun skatteforholdOgInntekt() = SkatteforholdOgInntektDto(
