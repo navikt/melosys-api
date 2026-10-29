@@ -162,22 +162,23 @@ class MottatteOpplysningerService(
     }
 
     /**
-     * Ved temaskifte kan søknadsflyten endres (yrkesaktiv ↔ ikke-yrkesaktiv). Da må typen på
-     * mottatteopplysningene følge den nye flyten, ellers caster vedtaksbrevet feil datatype
-     * (ClassCastException). Periode og søknadsland bevares; øvrige felt er ikke relevante på tvers
-     * av flytene og settes til standardverdier.
+     * Ved temaskifte mellom yrkesaktiv og ikke-yrkesaktiv må typen på mottatteopplysningene følge den
+     * nye flyten, ellers caster vedtaksbrevet feil datatype (ClassCastException). Andre typer
+     * (anmodning/attest, SED, utsendte arbeidstakere) beholdes, siden flyten deres ikke skifter.
+     * Periode og søknadsland bevares; øvrige felt er ikke relevante på tvers av flytene.
      */
     @Transactional
     fun synkroniserMottatteOpplysningerMedFlyt(behandling: Behandling) {
         val mottatteOpplysninger = behandling.mottatteOpplysninger ?: return
-        val (ønsketType, nyData) = utledSøknadstypeOgTomData(behandling) ?: return
-        if (mottatteOpplysninger.type == ønsketType) {
+        val harIkkeYrkesaktivType = mottatteOpplysninger.type == Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) == harIkkeYrkesaktivType) {
             return
         }
+        val (ønsketType, nyData) = utledSøknadstypeOgTomData(behandling) ?: return
 
-        mottatteOpplysninger.mottatteOpplysningerData?.let {
-            nyData.periode = it.periode
-            nyData.soeknadsland = it.soeknadsland
+        mottatteOpplysninger.mottatteOpplysningerData?.let { gammelData ->
+            nyData.periode = gammelData.periode?.let { Periode(it.fom, it.tom) }
+            nyData.soeknadsland = gammelData.soeknadsland?.let { Soeknadsland(ArrayList(it.landkoder), it.isFlereLandUkjentHvilke) }
         }
 
         log.info(

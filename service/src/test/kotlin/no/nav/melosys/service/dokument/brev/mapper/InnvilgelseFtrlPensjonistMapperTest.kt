@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -11,6 +12,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -25,8 +27,10 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MinstebeløpResponse
 import no.nav.melosys.service.avgift.MinstebeløpService
@@ -502,6 +506,23 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
                 harMedlemskapsperioderIForegåendeÅr.shouldBeFalse()
             }
+    }
+
+    @Test
+    fun `mapPensjonistFrivillig gir forståelig feil når mottatteopplysningene ikke er SøknadNorgeEllerUtenforEØS`() {
+        val behandlingsresultat = lagPensjonistBehandlingsresultatMedBeregningsregel(
+            Medlemskapstyper.FRIVILLIG, Avgiftsberegningsregel.ORDINÆR
+        ).apply {
+            hentBehandling().hentMottatteOpplysninger().apply {
+                type = Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+                mottatteOpplysningerData = SøknadIkkeYrkesaktiv()
+            }
+        }
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+
+        shouldThrow<FunksjonellException> {
+            innvilgelseFtrlMapper.mapPensjonistFrivillig(lagBrevbestilling())
+        }.message.shouldContain("SØKNAD_IKKE_YRKESAKTIV")
     }
 
     @Test

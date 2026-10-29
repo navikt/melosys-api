@@ -158,7 +158,10 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
             håndterer.håndter(prosessinstans)
 
             verify { behandlingService.endreTema(behandling, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY) }
-            verify { mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any()) }
+            verifyOrder {
+                mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(behandling)
+                mottatteOpplysningerService.oppdaterMottatteOpplysningerFraSøknad(behandlingId, any(), any())
+            }
         }
     }
 
@@ -469,6 +472,7 @@ internal class DigitalSøknadEksisterendeSakHåndtererTest {
 
     private fun mockEndreTema() {
         every { behandlingService.endreTema(any<Behandling>(), any()) } just Runs
+        every { mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(any()) } just Runs
     }
 
     private fun mockTømBehandlingsresultat() {

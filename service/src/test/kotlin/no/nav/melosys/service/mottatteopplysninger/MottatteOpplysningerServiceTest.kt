@@ -8,6 +8,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldNotBeInstanceOf
@@ -39,6 +41,8 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -727,6 +731,8 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerData.shouldBeInstanceOf<SøknadIkkeYrkesaktiv>()
             mottatteOpplysningerData.periode.fom.shouldBe(LocalDate.of(2024, 1, 1))
             mottatteOpplysningerData.soeknadsland.landkoder.shouldContainExactly("SE")
+            jsonData.shouldContain("ikkeYrkesaktivSituasjontype")
+            jsonData.shouldContain("2024-01-01")
         }
     }
 
@@ -752,7 +758,31 @@ internal class MottatteOpplysningerServiceTest {
             type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
             mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
             mottatteOpplysningerData.soeknadsland.landkoder.shouldContainExactly("DK")
+            jsonData.shouldContain("\"DK\"")
+            jsonData.shouldNotContain("ikkeYrkesaktivSituasjontype")
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Mottatteopplysningertyper::class,
+        names = ["ANMODNING_ELLER_ATTEST", "SED", "SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS", "SØKNAD_A1_YRKESAKTIVE_EØS"]
+    )
+    fun synkroniserMottatteOpplysningerMedFlyt_yrkesaktivFlytUendret_beholderTypeOgData(type: Mottatteopplysningertyper) {
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        val data = AnmodningEllerAttest()
+        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER).apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                this.type = type
+                mottatteOpplysningerData = data
+            }
+        }
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        behandling.mottatteOpplysninger!!.type.shouldBe(type)
+        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.shouldBe(data)
+        verify(exactly = 0) { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) }
     }
 
     @Test
