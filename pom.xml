@@ -48,7 +48,7 @@
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>45-26485e1</doksys.dokumentproduksjon.version>
-        <token-support.version>6.0.14</token-support.version>
+        <token-support.version>7.0.1</token-support.version>
 
 
         <!-- Versjoner av eksterne biblioteker -->
