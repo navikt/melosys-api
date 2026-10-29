@@ -115,13 +115,13 @@ class OppretteÅrsavregningVedEndring(
 
     private fun finnÅrMedEndringer(
         behandlingsresultat: Behandlingsresultat,
-        opprinneligBehandlingsresultat: Behandlingsresultat
+        sisteBehandlingsresultatMedVedtak: Behandlingsresultat
     ): Set<Int> {
-        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(opprinneligBehandlingsresultat)
+        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(sisteBehandlingsresultatMedVedtak)
             .union(hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat))
 
         return potensielleÅr.filter { år ->
-            perioderForÅr(behandlingsresultat, år) != perioderForÅr(opprinneligBehandlingsresultat, år)
+            perioderForÅr(behandlingsresultat, år) != perioderForÅr(sisteBehandlingsresultatMedVedtak, år)
         }.toSet()
     }
 
