@@ -85,6 +85,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             trygdeavgiftMottakerService,
             trygdeavgiftsberegningService,
             minstebeløpService,
+            AvgiftsgrunnlagMapper(unleash),
             unleash
         )
     }

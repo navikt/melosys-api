@@ -30,7 +30,8 @@ class InformasjonTrygdeavgift(
     val minstebelopVerdi: BigDecimal? = null,
     val minstebelopAar: Int? = null,
     val harMinstebelopPeriode: Boolean = false,
-    val har25ProsentRegelPeriode: Boolean = false
+    val har25ProsentRegelPeriode: Boolean = false,
+    val avgiftsgrunnlag: Avgiftsgrunnlag? = null,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
