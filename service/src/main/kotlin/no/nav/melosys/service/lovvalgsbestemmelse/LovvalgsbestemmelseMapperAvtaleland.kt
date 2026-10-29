@@ -3,6 +3,9 @@ package no.nav.melosys.service.lovvalgsbestemmelse
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Land_iso2.*
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ba.*
@@ -30,7 +33,7 @@ class LovvalgsbestemmelseMapperAvtaleland {
 
         // Oversikt over regler: https://confluence.adeo.no/display/TEESSI/Spesifikke+kodeverk+Trygdeavtaler#SpesifikkekodeverkTrygdeavtaler-Lovvalgsbestemmelser
         fun mapToLovvalgsbestemmelse(
-            land: Land_iso2, mappingType: LovvalgsbestemmelseMappingType
+            land: Land_iso2, mappingType: LovvalgsbestemmelseMappingType, behandlingstema: Behandlingstema
         ): Set<LovvalgBestemmelse> {
             return when (land) {
                 AU -> mapForAU(mappingType)
@@ -48,7 +51,7 @@ class LovvalgsbestemmelseMapperAvtaleland {
                 CA_QC -> mapForCAQC(mappingType)
                 RS -> mapForRS(mappingType)
                 SI -> mapForSI(mappingType)
-                GB -> mapForGB(mappingType)
+                GB -> mapForGB(mappingType, behandlingstema)
                 CH -> mapForCH(mappingType)
                 TR -> mapForTR(mappingType)
                 US -> mapForUS(mappingType)
@@ -193,15 +196,43 @@ class LovvalgsbestemmelseMapperAvtaleland {
             }
         }
 
-        private fun mapForGB(mappingType: LovvalgsbestemmelseMappingType): Set<Lovvalgsbestemmelser_trygdeavtale_gb> {
+        private fun mapForGB(
+            mappingType: LovvalgsbestemmelseMappingType, behandlingstema: Behandlingstema
+        ): Set<LovvalgBestemmelse> {
             return when (mappingType) {
                 LovvalgsbestemmelseMappingType.YRKESAKTIV -> setOf(UK_ART6_1, UK_ART6_5, UK_ART7_1, UK_ART8_2, UK_ART9)
                 LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(UK_ART5_4, UK_ART6_2, UK_ART8_5, UK_ART9)
-                LovvalgsbestemmelseMappingType.UNNTAK -> setOf(
+                LovvalgsbestemmelseMappingType.UNNTAK -> konvensjonsbestemmelserForGB(behandlingstema) + setOf(
                     UK, UK_ART6_1, UK_ART6_10, UK_ART7_1, UK_ART7_3, UK_ART8_2, UK_ART9
                 )
             }
         }
+
+        private fun konvensjonsbestemmelserForGB(behandlingstema: Behandlingstema): Set<LovvalgBestemmelse> =
+            when (behandlingstema) {
+                Behandlingstema.REGISTRERING_UNNTAK -> setOf(
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4,
+                    Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_5,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1A,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1B1,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2A,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2B,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_3,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1,
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3
+                )
+
+                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL -> setOf(
+                    Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+                )
+
+                else -> emptySet()
+            }
 
         private fun mapForCH(mappingType: LovvalgsbestemmelseMappingType): Set<Lovvalgsbestemmelser_trygdeavtale_ch> {
             return when (mappingType) {

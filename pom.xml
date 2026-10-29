@@ -18,7 +18,6 @@
 
     <modules>
         <module>app</module>
-        <module>soknad-altinn</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
@@ -41,9 +40,9 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.358</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.359</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.154-midlertidig</melosys.brev.version>
-        <melosys-skjema-api-types.version>2026.10.19-fe7338c8bf93</melosys-skjema-api-types.version>
+        <melosys-skjema-api-types.version>2026.10.23-8d0d600fb1f9</melosys-skjema-api-types.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
@@ -98,7 +97,7 @@
         <checkerframework.version>4.3.1</checkerframework.version>
         <threeten.version>1.11.0</threeten.version>
         <jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
-        <snappy.java.version>1.1.10.11</snappy.java.version>
+        <snappy.java.version>1.1.10.12</snappy.java.version>
         <mockito.inline.version>5.2.0</mockito.inline.version>
         <jacoco.version>0.8.15</jacoco.version>
         <springmockk.version>5.0.1</springmockk.version>
@@ -143,11 +142,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>app</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>soknad-altinn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -351,16 +351,6 @@ object ProsessflytDefinisjon {
             AVSLUTT_SAK_OG_BEHANDLING,
             ProsessSteg.SYNK_SKJEMA_SAKSSTATUS
         ),
-        MOTTAK_SOKNAD_ALTINN to ProsessFlyt(
-            prosessType = MOTTAK_SOKNAD_ALTINN,
-            OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD,
-            OPPRETT_ARKIVSAK,
-            OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN,
-            HENT_REGISTEROPPLYSNINGER,
-            VURDER_INNGANGSVILKÅR,
-            OPPRETT_OPPGAVE,
-            SEND_FORVALTNINGSMELDING
-        ),
         MOTTAK_DIGITAL_SØKNAD to ProsessFlyt(
             prosessType = MOTTAK_DIGITAL_SØKNAD,
             HENT_DIGITAL_SØKNADSDATA,

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
+import no.nav.melosys.config.observability.Traceparent
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingService
@@ -81,7 +82,12 @@ class SatsendringProsessGenerator(
                     ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
             } else {
-                val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
+                val uuid = Traceparent.iNyTrace(
+                    "satsendring prosessinstans",
+                    mapOf("saksnummer" to behandlingInfo.saksnummer, "behandlingId" to behandlingInfo.behandlingID.toString()),
+                ) {
+                    prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
+                }
                 log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
                 jobMonitor.stats.enkelSatsendringProsesser.add(
                     ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)
@@ -108,7 +114,12 @@ class SatsendringProsessGenerator(
                     ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
             } else {
-                val uuid = prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, år)
+                val uuid = Traceparent.iNyTrace(
+                    "satsendring prosessinstans",
+                    mapOf("saksnummer" to behandlingInfo.saksnummer, "behandlingId" to behandlingInfo.behandlingID.toString()),
+                ) {
+                    prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, år)
+                }
                 log.info("Opprettet satsendring med tilbakestilling av avgift: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
                 jobMonitor.stats.satsendringSamtAktivBehandlingProsesser.add(
                     ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)

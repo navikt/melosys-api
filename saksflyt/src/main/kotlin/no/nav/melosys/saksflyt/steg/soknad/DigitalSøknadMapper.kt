@@ -16,6 +16,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBas
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.skjema.types.felles.Ansettelsesform
 import no.nav.melosys.skjema.types.felles.LandKode
+import no.nav.melosys.skjema.types.felles.NorskeOgUtenlandskeVirksomheter
 import no.nav.melosys.skjema.types.felles.PeriodeDto
 import no.nav.melosys.skjema.types.felles.UtenlandskVirksomhetBase
 import no.nav.melosys.skjema.types.m2m.UtsendtArbeidstakerSkjemaM2MDto
@@ -28,10 +29,10 @@ internal fun mapPeriode(periodeDto: PeriodeDto?): Periode =
 internal fun mapSoeknadsland(landkode: LandKode?): Soeknadsland =
     Soeknadsland(landkode?.let { listOf(it.name) } ?: emptyList(), false)
 
-internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean {
+internal fun UtsendtArbeidstakerSkjemaM2MDto.erStatligArbeidsgiver(): Boolean {
     val skjemaer = listOfNotNull(skjema, kobletSkjema)
     val registerverdier = skjemaer
-        .mapNotNull { it.metadata.erOffentligArbeidsgiver }
+        .mapNotNull { it.metadata.erStatligArbeidsgiver }
         .distinct()
     check(registerverdier.size <= 1) { "Koblede skjemaer har motstridende klassifisering i EREG" }
     return checkNotNull(registerverdier.singleOrNull()) {
@@ -45,7 +46,6 @@ internal fun UtsendtArbeidstakerSkjemaM2MDto.erOffentligArbeidsgiver(): Boolean 
  * Dekker seksjonene: Periode og land, Arbeidsgiver/virksomhet, Arbeidssted(er).
  * Fullmektig håndteres ikke her — se MELOSYS-8031 (aktør på Fagsak, ikke felt på Soeknad).
  *
- * Regel ved begge deler: arbeidstakers del har presedens over arbeidsgivers del.
  * Full skjemadata lagres som original_data (JSON) i skjema_sak_mapping.
  */
 object DigitalSøknadMapper {
@@ -63,22 +63,25 @@ object DigitalSøknadMapper {
         val arbeidstakersDel = hentArbeidstakersData(dto)
         val arbeidsgiversDel = hentArbeidsgiversData(dto)
 
-        // Periode og land: AT vinner, AG fallback
         val periodeOgLand = arbeidstakersDel?.utsendingsperiodeOgLand ?: arbeidsgiversDel?.utsendingsperiodeOgLand
         søknad.periode = mapPeriode(periodeOgLand?.utsendelsePeriode)
         søknad.soeknadsland = mapSoeknadsland(periodeOgLand?.utsendelseLand)
 
-        // Arbeidssted kommer kun fra arbeidsgivers del
-        mapArbeidssteder(søknad, arbeidsgiversDel?.arbeidsstedIUtlandet, periodeOgLand?.utsendelseLand)
+        // Statsansatte som sender før arbeidsgiver, oppgir arbeidsstedet selv.
+        // Hvis arbeidssted også finnes i arbeidsgivers del, brukes det derfra.
+        val arbeidssted = arbeidsgiversDel?.arbeidsstedIUtlandet ?: arbeidstakersDel?.arbeidsstedIUtlandet
+        mapArbeidssteder(søknad, arbeidssted, periodeOgLand?.utsendelseLand)
 
-        // Norsk arbeidsgiver (hovedarbeidsgivers orgnr: AT vinner, AG fallback)
         søknad.juridiskArbeidsgiverNorge =
             mapJuridiskArbeidsgiverNorge(dto, arbeidsgiversDel?.arbeidsgiverensVirksomhetINorge)
 
-        // Utenlandske virksomheter ("Arbeidsgiver i utlandet") pre-utfylles fra både arbeidsgivers
-        // lønnsliste og arbeidstakers virksomhetsliste. Identiske oppføringer dedupliseres.
+        // Statsansatte som sender før arbeidsgiver, oppgir lønnsutbetalende virksomheter i skatteforholdOgInntekt,
+        // ikke i arbeidsgivers del. Begge kildene må derfor tas med.
         søknad.foretakUtland = mapUtenlandskeVirksomheter(
-            arbeidsgiversDel?.arbeidstakerensLonn,
+            listOfNotNull(
+                arbeidsgiversDel?.arbeidstakerensLonn?.virksomheterSomUtbetalerLonnOgNaturalytelser,
+                arbeidstakersDel?.skatteforholdOgInntekt?.virksomheterSomUtbetalerLonnOgNaturalytelser
+            ),
             arbeidstakersDel?.arbeidssituasjon
         )
     }
@@ -88,22 +91,17 @@ object DigitalSøknadMapper {
 
     private fun hentArbeidstakersData(dto: UtsendtArbeidstakerSkjemaM2MDto): ArbeidstakersDataLook? {
         return when (val data = dto.skjema.data) {
-            is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(
-                utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
-                arbeidssituasjon = data.arbeidssituasjon
-            )
+            is UtsendtArbeidstakerArbeidstakersSkjemaDataDto -> ArbeidstakersDataLook(data)
 
             is UtsendtArbeidstakerArbeidsgiverOgArbeidstakerSkjemaDataDto -> ArbeidstakersDataLook(
                 utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
-                arbeidssituasjon = data.arbeidstakersData.arbeidssituasjon
+                arbeidsstedIUtlandet = null,
+                arbeidssituasjon = data.arbeidstakersData.arbeidssituasjon,
+                skatteforholdOgInntekt = data.arbeidstakersData.skatteforholdOgInntekt
             )
 
-            else -> (dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto)?.let {
-                ArbeidstakersDataLook(
-                    utsendingsperiodeOgLand = it.utsendingsperiodeOgLand,
-                    arbeidssituasjon = it.arbeidssituasjon
-                )
-            }
+            else -> (dto.kobletSkjema?.data as? UtsendtArbeidstakerArbeidstakersSkjemaDataDto)
+                ?.let(::ArbeidstakersDataLook)
         }
     }
 
@@ -136,8 +134,17 @@ object DigitalSøknadMapper {
 
     private data class ArbeidstakersDataLook(
         val utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto?,
-        val arbeidssituasjon: ArbeidssituasjonDto?
-    )
+        val arbeidsstedIUtlandet: ArbeidsstedIUtlandetDto?,
+        val arbeidssituasjon: ArbeidssituasjonDto?,
+        val skatteforholdOgInntekt: SkatteforholdOgInntektDto?
+    ) {
+        constructor(data: UtsendtArbeidstakerArbeidstakersSkjemaDataDto) : this(
+            utsendingsperiodeOgLand = data.utsendingsperiodeOgLand,
+            arbeidsstedIUtlandet = data.arbeidsstedIUtlandet,
+            arbeidssituasjon = data.arbeidssituasjon,
+            skatteforholdOgInntekt = data.skatteforholdOgInntekt
+        )
+    }
 
     private data class ArbeidsgiversDataLook(
         val utsendingsperiodeOgLand: UtsendingsperiodeOgLandDto?,
@@ -150,7 +157,7 @@ object DigitalSøknadMapper {
         dto: UtsendtArbeidstakerSkjemaM2MDto,
         virksomhetINorge: ArbeidsgiverensVirksomhetINorgeDto?
     ): JuridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
-        erOffentligVirksomhet = dto.erOffentligArbeidsgiver()
+        erOffentligVirksomhet = dto.erStatligArbeidsgiver()
         ekstraArbeidsgivere = listOfNotNull(hentHovedarbeidsgiversOrgnr(dto))
         // Antall ansatte er hentet fra EREG (juridisk enhet), resten er oppgitt av arbeidsgiver
         antallAnsatte = listOfNotNull(dto.skjema, dto.kobletSkjema).firstNotNullOfOrNull { it.metadata.antallAnsatte }
@@ -176,21 +183,20 @@ object DigitalSøknadMapper {
     }
 
     private fun mapUtenlandskeVirksomheter(
-        agLonn: ArbeidstakerensLonnDto?,
+        lonnsvirksomheter: List<NorskeOgUtenlandskeVirksomheter>,
         atArbeidssituasjon: ArbeidssituasjonDto?
     ): List<ForetakUtland> {
-        val agUtenlandske = agLonn?.virksomheterSomUtbetalerLonnOgNaturalytelser
-            ?.utenlandskeVirksomheter.orEmpty()
+        val lonnUtenlandske = lonnsvirksomheter.flatMap { it.utenlandskeVirksomheter.orEmpty() }
         val atUtenlandske = atArbeidssituasjon?.virksomheterArbeidstakerJobberForIutsendelsesPeriode
             ?.utenlandskeVirksomheter.orEmpty()
 
-        // AT-versjonen tas først (har ansettelsesform-info). AG-versjon legges kun til hvis ikke
-        // identisk på alle felles base-felter.
+        // Ved duplikater mellom listene brukes oppføringen fra arbeidssituasjonen for å bevare
+        // opplysningen om selvstendig næringsvirksomhet. Ved ulike virksomhetsopplysninger beholdes begge.
         val atKeys = atUtenlandske.map(::dedupNokkel).toSet()
-        val agUnike = agUtenlandske.filterNot { dedupNokkel(it) in atKeys }
+        val lonnUnike = lonnUtenlandske.distinctBy(::dedupNokkel).filterNot { dedupNokkel(it) in atKeys }
 
         return atUtenlandske.map { mapForetakUtland(it, selvstendig = it.ansettelsesform == Ansettelsesform.SELVSTENDIG_NAERINGSDRIVENDE) } +
-            agUnike.map { mapForetakUtland(it) }
+            lonnUnike.map { mapForetakUtland(it) }
     }
 
     private fun dedupNokkel(v: UtenlandskVirksomhetBase): List<Any?> = listOf(
@@ -246,7 +252,7 @@ object DigitalSøknadMapper {
                     region = null,
                     landkode = utsendelseLand?.name
                 )
-            } ?: StrukturertAdresse()
+            } ?: StrukturertAdresse(landkode = utsendelseLand?.name)
 
             fysiskeArbeidssteder = listOf(
                 FysiskArbeidssted(virksomhetNavn = paLand.navnPaVirksomhet, adresse = adresse)

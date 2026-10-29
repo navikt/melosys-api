@@ -771,7 +771,7 @@ internal class JournalfoeringServiceTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             }
         }
-        val behandlingsresultat = Behandlingsresultat.forTest { type = Behandlingsresultattyper.AVSLAG_SØKNAD }
+        val behandlingsresultat = Behandlingsresultat.forTest { type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND }
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { behandlingsresultatRepository.findById(any()) } returns Optional.of(behandlingsresultat)

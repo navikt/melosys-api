@@ -35,7 +35,7 @@ class LovvalgsbestemmelseService {
         }
 
         return LovvalgsbestemmelseMapperAvtaleland.mapToLovvalgsbestemmelse(
-            land, LovvalgsbestemmelseMappingType.utledType(sakstema, behandlingstema)
+            land, LovvalgsbestemmelseMappingType.utledType(sakstema, behandlingstema), behandlingstema
         )
     }
 }

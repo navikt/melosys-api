@@ -14,10 +14,12 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -114,16 +116,44 @@ internal class LovvalgsbestemmelseServiceTest {
     fun henLovvalgsperioder_trygdeavtaleUnntakRegistreringUnntakGB_liste() {
         lovvalgsbestemmelseService.hentLovvalgsbestemmelser(
             Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK, Land_iso2.GB
-        ).shouldBe(
-            setOf(
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_10,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_1,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART9
-            )
+        ).shouldContainExactly(
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3B,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4,
+            Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_5,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_1,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1A,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_1B1,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2A,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_2B,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_3,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART15_4,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_1,
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART16_3,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_10,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART9
+        )
+    }
+
+    @Test
+    fun henLovvalgsperioder_trygdeavtaleUnntakAnmodningomunntakhovedregelGB_liste() {
+        lovvalgsbestemmelseService.hentLovvalgsbestemmelser(
+            Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL, Land_iso2.GB
+        ).shouldContainExactly(
+            Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_10,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART9
         )
     }
 
