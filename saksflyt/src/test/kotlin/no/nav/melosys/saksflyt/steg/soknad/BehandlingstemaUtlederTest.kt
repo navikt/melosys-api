@@ -17,7 +17,7 @@ import no.nav.melosys.skjema.types.utsendtarbeidstaker.UtsendtArbeidstakerArbeid
 class BehandlingstemaUtlederTest {
 
     @Test
-    fun `ren arbeidstakerdel bruker offentlig-status fra metadata`() {
+    fun `ren arbeidstakerdel bruker statlig-status fra metadata`() {
         val dto = lagUtsendtArbeidstakerSkjemaM2MDto {
             skjemadel = Skjemadel.ARBEIDSTAKERS_DEL
             data = UtsendtArbeidstakerArbeidstakersSkjemaDataDto()
@@ -26,7 +26,7 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
             )
         }
 
@@ -49,7 +49,7 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = false
+                erStatligArbeidsgiver = false
             )
         }
 
@@ -74,7 +74,7 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = null
+                erStatligArbeidsgiver = null
             )
         }
 
@@ -100,11 +100,11 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = true.takeIf { arbeidstakerVersjon == "2" }
+                erStatligArbeidsgiver = true.takeIf { arbeidstakerVersjon == "2" }
             )
             medKobletArbeidsgiverSkjema {
                 skjemaDefinisjonVersjon = arbeidsgiverVersjon
-                erOffentligArbeidsgiver = true.takeIf { arbeidsgiverVersjon == "2" }
+                erStatligArbeidsgiver = true.takeIf { arbeidsgiverVersjon == "2" }
                 data = UtsendtArbeidstakerArbeidsgiversSkjemaDataDto(
                     arbeidsgiverensVirksomhetINorge = ArbeidsgiverensVirksomhetINorgeDto(
                         erArbeidsgiverenOffentligVirksomhet = false
@@ -113,7 +113,7 @@ class BehandlingstemaUtlederTest {
             }
         }
 
-        assertThat(dto.erOffentligArbeidsgiver()).isTrue()
+        assertThat(dto.erStatligArbeidsgiver()).isTrue()
         assertThat(BehandlingstemaUtleder.utled(dto)).isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
         assertThat(DigitalSøknadMapper.tilSoeknad(dto).juridiskArbeidsgiverNorge.erOffentligVirksomhet).isTrue()
 
@@ -133,15 +133,15 @@ class BehandlingstemaUtlederTest {
                 arbeidsgiverNavn = arbeidsgiverNavn,
                 juridiskEnhetOrgnr = juridiskEnhetOrgnr,
                 arbeidstakerNavn = arbeidstakerNavn,
-                erOffentligArbeidsgiver = true
+                erStatligArbeidsgiver = true
             )
             medKobletArbeidsgiverSkjema {
                 skjemaDefinisjonVersjon = "2"
-                erOffentligArbeidsgiver = false
+                erStatligArbeidsgiver = false
             }
         }
 
-        assertThatThrownBy { dto.erOffentligArbeidsgiver() }
+        assertThatThrownBy { dto.erStatligArbeidsgiver() }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessageContaining("motstridende klassifisering i EREG")
     }
