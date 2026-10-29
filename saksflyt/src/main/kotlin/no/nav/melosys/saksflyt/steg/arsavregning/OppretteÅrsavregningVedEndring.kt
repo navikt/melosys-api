@@ -90,13 +90,13 @@ class OppretteÅrsavregningVedEndring(
         if (behandling.erFørstegangsvurdering()) {
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
         } else if (behandling.erNyVurdering()) {
-            val sammenligningsgrunnlag = finnSisteBehandlingsresultatMedVedtak(behandling)
-            if (sammenligningsgrunnlag == null) {
+            val sisteBehandlingsresultatMedVedtak = finnSisteBehandlingsresultatMedVedtak(behandling)
+            if (sisteBehandlingsresultatMedVedtak == null) {
                 opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
                 return
             }
 
-            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, sammenligningsgrunnlag)
+            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, sisteBehandlingsresultatMedVedtak)
             if (årMedEndringer.isNotEmpty()) {
                 opprettÅrsavregning(årMedEndringer, behandling, sendInnhentingsbrev)
             }
@@ -107,7 +107,8 @@ class OppretteÅrsavregningVedEndring(
 
     private fun finnSisteBehandlingsresultatMedVedtak(behandling: Behandling): Behandlingsresultat? =
         behandling.fagsak.behandlinger
-            .filter { it.id != behandling.id && !it.erÅrsavregning() }
+            .filter { it.id != behandling.id }
+            .filterNot { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harVedtak() }
             .maxWithOrNull(compareBy({ it.hentVedtakMetadata().vedtaksdato }, { it.registrertDato }))
