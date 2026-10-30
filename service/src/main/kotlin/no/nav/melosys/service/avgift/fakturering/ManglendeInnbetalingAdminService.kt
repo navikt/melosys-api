@@ -2,7 +2,11 @@ package no.nav.melosys.service.avgift.fakturering
 
 import jakarta.persistence.EntityManager
 import mu.KotlinLogging
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.LåsReferanseType
 import no.nav.melosys.saksflytapi.domain.ManglendeInnbetalingBehandlingLåsReferanse
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -35,7 +39,7 @@ class ManglendeInnbetalingAdminService(private val entityManager: EntityManager)
     fun hentSaker(fakturaserieReferanser: List<String>): List<FakturaserieSakDto> {
         val sakerPerReferanse = entityManager.createQuery(
             """
-            SELECT br.fakturaserieReferanse, f.saksnummer, f.status
+            SELECT br.fakturaserieReferanse, f.saksnummer, f.status, f.type, f.tema, b.tema, b.type
             FROM Behandlingsresultat br JOIN br.behandling b JOIN b.fagsak f
             WHERE br.fakturaserieReferanse IN :referanser
             ORDER BY br.registrertDato DESC, b.id DESC
@@ -44,7 +48,19 @@ class ManglendeInnbetalingAdminService(private val entityManager: EntityManager)
         )
             .setParameter("referanser", fakturaserieReferanser)
             .resultList
-            .groupBy({ it[0] as String }, { Sak(it[1] as String, it[2] as Saksstatuser) })
+            .groupBy(
+                { it[0] as String },
+                {
+                    Sak(
+                        saksnummer = it[1] as String,
+                        status = it[2] as Saksstatuser,
+                        sakstype = it[3] as Sakstyper,
+                        sakstema = it[4] as Sakstemaer,
+                        behandlingstema = it[5] as Behandlingstema,
+                        behandlingstype = it[6] as Behandlingstyper
+                    )
+                }
+            )
 
         return fakturaserieReferanser.map { referanse ->
             val saker = sakerPerReferanse[referanse].orEmpty()
@@ -53,7 +69,11 @@ class ManglendeInnbetalingAdminService(private val entityManager: EntityManager)
                 fakturaserieReferanse = referanse,
                 saksnummer = nyeste?.saksnummer,
                 saksstatus = nyeste?.status?.name,
-                antallSaker = saker.map { it.saksnummer }.distinct().size
+                antallSaker = saker.map { it.saksnummer }.distinct().size,
+                sakstype = nyeste?.sakstype?.name,
+                sakstema = nyeste?.sakstema?.name,
+                behandlingstema = nyeste?.behandlingstema?.name,
+                behandlingstype = nyeste?.behandlingstype?.name
             )
         }
     }
@@ -150,5 +170,12 @@ class ManglendeInnbetalingAdminService(private val entityManager: EntityManager)
         val saksnummer: String?
     )
 
-    private data class Sak(val saksnummer: String, val status: Saksstatuser)
+    private data class Sak(
+        val saksnummer: String,
+        val status: Saksstatuser,
+        val sakstype: Sakstyper,
+        val sakstema: Sakstemaer,
+        val behandlingstema: Behandlingstema,
+        val behandlingstype: Behandlingstyper
+    )
 }

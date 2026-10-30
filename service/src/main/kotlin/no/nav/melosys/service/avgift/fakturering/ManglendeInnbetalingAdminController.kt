@@ -32,9 +32,10 @@ class ManglendeInnbetalingAdminController(
     @PostMapping("/fakturaserier/saker")
     @Operation(
         summary = "Finn sak for mange fakturaseriereferanser i ett kall",
-        description = "Én rad per unik referanse, i samme rekkefølge. saksnummer og saksstatus er null når " +
-            "referansen ikke finnes. antallSaker > 1 betyr at referansen finnes på flere saker; da er saksnummer " +
-            "saken med nyeste behandlingsresultat. 1–$MAKS_ANTALL_REFERANSER unike referanser, ellers 400."
+        description = "Én rad per unik referanse, i samme rekkefølge. saksnummer, saksstatus, sakstype, sakstema, " +
+            "behandlingstema og behandlingstype (kodeverkets enum-navn) er null når referansen ikke finnes. " +
+            "antallSaker > 1 betyr at referansen finnes på flere saker; da hentes feltene fra nyeste " +
+            "behandlingsresultat og dets behandling og sak. 1–$MAKS_ANTALL_REFERANSER unike referanser, ellers 400."
     )
     fun hentSakerForFakturaserier(@RequestBody request: FakturaserieReferanserDto): ResponseEntity<FakturaserieSakerDto> {
         val referanser = request.fakturaserieReferanser.distinct()
@@ -69,7 +70,11 @@ data class FakturaserieSakDto(
     val fakturaserieReferanse: String,
     val saksnummer: String?,
     val saksstatus: String?,
-    val antallSaker: Int
+    val antallSaker: Int,
+    val sakstype: String?,
+    val sakstema: String?,
+    val behandlingstema: String?,
+    val behandlingstype: String?
 )
 
 data class ManglendeInnbetalingProsesserDto(val prosesser: List<ManglendeInnbetalingProsessDto>)

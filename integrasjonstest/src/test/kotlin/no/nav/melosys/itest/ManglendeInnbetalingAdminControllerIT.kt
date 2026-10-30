@@ -100,7 +100,12 @@ class ManglendeInnbetalingAdminControllerIT(
 
     @Test
     fun `saker gir én rad per unik referanse i samme rekkefølge, og nyeste behandlingsresultat vinner`() {
-        val førstLagret = lagBehandling(lagFagsak("MEL-8372-1", Saksstatuser.ANNULLERT), SERIE_A)
+        val førstLagret = lagBehandling(
+            lagFagsak("MEL-8372-1", Saksstatuser.ANNULLERT, Sakstyper.FTRL, Sakstemaer.TRYGDEAVGIFT),
+            SERIE_A,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.YRKESAKTIV
+        )
         val sistLagret = lagBehandling(lagFagsak("MEL-8372-2", Saksstatuser.OPPRETTET), SERIE_A)
         lagBehandling(lagFagsak("MEL-8372-3", Saksstatuser.OPPHØRT), SERIE_B)
         // Den sist lagrede gjøres eldst, så testen ikke kan bestå på lagringsrekkefølgen
@@ -111,10 +116,15 @@ class ManglendeInnbetalingAdminControllerIT(
             .andExpect(status().isOk).json()
 
         objectMapper.treeToValue(svar["saker"], Array<FakturaserieSakDto>::class.java).toList().shouldContainExactly(
-            FakturaserieSakDto(SERIE_B, "MEL-8372-3", "OPPHØRT", 1),
-            FakturaserieSakDto("UKJENT", null, null, 0),
-            FakturaserieSakDto(SERIE_A, "MEL-8372-1", "ANNULLERT", 2),
+            FakturaserieSakDto(
+                SERIE_B, "MEL-8372-3", "OPPHØRT", 1, "EU_EOS", "MEDLEMSKAP_LOVVALG", "ARBEID_TJENESTEPERSON_ELLER_FLY", "FØRSTEGANG"
+            ),
+            FakturaserieSakDto("UKJENT", null, null, 0, null, null, null, null),
+            FakturaserieSakDto(SERIE_A, "MEL-8372-1", "ANNULLERT", 2, "FTRL", "TRYGDEAVGIFT", "YRKESAKTIV", "NY_VURDERING"),
         )
+        svar["saker"][1].let { ukjent ->
+            listOf("sakstype", "sakstema", "behandlingstema", "behandlingstype").forEach { ukjent[it].isNull shouldBe true }
+        }
     }
 
     @Test
@@ -186,25 +196,35 @@ class ManglendeInnbetalingAdminControllerIT(
             sommertid.atZone(ZoneId.systemDefault()).toInstant().toString()
     }
 
-    private fun lagFagsak(saksnummer: String, status: Saksstatuser): Fagsak = fagsakRepository.save(
+    private fun lagFagsak(
+        saksnummer: String,
+        status: Saksstatuser,
+        sakstype: Sakstyper = Sakstyper.EU_EOS,
+        sakstema: Sakstemaer = Sakstemaer.MEDLEMSKAP_LOVVALG
+    ): Fagsak = fagsakRepository.save(
         Fagsak.forTest {
             this.saksnummer = saksnummer
-            type = Sakstyper.EU_EOS
-            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            type = sakstype
+            tema = sakstema
             this.status = status
             medBruker()
         }
     )
 
-    private fun lagBehandling(fagsak: Fagsak, fakturaserieReferanse: String): Behandling =
+    private fun lagBehandling(
+        fagsak: Fagsak,
+        fakturaserieReferanse: String,
+        behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+        behandlingstema: Behandlingstema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+    ): Behandling =
         behandlingsresultatRepository.saveAndFlush(
             Behandlingsresultat.forTest {
                 this.fakturaserieReferanse = fakturaserieReferanse
                 behandling {
                     medFagsak(fagsak)
-                    type = Behandlingstyper.FØRSTEGANG
+                    type = behandlingstype
                     status = Behandlingsstatus.AVSLUTTET
-                    tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+                    tema = behandlingstema
                 }
             }
         ).hentBehandling()
