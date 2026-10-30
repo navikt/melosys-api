@@ -89,8 +89,13 @@ class DokgenMalMapper(
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
-        val mottatteOpplysningerData =
-            behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData as SøknadIkkeYrkesaktiv
+        val mottatteOpplysninger = behandlingsresultat.hentBehandling().mottatteOpplysninger!!
+        val mottatteOpplysningerData = mottatteOpplysninger.mottatteOpplysningerData as? SøknadIkkeYrkesaktiv
+            ?: throw FunksjonellException(
+                "Mottatteopplysningene (type ${mottatteOpplysninger.type}) for behandling " +
+                    "${behandlingsresultat.hentBehandling().id} kan ikke brukes i ikke-yrkesaktiv vedtaksbrev; " +
+                    "forventet SøknadIkkeYrkesaktiv. Opplysningene er trolig ikke konvertert ved temaskifte."
+            )
         val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder[0]).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse

@@ -3,10 +3,13 @@ package no.nav.melosys.service.mottatteopplysninger
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldNotBeInstanceOf
@@ -38,6 +41,8 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -701,6 +706,109 @@ internal class MottatteOpplysningerServiceTest {
         Journalpost(behandling.initierendeJournalpostId).apply {
             forsendelseMottatt = mottattDato.atStartOfDay().toInstant(ZoneOffset.UTC)
         }
+
+    @Test
+    fun synkroniserMottatteOpplysningerMedFlyt_yrkesaktivTilIkkeYrkesaktiv_konvertererOgBevarerPeriodeOgLand() {
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } answers { firstArg() }
+
+        val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.IKKE_YRKESAKTIV).apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                    periode = Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
+                    soeknadsland = Soeknadsland(listOf("SE"), false)
+                }
+            }
+        }
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV)
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadIkkeYrkesaktiv>()
+            mottatteOpplysningerData.periode.fom.shouldBe(LocalDate.of(2024, 1, 1))
+            mottatteOpplysningerData.soeknadsland.landkoder.shouldContainExactly("SE")
+            jsonData.shouldContain("ikkeYrkesaktivSituasjontype")
+            jsonData.shouldContain("2024-01-01")
+        }
+    }
+
+    @Test
+    fun synkroniserMottatteOpplysningerMedFlyt_ikkeYrkesaktivTilYrkesaktiv_konvererterTilSøknadNorgeEllerUtenforEØS() {
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } answers { firstArg() }
+
+        val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV).apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                type = Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+                mottatteOpplysningerData = SøknadIkkeYrkesaktiv().apply {
+                    soeknadsland = Soeknadsland(listOf("DK"), false)
+                }
+            }
+        }
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        val slot = slot<MottatteOpplysninger>()
+        verify { mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot)) }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+            mottatteOpplysningerData.soeknadsland.landkoder.shouldContainExactly("DK")
+            jsonData.shouldContain("\"DK\"")
+            jsonData.shouldNotContain("ikkeYrkesaktivSituasjontype")
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Mottatteopplysningertyper::class,
+        names = ["ANMODNING_ELLER_ATTEST", "SED", "SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS", "SØKNAD_A1_YRKESAKTIVE_EØS"]
+    )
+    fun synkroniserMottatteOpplysningerMedFlyt_yrkesaktivFlytUendret_beholderTypeOgData(type: Mottatteopplysningertyper) {
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        val data = AnmodningEllerAttest()
+        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER).apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                this.type = type
+                mottatteOpplysningerData = data
+            }
+        }
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        behandling.mottatteOpplysninger!!.type.shouldBe(type)
+        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.shouldBe(data)
+        verify(exactly = 0) { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) }
+    }
+
+    @Test
+    fun synkroniserMottatteOpplysningerMedFlyt_typeStemmerAllerede_gjørIngenting() {
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
+
+        val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.IKKE_YRKESAKTIV).apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                type = Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+                mottatteOpplysningerData = SøknadIkkeYrkesaktiv()
+            }
+        }
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        verify(exactly = 0) { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) }
+    }
+
+    @Test
+    fun synkroniserMottatteOpplysningerMedFlyt_ingenMottatteOpplysninger_gjørIngenting() {
+        val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.IKKE_YRKESAKTIV)
+
+        mottatteOpplysningerServiceSpy.synkroniserMottatteOpplysningerMedFlyt(behandling)
+
+        verify(exactly = 0) { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) }
+    }
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, behandlingstema: Behandlingstema) =
         Behandling.forTest {

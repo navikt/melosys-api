@@ -3,13 +3,16 @@ package no.nav.melosys.service.dokument.brev.mapper
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -20,7 +23,9 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca_qc
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.dokument.DokgenTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -183,6 +188,41 @@ class DokgenMalMapperIkkeYrkesaktivTest {
         }
 
         // vedtaksbrev.toJsonNode.toPrettyString().also(::println)
+    }
+
+    @Test
+    fun `gir forståelig feil når mottatteopplysningene ikke er SøknadIkkeYrkesaktiv`() {
+        val behandling = Behandling.forTest {
+            id = 3L
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            type = Behandlingstyper.NY_VURDERING
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
+                mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+            }
+            fagsak {
+                type = Sakstyper.TRYGDEAVTALE
+            }
+        }
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
+            id = 3L
+            this.behandling = behandling
+            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
+                fom = LocalDate.of(2020, 1, 1)
+                tom = LocalDate.of(2021, 2, 1)
+                bestemmelse = Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART7_3
+            })
+        }
+
+        shouldThrow<FunksjonellException> {
+            dokgenMalMapper.lagIkkeYrkesaktivVedtaksbrev(
+                IkkeYrkesaktivBrevbestilling.Builder()
+                    .medPersonMottaker(DokgenTestData.lagPersondata())
+                    .medPersonDokument(DokgenTestData.lagPersondata())
+                    .medBehandling(behandling)
+                    .build()
+            )
+        }.message.shouldContain("SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS")
     }
 
 

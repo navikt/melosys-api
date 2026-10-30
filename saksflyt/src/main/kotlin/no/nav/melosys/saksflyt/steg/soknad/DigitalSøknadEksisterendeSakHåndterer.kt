@@ -126,6 +126,7 @@ class DigitalSøknadEksisterendeSakHåndterer(
         val utledetBehandlingstema = utledBehandlingstema(fagsak, søknadsdata) { behandling.tema }
         if (behandling.tema != utledetBehandlingstema) {
             behandlingService.endreTema(behandling, utledetBehandlingstema)
+            mottatteOpplysningerService.synkroniserMottatteOpplysningerMedFlyt(behandling)
         }
 
         val skalResetteStegvelger = behandling.status in setOf(
