@@ -90,10 +90,13 @@ class OppretteÅrsavregningVedEndring(
         if (behandling.erFørstegangsvurdering()) {
             opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
         } else if (behandling.erNyVurdering()) {
-            val opprinneligBehandling = behandling.hentOpprinneligBehandling()
-            val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+            val sisteBehandlingsresultatMedVedtak = finnSisteBehandlingsresultatMedVedtak(behandling)
+            if (sisteBehandlingsresultatMedVedtak == null) {
+                opprettÅrsavregning(potensielleÅrsavregningÅrNy, behandling, sendInnhentingsbrev)
+                return
+            }
 
-            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, opprinneligBehandlingsresultat)
+            val årMedEndringer = finnÅrMedEndringer(behandlingsresultat, sisteBehandlingsresultatMedVedtak)
             if (årMedEndringer.isNotEmpty()) {
                 opprettÅrsavregning(årMedEndringer, behandling, sendInnhentingsbrev)
             }
@@ -102,15 +105,23 @@ class OppretteÅrsavregningVedEndring(
         }
     }
 
+    private fun finnSisteBehandlingsresultatMedVedtak(behandling: Behandling): Behandlingsresultat? =
+        behandling.fagsak.behandlinger
+            .filter { it.id != behandling.id }
+            .filterNot { it.erÅrsavregning() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.harVedtak() }
+            .maxWithOrNull(compareBy({ it.hentVedtakMetadata().vedtaksdato }, { it.registrertDato }))
+
     private fun finnÅrMedEndringer(
         behandlingsresultat: Behandlingsresultat,
-        opprinneligBehandlingsresultat: Behandlingsresultat
+        sisteBehandlingsresultatMedVedtak: Behandlingsresultat
     ): Set<Int> {
-        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(opprinneligBehandlingsresultat)
+        val potensielleÅr = hentPotensielleÅrsavregningÅrFraAvgiftsperioder(sisteBehandlingsresultatMedVedtak)
             .union(hentPotensielleÅrsavregningÅrFraAvgiftsperioder(behandlingsresultat))
 
         return potensielleÅr.filter { år ->
-            perioderForÅr(behandlingsresultat, år) != perioderForÅr(opprinneligBehandlingsresultat, år)
+            perioderForÅr(behandlingsresultat, år) != perioderForÅr(sisteBehandlingsresultatMedVedtak, år)
         }.toSet()
     }
 
