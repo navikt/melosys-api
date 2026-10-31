@@ -174,3 +174,5 @@ class KafkaSkipIT(
         skippableKafkaErrorHandler.failedMessages.shouldBeEmpty()
     }
 }
+
+private val bevisKompileringsfeil: Int = "ikke et tall"
