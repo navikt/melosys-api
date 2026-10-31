@@ -198,6 +198,7 @@ jobs:
         with:
           annotate_only: true
           require_tests: true
+          require_passed_tests: true
           fail_on_failure: true
           report_paths: 'unit-reports/**/TEST-*.xml'
       - name: Result of the unit job
@@ -233,6 +234,7 @@ jobs:
         with:
           annotate_only: true
           require_tests: true
+          require_passed_tests: true
           fail_on_failure: true
           report_paths: 'it-reports/**/TEST-*.xml'
       - name: Every IT class in exactly one shard
