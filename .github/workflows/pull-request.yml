@@ -119,8 +119,46 @@ jobs:
             echo "| **TOTAL** | **${total_line_pct}%** | **${total_branch_pct}%** |" >> $GITHUB_STEP_SUMMARY
           fi
 
+  # Fordeler IT-klassene på shards etter tidene fra siste grønne kjøring i merge queue.
+  # «Maven Test» kjører ikke på push til master, så køen er der tidene finnes.
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
+      plan: ${{ steps.plan.outputs.plan }}
+    env:
+      IT_SHARDS: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Fetch timings from the last green queue run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for id in $(gh run list -R "$GITHUB_REPOSITORY" --workflow pull-request.yml --event merge_group \
+              --status success -L 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$id" -R "$GITHUB_REPOSITORY" -n it-timings -D "$RUNNER_TEMP/tider/$id" 2>/dev/null; then
+              cp "$RUNNER_TEMP/tider/$id/it-timings.json" "$RUNNER_TEMP/it-timings.json"
+              echo "Tider fra kjøring [$id]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$id)." >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+          done
+      - name: Distribute the IT classes
+        id: plan
+        run: |
+          tider="$RUNNER_TEMP/it-timings.json"
+          [ -f "$tider" ] || tider=-
+          node .github/scripts/it-shard-plan.mjs integrasjonstest/src/test "$tider" "$IT_SHARDS" > "$RUNNER_TEMP/plan.json"
+          echo "plan=$(jq -c . "$RUNNER_TEMP/plan.json")" >> "$GITHUB_OUTPUT"
+          echo "shards=$(jq -c '[.shards[].shard]' "$RUNNER_TEMP/plan.json")" >> "$GITHUB_OUTPUT"
+
   # Ikke «Integration Tests»: det navnet har samlejobben, som branch protection krever.
   it-shard:
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -130,7 +168,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1]
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -159,9 +197,18 @@ jobs:
           password: ${{ secrets.READER_TOKEN }}
       # -Dtest=Ingen slår av surefire; -Dsurefire.skip=true gjør ikke det.
       - name: Integration tests
-        run: >-
-          mvn clean verify -pl integrasjonstest -am --threads=4 -B -e -U --settings .github/settings.xml
-          -Dtest=Ingen -Dsurefire.failIfNoSpecifiedTests=false
+        env:
+          PLAN: ${{ needs.plan.outputs.plan }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          KLASSER=$(jq -r --argjson shard "$SHARD" '.shards[] | select(.shard == $shard) | .klasser | join(",")' <<< "$PLAN")
+          if [ -z "$KLASSER" ]; then
+            echo "::error::Shard $SHARD har ingen klasser i planen."
+            exit 1
+          fi
+          echo "Shard $SHARD: $KLASSER"
+          mvn clean verify -pl integrasjonstest -am --threads=4 -B -e -U --settings .github/settings.xml \
+            -Dtest=Ingen -Dsurefire.failIfNoSpecifiedTests=false -Dit.test="$KLASSER"
 
       # Rapportene ligger i en mappe med shardets navn inne i artefaktet, så samlejobben ser
       # hvilket shard en klasse kjørte i, også når bare ett shard har lastet opp.
@@ -220,7 +267,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    needs: it-shard
+    needs: [plan, it-shard]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -235,8 +282,8 @@ jobs:
           pattern: it-reports-shard-*
           merge-multiple: true
           path: it-reports
-      - name: Test the report script
-        run: node --test .github/scripts/it-rapport.test.mjs
+      - name: Test the report and plan scripts
+        run: node --test .github/scripts/it-rapport.test.mjs .github/scripts/it-shard-plan.test.mjs
       - name: Test report
         id: rapport
         uses: mikepenz/action-junit-report@v6.6.1
@@ -261,9 +308,14 @@ jobs:
       - name: Result of the shards
         if: success() || failure()
         env:
+          PLAN: ${{ needs.plan.result }}
           SHARDS: ${{ needs.it-shard.result }}
           BESTATT: ${{ steps.rapport.outputs.passed }}
         run: |
+          if [ "$PLAN" != "success" ]; then
+            echo "::error::Plan-jobben endte med $PLAN."
+            exit 1
+          fi
           if [ "$SHARDS" != "success" ]; then
             echo "::error::IT-shardene endte med $SHARDS."
             exit 1
