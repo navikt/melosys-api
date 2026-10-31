@@ -40,16 +40,20 @@ export function itTest(shards, shard) {
 
 // Samme inndata gir samme plan: like lange klasser sorteres på navn.
 export function planlegg(klasser, tider, ønsketAntall) {
-  const kjente = klasser.filter((klasse) => Number.isFinite(tider[klasse]));
+  const erMålt = (klasse) => Number.isFinite(tider[klasse]) && tider[klasse] >= 0;
+  const kjente = klasser.filter(erMålt);
   const reserve = median(kjente.map((klasse) => tider[klasse]));
   const antall = Math.max(1, Math.min(Math.floor(Number(ønsketAntall)) || 1, klasser.length));
   const shards = Array.from({ length: antall }, (_, i) => ({ shard: i + 1, klasser: [], sekunder: 0 }));
 
   const ordnet = klasser
-    .map((klasse) => ({ klasse, sekunder: Number.isFinite(tider[klasse]) ? tider[klasse] : reserve }))
+    .map((klasse) => ({ klasse, sekunder: erMålt(klasse) ? tider[klasse] : reserve }))
     .sort((a, b) => b.sekunder - a.sekunder || etterNavn(a.klasse, b.klasse));
   for (const { klasse, sekunder } of ordnet) {
-    const mål = shards.reduce((min, s) => (s.sekunder < min.sekunder ? s : min));
+    // Ved lik tid vinner shardet med færrest klasser, så klasser med tid 0 ikke samles i ett shard.
+    const mål = shards.reduce((min, s) =>
+      s.sekunder < min.sekunder || (s.sekunder === min.sekunder && s.klasser.length < min.klasser.length) ? s : min,
+    );
     mål.klasser.push(klasse);
     mål.sekunder += sekunder;
   }

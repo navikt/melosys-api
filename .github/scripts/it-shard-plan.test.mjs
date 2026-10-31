@@ -91,3 +91,30 @@ test('siste shard kjører failsafes utvalg minus klassene i de andre shardene, m
 test('med ett shard kjører det failsafes utvalg uten eksklusjoner', () => {
   assert.equal(planlegg(['AIT', 'BIT'], {}, 1).shards[0].itTest, '**/IT*,**/*IT,**/*ITCase');
 });
+
+test('negative tider regnes som ukjente og gir ingen tomme shards', () => {
+  const plan = planlegg(['AIT', 'BIT', 'CIT'], { AIT: -5, BIT: -5, CIT: 10 }, 3);
+  assert.deepEqual(
+    plan.shards.map((s) => s.klasser.length),
+    [1, 1, 1],
+  );
+  assert.equal(plan.kjente, 1);
+});
+
+test('like lange klasser fordeles på shardet med færrest klasser, så ingen shard står tomt', () => {
+  const plan = planlegg(['AIT', 'BIT', 'CIT'], { AIT: 0, BIT: 0, CIT: 0 }, 3);
+  assert.deepEqual(
+    plan.shards.map((s) => s.klasser),
+    [['AIT'], ['BIT'], ['CIT']],
+  );
+});
+
+test('tidsfil med et tall gir like estimater og en advarsel', () => {
+  const kilde = mkdtempSync(join(tmpdir(), 'it-kilde-'));
+  writeFileSync(join(kilde, 'AIT.kt'), 'class AIT\n');
+  const tidsfil = join(kilde, 'it-timings.json');
+  writeFileSync(tidsfil, '42');
+  const kjøring = spawnSync(process.execPath, [skript, kilde, tidsfil, '1'], { encoding: 'utf8', env: { PATH: process.env.PATH } });
+  assert.equal(kjøring.status, 0, kjøring.stderr);
+  assert.match(kjøring.stderr, /::warning::/);
+});
