@@ -19,7 +19,7 @@ const filer = (mappe) =>
   });
 
 // Klassen, ikke filen, avgjør hva failsafe kjører: en Kotlin-fil kan hete noe annet enn klassen.
-// Failsafe tar med klasser som heter IT*, *IT eller *ITCase, men ikke abstrakte eller nøstede.
+// Failsafes standardutvalg: klasser som heter IT*, *IT eller *ITCase, ikke abstrakte eller nøstede.
 const toppnivåklasse = /^((?:[a-z]+\s+)*)class\s+([\p{L}\p{N}_]+)/gmu;
 const erItKlasse = (navn) => /^IT|IT$|ITCase$/u.test(navn);
 
