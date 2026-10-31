@@ -194,19 +194,27 @@ jobs:
           name: unit-reports
           path: unit-reports
       - name: Test report
+        id: rapport
         uses: mikepenz/action-junit-report@v6.6.1
         with:
           annotate_only: true
           require_tests: true
-          require_passed_tests: true
           fail_on_failure: true
           report_paths: 'unit-reports/**/TEST-*.xml'
+      # Bestått-kravet står her og ikke som require_passed_tests i rapportsteget: der stopper
+      # det rapporten før annotasjonene, så feilende tester ikke vises når ingen består.
       - name: Result of the unit job
+        if: success() || failure()
         env:
           UNIT: ${{ needs.unit.result }}
+          BESTATT: ${{ steps.rapport.outputs.passed }}
         run: |
           if [ "$UNIT" != "success" ]; then
             echo "::error::Unit-jobben endte med $UNIT."
+            exit 1
+          fi
+          if [ "${BESTATT:-0}" -lt 1 ]; then
+            echo "::error::Ingen test besto i rapportene."
             exit 1
           fi
 
@@ -230,11 +238,11 @@ jobs:
       - name: Test the report script
         run: node --test .github/scripts/it-rapport.test.mjs
       - name: Test report
+        id: rapport
         uses: mikepenz/action-junit-report@v6.6.1
         with:
           annotate_only: true
           require_tests: true
-          require_passed_tests: true
           fail_on_failure: true
           report_paths: 'it-reports/**/TEST-*.xml'
       - name: Every IT class in exactly one shard
@@ -254,8 +262,13 @@ jobs:
         if: success() || failure()
         env:
           SHARDS: ${{ needs.it-shard.result }}
+          BESTATT: ${{ steps.rapport.outputs.passed }}
         run: |
           if [ "$SHARDS" != "success" ]; then
             echo "::error::IT-shardene endte med $SHARDS."
+            exit 1
+          fi
+          if [ "${BESTATT:-0}" -lt 1 ]; then
+            echo "::error::Ingen test besto i rapportene."
             exit 1
           fi
