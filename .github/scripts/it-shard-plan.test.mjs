@@ -79,3 +79,15 @@ for (const [navn, innhold] of [
     assert.deepEqual(JSON.parse(kjøring.stdout).shards.map((s) => s.sekunder), [30, 30]);
   });
 }
+
+test('siste shard kjører failsafes utvalg minus klassene i de andre shardene, med nøstede klasser', () => {
+  const plan = planlegg(['AIT', 'BIT', 'CIT'], { AIT: 30, BIT: 20, CIT: 10 }, 3);
+  assert.deepEqual(
+    plan.shards.map((s) => s.itTest),
+    ['AIT', 'BIT', '**/IT*,**/*IT,**/*ITCase,!AIT,!AIT$*,!BIT,!BIT$*'],
+  );
+});
+
+test('med ett shard kjører det failsafes utvalg uten eksklusjoner', () => {
+  assert.equal(planlegg(['AIT', 'BIT'], {}, 1).shards[0].itTest, '**/IT*,**/*IT,**/*ITCase');
+});

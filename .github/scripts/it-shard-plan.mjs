@@ -3,7 +3,10 @@
 // klasse først, til shardet med minst estimert tid.
 //
 // Bruk: node it-shard-plan.mjs <kildemappe> <tider.json eller -> <antall shards>
-// Planen skrives som JSON på stdout: { shards: [{ shard, klasser, sekunder }], ... }
+// Planen skrives som JSON på stdout: { shards: [{ shard, klasser, sekunder, itTest }], ... }
+//
+// itTest er verdien shardet gir -Dit.test. Siste shard kjører failsafes eget utvalg minus
+// klassene i de andre shardene, så en IT-klasse klassesøket i kildekoden ikke fant, kjører der.
 //
 // Tidene er it-timings.json fra samlejobben i en tidligere kjøring. En klasse uten tid får
 // medianen av de kjente. Den første klassen i hver JVM bærer oppstarten av Oracle og den
@@ -25,6 +28,16 @@ function median(verdier) {
 
 const etterNavn = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
+// Failsafes standardutvalg. Et filter med bare eksklusjoner tar med alle testklasser, også *Test.
+const FAILSAFE_UTVALG = ['**/IT*', '**/*IT', '**/*ITCase'];
+
+// `!X` utelater ikke nøstede klasser (X$Indre), så de utelates med `!X$*`.
+export function itTest(shards, shard) {
+  if (shard.shard !== shards.length) return shard.klasser.join(',');
+  const andre = shards.filter((s) => s !== shard).flatMap((s) => s.klasser);
+  return [...FAILSAFE_UTVALG, ...andre.flatMap((klasse) => [`!${klasse}`, `!${klasse}$*`])].join(',');
+}
+
 // Samme inndata gir samme plan: like lange klasser sorteres på navn.
 export function planlegg(klasser, tider, ønsketAntall) {
   const kjente = klasser.filter((klasse) => Number.isFinite(tider[klasse]));
@@ -41,10 +54,11 @@ export function planlegg(klasser, tider, ønsketAntall) {
     mål.sekunder += sekunder;
   }
 
+  const ferdige = shards.map((s) => ({ ...s, klasser: s.klasser.sort(etterNavn), sekunder: Math.round(s.sekunder) }));
   return {
     klasser: klasser.length,
     kjente: kjente.length,
-    shards: shards.map((s) => ({ ...s, klasser: s.klasser.sort(etterNavn), sekunder: Math.round(s.sekunder) })),
+    shards: ferdige.map((s) => ({ ...s, itTest: itTest(ferdige, s) })),
   };
 }
 
