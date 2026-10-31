@@ -2,8 +2,8 @@
 // fordelingen av klasser på shards leser i neste kjøring.
 //
 // Bruk: node it-rapport.mjs <kildemappe> <rapportmappe> <tider.json>
-//   kildemappe:   integrasjonstest/src/test; hver fil som heter *IT.kt eller *IT.java er en IT-klasse
-//   rapportmappe: én undermappe per shard-artefakt, med failsafe-rapportene (TEST-*.xml)
+//   kildemappe:   integrasjonstest/src/test
+//   rapportmappe: én undermappe per shard (it-reports-shard-N), med failsafe-rapportene (TEST-*.xml)
 //
 // Feiler når en IT-klasse mangler i rapportene eller finnes i mer enn ett shard: da har
 // fordelingen hoppet over eller doblet en klasse, og en grønn sjekk ville ikke vært sann.
@@ -18,11 +18,18 @@ const filer = (mappe) =>
     return oppføring.isDirectory() ? filer(sti) : [sti];
   });
 
+// Klassen, ikke filen, avgjør hva failsafe kjører: en Kotlin-fil kan hete noe annet enn klassen.
+// Failsafe tar med klasser som heter IT*, *IT eller *ITCase, men ikke abstrakte eller nøstede.
+const toppnivåklasse = /^((?:[a-z]+\s+)*)class\s+([\p{L}\p{N}_]+)/gmu;
+const erItKlasse = (navn) => /^IT|IT$|ITCase$/u.test(navn);
+
 export function finnItKlasser(kildemappe) {
-  return filer(kildemappe)
-    .map((sti) => basename(sti).normalize('NFC').match(/^([\p{L}\p{N}_]+IT)\.(kt|java)$/u)?.[1])
-    .filter(Boolean)
-    .sort();
+  const klasser = filer(kildemappe)
+    .filter((sti) => /\.(kt|java)$/.test(sti))
+    .flatMap((sti) => [...readFileSync(sti, 'utf8').normalize('NFC').matchAll(toppnivåklasse)])
+    .filter(([, modifikatorer, navn]) => erItKlasse(navn) && !/\babstract\b/.test(modifikatorer))
+    .map(([, , navn]) => navn);
+  return [...new Set(klasser)].sort();
 }
 
 const attributt = (tagg, navn) => tagg.match(new RegExp(`\\s${navn}="([^"]*)"`))?.[1];
@@ -38,6 +45,10 @@ export function lesRapport(xml) {
 }
 
 export function lesShards(rapportmappe) {
+  const løse = readdirSync(rapportmappe).filter((navn) => /^TEST-.*\.xml$/.test(navn));
+  if (løse.length) {
+    throw new Error(`${løse.length} rapporter ligger rett i ${rapportmappe}, ikke i en shard-mappe.`);
+  }
   return readdirSync(rapportmappe, { withFileTypes: true })
     .filter((oppføring) => oppføring.isDirectory())
     .map((oppføring) => {
@@ -97,7 +108,13 @@ function main([kildemappe, rapportmappe, utfil]) {
     return 2;
   }
   const klasser = finnItKlasser(kildemappe);
-  const shards = lesShards(rapportmappe);
+  let shards;
+  try {
+    shards = lesShards(rapportmappe);
+  } catch (feil) {
+    console.error(`::error::${feil.message}`);
+    return 1;
+  }
   const resultat = vurder(klasser, shards);
   const tekst = oppsummering(klasser, shards, resultat);
   console.log(tekst);

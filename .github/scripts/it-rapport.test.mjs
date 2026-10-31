@@ -14,20 +14,30 @@ const skriv = (rot, sti, innhold) => {
   writeFileSync(full, innhold);
 };
 
-test('finner IT-klasser i Kotlin og Java, også med æøå, og ikke baseklasser', () => {
+test('finner IT-klasser fra klassedeklarasjonen, ikke filnavnet, som failsafe gjør', () => {
   const rot = mkdtempSync(join(tmpdir(), 'it-kilde-'));
-  skriv(rot, 'kotlin/no/nav/ÅrsavregningIT.kt', '');
-  skriv(rot, 'java/no/nav/GammelIT.java', '');
-  skriv(rot, 'kotlin/no/nav/ComponentTestBase.kt', '');
-  skriv(rot, 'kotlin/no/nav/KafkaSerializationTest.kt', '');
-  assert.deepEqual(finnItKlasser(rot), ['GammelIT', 'ÅrsavregningIT']);
+  skriv(rot, 'kotlin/no/nav/SedMottakBehandlingsTypeIT.kt', 'package no.nav\n\n@SpringBootTest\nclass SedMottakBehandlingTypeIT(\n) {\n}\n');
+  skriv(rot, 'kotlin/no/nav/ÅrsavregningIT.kt', 'class ÅrsavregningIT : ComponentTestBase() {\n    @Nested\n    inner class NøstetIT {}\n}\n');
+  skriv(rot, 'kotlin/no/nav/Hjelpere.kt', 'internal class EkstraIT {\n}\n');
+  skriv(rot, 'kotlin/no/nav/BaseIT.kt', 'abstract class BaseIT : ComponentTestBase()\n');
+  skriv(rot, 'kotlin/no/nav/ComponentTestBase.kt', 'abstract class ComponentTestBase\n');
+  skriv(rot, 'kotlin/no/nav/KafkaSerializationTest.kt', 'class KafkaSerializationTest\n');
+  skriv(rot, 'java/no/nav/GammelIT.java', 'package no.nav;\n\npublic class GammelIT {\n}\n');
+  skriv(rot, 'resources/notat.txt', 'class IkkeKodeIT\n');
+  assert.deepEqual(finnItKlasser(rot), ['EkstraIT', 'GammelIT', 'SedMottakBehandlingTypeIT', 'ÅrsavregningIT']);
 });
 
-test('klassenavn fra filsystem med NFD (macOS) og rapport med NFC blir like', () => {
+test('klassenavn med NFD i kildefila og NFC i rapporten blir like', () => {
   const rot = mkdtempSync(join(tmpdir(), 'it-kilde-'));
-  skriv(rot, 'ÅpenIT.kt'.normalize('NFD'), '');
+  skriv(rot, 'ÅpenIT.kt', `class ${'ÅpenIT'.normalize('NFD')}\n`);
   const [klasse] = finnItKlasser(rot);
   assert.equal(klasse, lesRapport(rapport('no.nav.ÅpenIT'.normalize('NFC'), '1')).klasse);
+});
+
+test('rapporter rett i rapportmappa, uten shard-mappe, gir feil i stedet for at alt mangler', () => {
+  const rot = mkdtempSync(join(tmpdir(), 'it-rapporter-'));
+  skriv(rot, 'TEST-no.nav.AIT.xml', rapport('no.nav.AIT', '3'));
+  assert.throws(() => lesShards(rot), /shard-mappe/);
 });
 
 test('leser klassenavn og tid, og regner nøstede klasser til ytre klasse', () => {
