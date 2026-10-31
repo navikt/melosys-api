@@ -1,6 +1,13 @@
 import { strict as assert } from 'node:assert';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { planlegg } from './it-shard-plan.mjs';
+
+const skript = fileURLToPath(new URL('./it-shard-plan.mjs', import.meta.url));
 
 const alle = (plan) => plan.shards.flatMap((s) => s.klasser).sort();
 
@@ -54,3 +61,21 @@ test('tid 0 (en @Disabled-klasse) regnes som målt, ikke som ukjent', () => {
   const plan = planlegg(['AIT', 'DisabledIT'], { AIT: 100, DisabledIT: 0 }, 1);
   assert.equal(plan.shards[0].sekunder, 100);
 });
+
+for (const [navn, innhold] of [
+  ['ugyldig JSON', '{ikke json'],
+  ['null', 'null'],
+  ['en liste', '[1, 2]'],
+]) {
+  test(`tidsfil med ${navn} gir plan med like estimater og en advarsel, ikke feil`, () => {
+    const kilde = mkdtempSync(join(tmpdir(), 'it-kilde-'));
+    writeFileSync(join(kilde, 'AIT.kt'), 'class AIT\n');
+    writeFileSync(join(kilde, 'BIT.kt'), 'class BIT\n');
+    const tidsfil = join(kilde, 'it-timings.json');
+    writeFileSync(tidsfil, innhold);
+    const kjøring = spawnSync(process.execPath, [skript, kilde, tidsfil, '2'], { encoding: 'utf8', env: { PATH: process.env.PATH } });
+    assert.equal(kjøring.status, 0, kjøring.stderr);
+    assert.match(kjøring.stderr, /::warning::/);
+    assert.deepEqual(JSON.parse(kjøring.stdout).shards.map((s) => s.sekunder), [30, 30]);
+  });
+}

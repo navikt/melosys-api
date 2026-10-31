@@ -219,6 +219,10 @@ jobs:
         run: |
           mkdir -p "$SHARD_MAPPE"
           find integrasjonstest/target/failsafe-reports -name 'TEST-*.xml' -exec cp {} "$SHARD_MAPPE" \; 2>/dev/null || true
+          # Klassene failsafe ville funnet selv (IT*, *IT, *ITCase, ikke nøstede), så samlejobben
+          # ser en klasse som klassesøket i kildekoden ikke fant.
+          find integrasjonstest/target/test-classes -name '*.class' ! -name '*$*' 2>/dev/null \
+            | sed 's#.*/##; s#\.class$##' | grep -E '^IT|IT$|ITCase$' | sort -u > "$SHARD_MAPPE/kompilerte-it-klasser.txt" || true
       - name: Upload test reports
         if: success() || failure()
         uses: actions/upload-artifact@v7

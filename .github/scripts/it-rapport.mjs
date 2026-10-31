@@ -4,9 +4,12 @@
 // Bruk: node it-rapport.mjs <kildemappe> <rapportmappe> <tider.json>
 //   kildemappe:   integrasjonstest/src/test
 //   rapportmappe: én undermappe per shard (it-reports-shard-N), med failsafe-rapportene (TEST-*.xml)
+//                 og kompilerte-it-klasser.txt, IT-klassene shardet kompilerte
 //
 // Feiler når en IT-klasse mangler i rapportene eller finnes i mer enn ett shard: da har
 // fordelingen hoppet over eller doblet en klasse, og en grønn sjekk ville ikke vært sann.
+// Feiler også når et shard kompilerte en IT-klasse som klassesøket i kildekoden ikke fant:
+// shardene kjører bare klassene i planen, så en slik klasse ville aldri kjørt.
 
 import { appendFileSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -42,6 +45,20 @@ export function lesRapport(xml) {
   const klasse = navn.normalize('NFC').split('.').pop().split('$')[0];
   const sekunder = Number.parseFloat((attributt(tagg, 'time') ?? '0').replaceAll(',', ''));
   return { klasse, sekunder: Number.isFinite(sekunder) ? sekunder : 0 };
+}
+
+const KOMPILERTE = 'kompilerte-it-klasser.txt';
+
+export function lesKompilerte(rapportmappe) {
+  const klasser = new Set();
+  for (const sti of filer(rapportmappe)) {
+    if (basename(sti) !== KOMPILERTE) continue;
+    for (const linje of readFileSync(sti, 'utf8').split('\n')) {
+      const klasse = linje.trim().normalize('NFC');
+      if (klasse) klasser.add(klasse);
+    }
+  }
+  return [...klasser].sort();
 }
 
 export function lesShards(rapportmappe) {
@@ -127,7 +144,15 @@ function main([kildemappe, rapportmappe, utfil]) {
   }
   if (resultat.mangler.length) console.error(`::error::IT-klasser uten rapport: ${resultat.mangler.join(', ')}`);
   if (resultat.doble.length) console.error(`::error::IT-klasser kjørt i flere shards: ${resultat.doble.map((d) => d.klasse).join(', ')}`);
-  return resultat.mangler.length || resultat.doble.length ? 1 : 0;
+  const kjent = new Set(klasser);
+  const ukjente = lesKompilerte(rapportmappe).filter((klasse) => !kjent.has(klasse));
+  if (ukjente.length) {
+    console.error(
+      `::error::Kompilerte IT-klasser som klassesøket i kildekoden ikke fant, og som derfor ikke kjørte: ${ukjente.join(', ')}. ` +
+        'Skriv klassedeklarasjonen på en egen linje, eller gi en abstrakt klasse et navn som ikke ender på IT.',
+    );
+  }
+  return resultat.mangler.length || resultat.doble.length || ukjente.length ? 1 : 0;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

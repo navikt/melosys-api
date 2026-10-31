@@ -1,9 +1,13 @@
 import { strict as assert } from 'node:assert';
+import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { finnItKlasser, lesRapport, lesShards, vurder } from './it-rapport.mjs';
+
+const skript = fileURLToPath(new URL('./it-rapport.mjs', import.meta.url));
 
 const rapport = (navn, tid) =>
   `<?xml version="1.0" encoding="UTF-8"?>\n<testsuite xmlns:xsi="x" version="3.0.2" name="${navn}" time="${tid}" tests="1">\n</testsuite>\n`;
@@ -77,4 +81,26 @@ test('alle klasser i nøyaktig ett shard gir ingen funn', () => {
   skriv(rot, 'it-reports-shard-1/TEST-no.nav.AIT.xml', rapport('no.nav.AIT', '3'));
   const { mangler, doble } = vurder(['AIT'], lesShards(rot));
   assert.deepEqual([mangler, doble], [[], []]);
+});
+
+test('kompilert IT-klasse som klassesøket i kildekoden ikke fant, gir feil', () => {
+  const kilde = mkdtempSync(join(tmpdir(), 'it-kilde-'));
+  skriv(kilde, 'AIT.kt', 'class AIT\n');
+  skriv(kilde, 'NyIT.kt', '@Tag("treg") class NyIT\n');
+  const rapporter = mkdtempSync(join(tmpdir(), 'it-rapporter-'));
+  skriv(rapporter, 'it-reports-shard-1/TEST-no.nav.AIT.xml', rapport('no.nav.AIT', '3'));
+  skriv(rapporter, 'it-reports-shard-1/kompilerte-it-klasser.txt', 'AIT\nNyIT\n');
+  const kjøring = spawnSync(process.execPath, [skript, kilde, rapporter, join(rapporter, 'tider.json')], { encoding: 'utf8' });
+  assert.equal(kjøring.status, 1);
+  assert.match(kjøring.stderr, /NyIT/);
+});
+
+test('kompilerte IT-klasser som alle er funnet i kildekoden, gir ingen feil', () => {
+  const kilde = mkdtempSync(join(tmpdir(), 'it-kilde-'));
+  skriv(kilde, 'AIT.kt', 'class AIT\n');
+  const rapporter = mkdtempSync(join(tmpdir(), 'it-rapporter-'));
+  skriv(rapporter, 'it-reports-shard-1/TEST-no.nav.AIT.xml', rapport('no.nav.AIT', '3'));
+  skriv(rapporter, 'it-reports-shard-1/kompilerte-it-klasser.txt', 'AIT\n');
+  const kjøring = spawnSync(process.execPath, [skript, kilde, rapporter, join(rapporter, 'tider.json')], { encoding: 'utf8' });
+  assert.equal(kjøring.status, 0, kjøring.stderr);
 });

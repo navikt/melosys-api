@@ -48,6 +48,23 @@ export function planlegg(klasser, tider, ønsketAntall) {
   };
 }
 
+// Ugyldige tider stopper ikke CI: plan-jobben feiler da i hver kjøring, også i merge queue,
+// og ingen ny grønn kjøring kan erstatte artefaktet.
+function lesTider(tidsfil) {
+  if (tidsfil === '-') {
+    console.error('::warning::Fant ingen tider fra en tidligere kjøring; alle klasser får samme estimat.');
+    return {};
+  }
+  try {
+    const tider = JSON.parse(readFileSync(tidsfil, 'utf8'));
+    if (tider && typeof tider === 'object' && !Array.isArray(tider)) return tider;
+  } catch {
+    // Faller gjennom til advarselen under.
+  }
+  console.error(`::warning::Kunne ikke lese tidene i ${tidsfil}; alle klasser får samme estimat.`);
+  return {};
+}
+
 function oppsummering(plan) {
   return [
     '## Fordeling av IT-klasser',
@@ -71,8 +88,7 @@ function main([kildemappe, tidsfil, antall]) {
     console.error(`::error::Fant ingen IT-klasser i ${kildemappe}.`);
     return 1;
   }
-  const tider = tidsfil === '-' ? {} : JSON.parse(readFileSync(tidsfil, 'utf8'));
-  if (tidsfil === '-') console.error('::warning::Fant ingen tider fra en tidligere kjøring; alle klasser får samme estimat.');
+  const tider = lesTider(tidsfil);
   const plan = planlegg(klasser, tider, antall);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, oppsummering(plan));
   console.log(JSON.stringify(plan));
