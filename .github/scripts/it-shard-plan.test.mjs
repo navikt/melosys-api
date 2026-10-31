@@ -109,7 +109,7 @@ test('like lange klasser fordeles på shardet med færrest klasser, så ingen sh
   );
 });
 
-test('tidsfil med et tall gir like estimater og en advarsel', () => {
+test('tidsfil med et tall gir en advarsel, ikke feil', () => {
   const kilde = mkdtempSync(join(tmpdir(), 'it-kilde-'));
   writeFileSync(join(kilde, 'AIT.kt'), 'class AIT\n');
   const tidsfil = join(kilde, 'it-timings.json');

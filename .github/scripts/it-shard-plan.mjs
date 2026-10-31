@@ -5,11 +5,13 @@
 // Bruk: node it-shard-plan.mjs <kildemappe> <tider.json eller -> <antall shards>
 // Planen skrives som JSON på stdout: { shards: [{ shard, klasser, sekunder, itTest }], ... }
 //
-// itTest er verdien shardet gir -Dit.test. Siste shard kjører failsafes eget utvalg minus
+// itTest er verdien shardet gir -Dit.test. Siste shard kjører failsafes navnemønster minus
 // klassene i de andre shardene, så en IT-klasse klassesøket i kildekoden ikke fant, kjører der.
+// Med -Dit.test gjelder ikke failsafes standard-eksklusjon av nøstede klasser (**/*$*), så en
+// nøstet klasse med IT-navn kjører også der.
 //
-// Tidene er it-timings.json fra samlejobben i en tidligere kjøring. En klasse uten tid får
-// medianen av de kjente. Den første klassen i hver JVM bærer oppstarten av Oracle og den
+// Tidene er it-timings.json fra samlejobben i en tidligere kjøring. En klasse uten tid, eller
+// med negativ tid, får medianen av de kjente. Den første klassen i hver JVM bærer oppstarten av Oracle og den
 // første Spring-konteksten (ca. 100 s). Med tider fra en kjøring med like mange shards har
 // hvert shard én slik klasse, og LPT legger de største i hvert sitt shard.
 
@@ -31,7 +33,8 @@ const etterNavn = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 // Failsafes standardutvalg. Et filter med bare eksklusjoner tar med alle testklasser, også *Test.
 const FAILSAFE_UTVALG = ['**/IT*', '**/*IT', '**/*ITCase'];
 
-// `!X` utelater ikke nøstede klasser (X$Indre), så de utelates med `!X$*`.
+// `!X$*` utelater nøstede klasser med IT-navn (X$NoeIT), som inkluderingene ellers tar med, og
+// som da ville kjørt både her og i shardet til X.
 export function itTest(shards, shard) {
   if (shard.shard !== shards.length) return shard.klasser.join(',');
   const andre = shards.filter((s) => s !== shard).flatMap((s) => s.klasser);
@@ -50,7 +53,7 @@ export function planlegg(klasser, tider, ønsketAntall) {
     .map((klasse) => ({ klasse, sekunder: erMålt(klasse) ? tider[klasse] : reserve }))
     .sort((a, b) => b.sekunder - a.sekunder || etterNavn(a.klasse, b.klasse));
   for (const { klasse, sekunder } of ordnet) {
-    // Ved lik tid vinner shardet med færrest klasser, så klasser med tid 0 ikke samles i ett shard.
+    // Ved lik tid vinner shardet med færrest klasser, så ingen shard står tomt når klasser har tid 0.
     const mål = shards.reduce((min, s) =>
       s.sekunder < min.sekunder || (s.sekunder === min.sekunder && s.klasser.length < min.klasser.length) ? s : min,
     );
